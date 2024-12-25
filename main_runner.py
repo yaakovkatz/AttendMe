@@ -7,7 +7,6 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from primary_check import detect_and_recognize_faces as primary_check
 from secondary_check import detect_and_recognize_faces as secondary_check
 import cv2
-# some changes
 
 def run_face_detection(target_image):
     """
