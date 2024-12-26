@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="Initial commit" />
+    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="Initial commit">
+      <change beforePath="$PROJECT_DIR$/.idea/AttendMe.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AttendMe.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_runner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/petel.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/primary_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/Primary_Check.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result_primary.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/result_secondary.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/secondary_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/Secondary_Check.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,15 +41,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main_runner.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.Primary_Check.executor": "Run",
+    "Python.Secondary_Check.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.main_runner.executor": "Run",
+    "Python.secondary_check.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="main_runner" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="AttendMe" />
@@ -48,15 +61,15 @@
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="TF_CPP_MIN_LOG_LEVEL" value="2" />
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="Python 3.12 (pythonProject)" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\User\PycharmProjects\AttendMe" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$USER_HOME$/program_exercises/finel/AttendMe/main_runner.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main_runner.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -106,7 +119,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1735135620804</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL‎-00004" summary="Initial commit">
+      <option name="closed" value="true" />
+      <created>1735135664442</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL‎-00004" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735135664442</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
