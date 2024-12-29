@@ -1,6 +1,6 @@
 # Person.py
 class Person:
-    def __init__(self, first_name, last_name, id_number, base_path="C:/Users/User/Pictures"):
+    def __init__(self, first_name, last_name, id_number, base_path="C:/Users/User/PycharmProjects/AttendMe"):
         # מידע אישי
         self.first_name = first_name
         self.last_name = last_name

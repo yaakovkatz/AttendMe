@@ -4,12 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Attend_Manage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Data_Manage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Person.py" afterDir="false" />
+    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="הוספתי 3 מחלקות וסידרתי את הקוד">
+      <change afterPath="$PROJECT_DIR$/Face_Detection.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Attend_Manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/Attend_Manage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Person.py" beforeDir="false" afterPath="$PROJECT_DIR$/Person.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Primary_Check.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/known_faces/2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/known_faces/3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/known_faces/primary.jpg" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_runner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mapley.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/primary.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/primary_check_results.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/secondary_check_results.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +48,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Python.Attend_Manage.executor&quot;: &quot;Run&quot;,
     &quot;Python.Primary_Check.executor&quot;: &quot;Run&quot;,
     &quot;Python.Secondary_Check.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
@@ -133,12 +142,21 @@
       <option name="project" value="LOCAL‎" />
       <updated>1735218165941</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL‎-00006" summary="הוספתי 3 מחלקות וסידרתי את הקוד">
+      <option name="closed" value="true" />
+      <created>1735474999975</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL‎-00006" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735474999975</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
     <MESSAGE value="סידרתי את הקוד בשלושה קבצים וקיצרתי את ה-main משמעותי.&#10;בסוף כל בדיקה (הראשונה והשניה) הוא מצייר רבועים סביב הפרצופים (בצבע המתאים) עם רישום מספר התמונה ואחוזי ההתאמה" />
-    <option name="LAST_COMMIT_MESSAGE" value="סידרתי את הקוד בשלושה קבצים וקיצרתי את ה-main משמעותי.&#10;בסוף כל בדיקה (הראשונה והשניה) הוא מצייר רבועים סביב הפרצופים (בצבע המתאים) עם רישום מספר התמונה ואחוזי ההתאמה" />
+    <MESSAGE value="הוספתי 3 מחלקות וסידרתי את הקוד" />
+    <option name="LAST_COMMIT_MESSAGE" value="הוספתי 3 מחלקות וסידרתי את הקוד" />
   </component>
 </project>
