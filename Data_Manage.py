@@ -1,4 +1,6 @@
 # Data_Manage.py
+import os
+import re
 from Person import Person
 
 # וקטור גלובלי לשמירת האנשים
@@ -32,7 +34,9 @@ def remove_person():
 
     for i, person in enumerate(people_vector):
         if person.id_number == id_number:
-            removed_person = people_vector.pop(i)
+            removed_person = people_vector[i]
+            removed_person.mark_for_deletion()  # סימון למחיקת תיקייה
+            people_vector.pop(i)  # הסרה מהווקטור
             print(f"האדם {removed_person.get_full_name()} הוסר בהצלחה")
             print(f"מספר אנשים במערכת: {len(people_vector)}")
             return
@@ -52,6 +56,88 @@ def display_all_people():
         print(f"   ת.ז: {details['id_number']}")
         print(f"   סטטוס נוכחות: {'נוכח' if details['is_present'] else 'לא נוכח'}")
 
+        import os
+        import re
+
+        def load_existing_people(base_path="C:/Users/User/PycharmProjects/AttendMe"):
+            """טעינת אנשים קיימים מהתיקיות"""
+            print("\n=== טוען אנשים קיימים מהמערכת ===")
+
+            try:
+                # מקבל רשימה של כל התיקיות בנתיב הבסיס
+                directories = [d for d in os.listdir(base_path)
+                               if os.path.isdir(os.path.join(base_path, d))]
+
+                # ביטוי רגולרי לבדיקת פורמט השם
+                # מחפש: אותיות_אותיות_מספרים
+                pattern = r'^([A-Za-z]+)_([A-Za-z]+)_(\d+)$'
+
+                loaded_count = 0
+                for dir_name in directories:
+                    match = re.match(pattern, dir_name)
+                    if match:
+                        first_name = match.group(1)  # הקבוצה הראשונה - שם פרטי
+                        last_name = match.group(2)  # הקבוצה השנייה - שם משפחה
+                        id_number = match.group(3)  # הקבוצה השלישית - ת.ז.
+
+                        # בדיקה אם האדם כבר קיים במערכת
+                        if not any(person.id_number == id_number for person in people_vector):
+                            try:
+                                new_person = Person(first_name, last_name, id_number)
+                                people_vector.append(new_person)
+                                loaded_count += 1
+                                print(f"נטען בהצלחה: {new_person.get_full_name()} (ת.ז: {id_number})")
+                            except Exception as e:
+                                print(f"שגיאה בטעינת {dir_name}: {str(e)}")
+                        else:
+                            print(f"דילוג על {dir_name} - כבר קיים במערכת")
+
+                print(f"\nסה\"כ נטענו {loaded_count} אנשים חדשים למערכת")
+                print(f"מספר אנשים כולל במערכת: {len(people_vector)}")
+
+            except Exception as e:
+                print(f"שגיאה בטעינת אנשים קיימים: {str(e)}")
+
+
+def load_existing_people(base_path="C:/Users/User/PycharmProjects/AttendMe"):
+    """טעינת אנשים קיימים מהתיקיות"""
+    print("\n=== טוען אנשים קיימים מהמערכת ===")
+
+    try:
+        # מקבל רשימה של כל התיקיות בנתיב הבסיס
+        directories = [d for d in os.listdir(base_path)
+                       if os.path.isdir(os.path.join(base_path, d))]
+
+        # ביטוי רגולרי לבדיקת פורמט השם
+        # מחפש: אותיות_אותיות_מספרים
+        pattern = r'^([A-Za-z]+)_([A-Za-z]+)_(\d+)$'
+
+        loaded_count = 0
+        for dir_name in directories:
+            match = re.match(pattern, dir_name)
+            if match:
+                first_name = match.group(1)  # הקבוצה הראשונה - שם פרטי
+                last_name = match.group(2)  # הקבוצה השנייה - שם משפחה
+                id_number = match.group(3)  # הקבוצה השלישית - ת.ז.
+
+                # בדיקה אם האדם כבר קיים במערכת
+                if not any(person.id_number == id_number for person in people_vector):
+                    try:
+                        new_person = Person(first_name, last_name, id_number)
+                        people_vector.append(new_person)
+                        loaded_count += 1
+                        print(f"נטען בהצלחה: {new_person.get_full_name()} (ת.ז: {id_number})")
+                    except Exception as e:
+                        print(f"שגיאה בטעינת {dir_name}: {str(e)}")
+                else:
+                    print(f"דילוג על {dir_name} - כבר קיים במערכת")
+
+        print(f"\nסה\"כ נטענו {loaded_count} אנשים חדשים למערכת")
+        print(f"מספר אנשים כולל במערכת: {len(people_vector)}")
+
+    except Exception as e:
+        print(f"שגיאה בטעינת אנשים קיימים: {str(e)}")
+
 
 def manage_data():
     while True:
@@ -59,9 +145,10 @@ def manage_data():
         print("1. הוספת אדם חדש")
         print("2. הסרת אדם")
         print("3. הצגת כל האנשים במערכת")
-        print("4. חזרה לתפריט ראשי")
+        print("4. טעינת אנשים קיימים מהמערכת")
+        print("5. חזרה לתפריט ראשי")
 
-        choice = input("\nבחר אפשרות (1-4): ")
+        choice = input("\nבחר אפשרות (1-5): ")
 
         if choice == "1":
             add_new_person()
@@ -70,6 +157,8 @@ def manage_data():
         elif choice == "3":
             display_all_people()
         elif choice == "4":
+            load_existing_people()
+        elif choice == "5":
             print("חוזר לתפריט ראשי...")
             break
         else:

@@ -11,6 +11,7 @@ def check_presence():
    print("\nInitializing Face Detection System...")
    # יצירת מופע של FaceDetection שמיד יחתוך את הפנים מתמונת המטרה
    face_detection = FaceDetection("target.jpg")
+   face_detection.extract_faces_from_directory(r"C:\Users\User\PycharmProjects\AttendMe\target")
 
    try:
        # בדיקת כל אדם במערכת

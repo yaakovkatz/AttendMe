@@ -4,10 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="עשיתי כמה שינוים, המערכת אוספת את כל הפרצופים שהיא מוצאת בתמונה ושמה את זה בקובץ מסוים ואז משווה בין הפרצופים במאגר">
+    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="עשיתי כמה שינוים">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Attend_Manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/Attend_Manage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data_Manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data_Manage.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Face_Detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/Face_Detection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Person.py" beforeDir="false" afterPath="$PROJECT_DIR$/Person.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Secondary_Check.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sk1/person1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sk1/person2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sk1/person3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/yk2/person1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/yk2/person2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/yk2/‏‏person3.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -149,7 +159,23 @@
       <option name="project" value="LOCAL‎" />
       <updated>1735495982281</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL‎-00008" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1735643824470</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL‎-00008" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735643824470</updated>
+    </task>
+    <task id="LOCAL‎-00009" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1735644142626</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL‎-00009" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735644142626</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -157,6 +183,7 @@
     <MESSAGE value="סידרתי את הקוד בשלושה קבצים וקיצרתי את ה-main משמעותי.&#10;בסוף כל בדיקה (הראשונה והשניה) הוא מצייר רבועים סביב הפרצופים (בצבע המתאים) עם רישום מספר התמונה ואחוזי ההתאמה" />
     <MESSAGE value="הוספתי 3 מחלקות וסידרתי את הקוד" />
     <MESSAGE value="עשיתי כמה שינוים, המערכת אוספת את כל הפרצופים שהיא מוצאת בתמונה ושמה את זה בקובץ מסוים ואז משווה בין הפרצופים במאגר" />
-    <option name="LAST_COMMIT_MESSAGE" value="עשיתי כמה שינוים, המערכת אוספת את כל הפרצופים שהיא מוצאת בתמונה ושמה את זה בקובץ מסוים ואז משווה בין הפרצופים במאגר" />
+    <MESSAGE value="עשיתי כמה שינוים" />
+    <option name="LAST_COMMIT_MESSAGE" value="עשיתי כמה שינוים" />
   </component>
 </project>
