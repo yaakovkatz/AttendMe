@@ -17,6 +17,28 @@ class FaceDetection:
         # חיתוך הפנים מתמונת המטרה בעת יצירת המחלקה
         self.extract_faces_from_target(target_image_path)
 
+    def clear_enviro_faces(self):
+        """מחיקת כל התמונות מתיקיית EnviroFaces"""
+        try:
+            # בדיקה שהתיקייה קיימת
+            if not os.path.exists(self.enviro_faces_dir):
+                print(f"Directory {self.enviro_faces_dir} does not exist")
+                return
+
+            # מחיקת כל הקבצים בתיקייה
+            files = glob.glob(f"{self.enviro_faces_dir}/*.jpg")
+            for file in files:
+                try:
+                    os.remove(file)
+                    print(f"Deleted: {file}")
+                except Exception as e:
+                    print(f"Error deleting {file}: {str(e)}")
+
+            print(f"Successfully cleared {len(files)} files from {self.enviro_faces_dir}")
+
+        except Exception as e:
+            print(f"Error clearing directory: {str(e)}")
+
     def extract_faces_from_target(self, target_path):
         """חיתוך ושמירת הפנים מתמונת המטרה"""
         try:

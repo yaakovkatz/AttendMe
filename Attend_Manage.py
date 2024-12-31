@@ -27,6 +27,9 @@ def check_presence():
                person.mark_absent()
                print(f"❌ {person.get_full_name()} is not present")
 
+       print(f"")
+       face_detection.clear_enviro_faces();
+
        if not match_found:
            print("\nNo matches found in the system")
 
