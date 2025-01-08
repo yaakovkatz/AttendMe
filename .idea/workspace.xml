@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="עשיתי כמה שינוים">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2qZqCDtVkC9GFyABNtTZulmHgfd" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.Attend_Manage.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Face_Detection.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Primary_Check.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Secondary_Check.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_runner.executor&quot;: &quot;Run&quot;,
+    &quot;Python.secondary_check.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="main_runner" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="AttendMe" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="TF_CPP_MIN_LOG_LEVEL" value="2" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.12 (pythonProject)" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\User\PycharmProjects\AttendMe" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main_runner.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-50da183f06c8-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13135.95" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="" />
+      <created>1734880316151</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1734880316151</updated>
+    </task>
+    <task id="LOCAL‎-00001" summary="Initial commit">
+      <option name="closed" value="true" />
+      <created>1735132512407</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL‎-00001" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735132512407</updated>
+    </task>
+    <task id="LOCAL‎-00002" summary="Initial commit">
+      <option name="closed" value="true" />
+      <created>1735132519785</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL‎-00002" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735132519785</updated>
+    </task>
+    <task id="LOCAL‎-00003" summary="Initial commit">
+      <option name="closed" value="true" />
+      <created>1735135620803</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL‎-00003" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735135620804</updated>
+    </task>
+    <task id="LOCAL‎-00004" summary="Initial commit">
+      <option name="closed" value="true" />
+      <created>1735135664442</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL‎-00004" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735135664442</updated>
+    </task>
+    <task id="LOCAL‎-00005" summary="סידרתי את הקוד בשלושה קבצים וקיצרתי את ה-main משמעותי.&#10;בסוף כל בדיקה (הראשונה והשניה) הוא מצייר רבועים סביב הפרצופים (בצבע המתאים) עם רישום מספר התמונה ואחוזי ההתאמה">
+      <option name="closed" value="true" />
+      <created>1735218165941</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL‎-00005" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735218165941</updated>
+    </task>
+    <task id="LOCAL‎-00006" summary="הוספתי 3 מחלקות וסידרתי את הקוד">
+      <option name="closed" value="true" />
+      <created>1735474999975</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL‎-00006" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735474999975</updated>
+    </task>
+    <task id="LOCAL‎-00007" summary="עשיתי כמה שינוים, המערכת אוספת את כל הפרצופים שהיא מוצאת בתמונה ושמה את זה בקובץ מסוים ואז משווה בין הפרצופים במאגר">
+      <option name="closed" value="true" />
+      <created>1735495982281</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL‎-00007" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735495982281</updated>
+    </task>
+    <task id="LOCAL‎-00008" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1735643824470</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL‎-00008" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735643824470</updated>
+    </task>
+    <task id="LOCAL‎-00009" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1735644142626</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL‎-00009" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735644142626</updated>
+    </task>
+    <task id="LOCAL‎-00010" summary="עשיתי כמה שינוים משמעותים">
+      <option name="closed" value="true" />
+      <created>1735656319215</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL‎-00010" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1735656319215</updated>
+    </task>
+    <task id="LOCAL‎-00011" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1736077131653</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL‎-00011" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1736077131653</updated>
+    </task>
+    <task id="LOCAL‎-00012" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1736248605156</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL‎-00012" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1736248605156</updated>
+    </task>
+    <task id="LOCAL‎-00013" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1736344863929</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL‎-00013" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1736344863929</updated>
+    </task>
+    <task id="LOCAL‎-00014" summary="עשיתי כמה שינוים">
+      <option name="closed" value="true" />
+      <created>1736345133669</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL‎-00014" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1736345133669</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial commit" />
+    <MESSAGE value="סידרתי את הקוד בשלושה קבצים וקיצרתי את ה-main משמעותי.&#10;בסוף כל בדיקה (הראשונה והשניה) הוא מצייר רבועים סביב הפרצופים (בצבע המתאים) עם רישום מספר התמונה ואחוזי ההתאמה" />
+    <MESSAGE value="הוספתי 3 מחלקות וסידרתי את הקוד" />
+    <MESSAGE value="עשיתי כמה שינוים, המערכת אוספת את כל הפרצופים שהיא מוצאת בתמונה ושמה את זה בקובץ מסוים ואז משווה בין הפרצופים במאגר" />
+    <MESSAGE value="עשיתי כמה שינוים משמעותים" />
+    <MESSAGE value="עשיתי כמה שינוים" />
+    <option name="LAST_COMMIT_MESSAGE" value="עשיתי כמה שינוים" />
+  </component>
+</project>
