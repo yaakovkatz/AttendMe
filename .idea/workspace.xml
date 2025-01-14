@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="עשיתי כמה שינוים" />
+    <list default="true" id="ace45db4-645d-4759-a55a-c613f3a41897" name="Changes" comment="עשיתי כמה שינוים">
+      <change beforePath="$PROJECT_DIR$/.idea/AttendMe.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AttendMe.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Face_Detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/Face_Detection.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -59,7 +64,7 @@
         <env name="TF_CPP_MIN_LOG_LEVEL" value="2" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.12 (pythonProject)" />
+      <option name="SDK_NAME" value="Python 3.12" />
       <option name="WORKING_DIRECTORY" value="C:\Users\User\PycharmProjects\AttendMe" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -224,5 +229,15 @@
     <MESSAGE value="עשיתי כמה שינוים משמעותים" />
     <MESSAGE value="עשיתי כמה שינוים" />
     <option name="LAST_COMMIT_MESSAGE" value="עשיתי כמה שינוים" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Face_Detection.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import os
 import glob
+import shutil
 
 FIRST_THRESHOLD = 0.45
 SECOND_THRESHOLD = 0.25
@@ -245,7 +246,7 @@ class FaceDetection:
                             print(f"Siamese similarity with {face_in_db}: {siamese_similarity:.2%}")
 
                             # רק אם כל שלוש הבדיקות עוברות את הסף
-                            if siamese_similarity >= THIRD_THRESHOLD:  # סף למודל Siamese
+                            if siamese_similarity >= THIRD_THRESHOLD:
                                 matched_faces.append(face_in_db)
                                 found_match = True
                         else:
@@ -259,15 +260,16 @@ class FaceDetection:
             if found_match:
                 for face_in_db in matched_faces:
                     try:
-                        import shutil
+                        # העתקת התמונה המזוהה ל-Identified_Images
+                        # אבל לא מוחקים אותה מ-EnviroFaces
                         original_number = os.path.basename(face_in_db).split('_')[-1].split('.')[0]
                         new_filename = f"{parent_dir}_{original_number}.jpg"
                         new_path = os.path.join(identified_dir, new_filename)
 
                         shutil.copy2(face_in_db, new_path)
                         print(f"Matched face copied to: {new_path}")
-                        os.remove(face_in_db)
-                        print(f"Matched face removed from EnviroFaces: {face_in_db}")
+                        # הסרנו את שורת המחיקה!
+
                     except Exception as file_error:
                         print(f"Error handling files: {str(file_error)}")
 
