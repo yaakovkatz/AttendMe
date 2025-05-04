@@ -25,6 +25,8 @@ MIN_SHARPNESS = 000
 MAX_NOISE_THRESHOLD = 100
 MIN_CONTRAST = 0.0
 
+# אאאאאאאאאאאאאאאאאאאאאאאאאא
+
 
 class FaceDetection:
     def __init__(self, target_image_path="target.jpg"):
