@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendMe - מערכת זיהוי נוכחות באמצעות פנים</title>
+    <link rel="stylesheet" href="/web_static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <span class="logo-icon">👁️</span>
+                    AttendMe
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home" class="active">דף בית</a></li>
+                    <li><a href="#dashboard">לוח בקרה</a></li>
+                    <li><a href="#people-management">ניהול אנשים</a></li>
+                    <li><a href="#attendance">נוכחות</a></li>
+                    <li><a href="#settings">הגדרות</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Home Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>מערכת חכמה לזיהוי נוכחות באמצעות פנים</h1>
+            <p>פתרון מתקדם לרישום נוכחות בגני ילדים ובתי ספר באמצעות טכנולוגיית זיהוי פנים מבוססת בינה מלאכותית</p>
+            <div class="cta-buttons">
+                <a href="#dashboard" class="cta-button">לוח בקרה</a>
+                <a href="#attendance" class="cta-button secondary">בדיקת נוכחות</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="section">
+        <div class="container">
+            <h2 class="section-title">לוח בקרה</h2>
+            <div class="dashboard-overview">
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="status-details">
+                        <h3>סה"כ אנשים</h3>
+                        <p id="total-people">0</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="status-details">
+                        <h3>נוכחים</h3>
+                        <p id="present-people">0</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="status-details">
+                        <h3>נעדרים</h3>
+                        <p id="absent-people">0</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="status-details">
+                        <h3>סטטוס מצלמה</h3>
+                        <p id="camera-status">לא פעילה</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="camera-controls">
+                <button id="start-camera" class="action-button">
+                    <i class="fas fa-play"></i> הפעל מצלמה
+                </button>
+                <button id="stop-camera" class="action-button secondary">
+                    <i class="fas fa-stop"></i> עצור מצלמה
+                </button>
+                <button id="check-attendance" class="action-button primary">
+                    <i class="fas fa-check"></i> בדיקת נוכחות
+                </button>
+            </div>
+
+            <div class="camera-container">
+                <div class="camera-feed">
+                    <img id="camera-feed-img" src="/web_static/img/camera-placeholder.jpg" alt="תמונת מצלמה">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- People Management Section -->
+    <section id="people-management" class="section">
+        <div class="container">
+            <h2 class="section-title">ניהול אנשים</h2>
+            <div class="people-controls">
+                <button id="add-person-btn" class="action-button">
+                    <i class="fas fa-user-plus"></i> הוסף אדם חדש
+                </button>
+                <input type="text" id="search-people" placeholder="חיפוש לפי שם או ת.ז.">
+            </div>
+
+            <div class="people-list">
+                <table id="people-table">
+                    <thead>
+                        <tr>
+                            <th>תמונה</th>
+                            <th>שם מלא</th>
+                            <th>ת.ז.</th>
+                            <th>סטטוס נוכחות</th>
+                            <th>פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody id="people-table-body">
+                        <!-- תוכן הטבלה יתמלא דינמית ע"י JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal for adding new person -->
+        <div id="add-person-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>הוספת אדם חדש</h3>
+                <form id="add-person-form">
+                    <div class="form-group">
+                        <label for="first-name">שם פרטי:</label>
+                        <input type="text" id="first-name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">שם משפחה:</label>
+                        <input type="text" id="last-name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id-number">מספר ת.ז.:</label>
+                        <input type="text" id="id-number" name="id_number" required pattern="[0-9]+" title="נא להזין ספרות בלבד">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="action-button">הוסף</button>
+                        <button type="button" class="action-button secondary close-modal-btn">ביטול</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal for uploading image -->
+        <div id="upload-image-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>העלאת תמונה</h3>
+                <!-- סטטוס העלאת תמונות - חדש -->
+                <div id="upload-status" class="upload-status">
+                    יש להעלות לפחות 3 תמונות ועד 5 תמונות בסך הכל
+                </div>
+                <!-- מד התקדמה חזותי - חדש -->
+                <div class="upload-progress">
+                    <div class="progress-step" id="progress-step-1"></div>
+                    <div class="progress-step" id="progress-step-2"></div>
+                    <div class="progress-step" id="progress-step-3"></div>
+                    <div class="progress-step optional" id="progress-step-4"></div>
+                    <div class="progress-step optional" id="progress-step-5"></div>
+                </div>
+                <form id="upload-image-form">
+                    <input type="hidden" id="upload-person-id" name="id_number">
+                    <div class="form-group">
+                        <label for="person-image">בחר תמונה:</label>
+                        <input type="file" id="person-image" name="file" accept="image/*" required>
+                    </div>
+                    <div class="image-preview">
+                        <img id="image-preview" src="/web_static/img/person-placeholder.jpg" alt="תצוגה מקדימה">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="action-button">העלה</button>
+                        <button type="button" id="finish-upload-button" style="display: none;" class="action-button secondary">סיים</button>
+                        <button type="button" class="action-button secondary close-modal-btn">ביטול</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal for viewing all person images - חדש -->
+        <div id="person-images-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>תמונות של <span id="person-images-name"></span></h3>
+                <div class="person-images-gallery" id="person-images-gallery">
+                    <!-- התמונות יתווספו כאן דינמית -->
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="action-button secondary close-modal-btn">סגור</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Attendance Section -->
+    <section id="attendance" class="section">
+        <div class="container">
+            <h2 class="section-title">דוח נוכחות</h2>
+            <div class="attendance-controls">
+                <div class="date-filter">
+                    <label for="attendance-date">תאריך:</label>
+                    <input type="date" id="attendance-date" value="">
+                </div>
+                <button id="refresh-attendance" class="action-button">
+                    <i class="fas fa-sync"></i> רענן
+                </button>
+                <button id="export-attendance" class="action-button secondary">
+                    <i class="fas fa-file-export"></i> ייצוא לאקסל
+                </button>
+            </div>
+
+            <div class="attendance-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="attendance-present">0</div>
+                    <div class="stat-label">נוכחים</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="attendance-absent">0</div>
+                    <div class="stat-label">נעדרים</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="attendance-percentage">0%</div>
+                    <div class="stat-label">אחוז נוכחות</div>
+                </div>
+            </div>
+
+            <div class="attendance-list">
+                <table id="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>תמונה</th>
+                            <th>שם מלא</th>
+                            <th>ת.ז.</th>
+                            <th>סטטוס</th>
+                            <th>זמן בדיקה</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-table-body">
+                        <!-- תוכן הטבלה יתמלא דינמית ע"י JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings Section -->
+    <section id="settings" class="section">
+        <div class="container">
+            <h2 class="section-title">הגדרות מערכת</h2>
+
+            <div class="settings-container">
+                <div class="settings-group">
+                    <h3>הגדרות מצלמה</h3>
+                    <div class="form-group">
+                        <label for="camera-id">זיהוי מצלמה:</label>
+                        <select id="camera-id">
+                            <option value="0">מצלמה ראשית (0)</option>
+                            <option value="1">מצלמה משנית (1)</option>
+                            <option value="2">מצלמה נוספת (2)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="detection-frequency">תדירות בדיקה אוטומטית:</label>
+                        <select id="detection-frequency">
+                            <option value="0">ידני בלבד</option>
+                            <option value="30">כל 30 שניות</option>
+                            <option value="60">כל דקה</option>
+                            <option value="300">כל 5 דקות</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>הגדרות זיהוי פנים</h3>
+                    <div class="form-group">
+                        <label for="detection-threshold">סף זיהוי:</label>
+                        <input type="range" id="detection-threshold" min="0.3" max="0.9" step="0.05" value="0.6">
+                        <span id="threshold-value">0.6</span>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enable-notifications" checked>
+                            <label for="enable-notifications">הפעל התראות</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-actions">
+                <button id="save-settings" class="action-button">שמור הגדרות</button>
+                <button id="reset-settings" class="action-button secondary">אפס להגדרות ברירת מחדל</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="copyright">© 2025 AttendMe - כל הזכויות שמורות</p>
+        </div>
+    </footer>
+
+    <!-- Script imports -->
+    <script src="/web_static/js/main.js"></script>
+</body>
+</html>
