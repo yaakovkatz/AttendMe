@@ -1,13 +1,21 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
+from attendance_checker import check_attendance_simple
 import os
 import json
 from werkzeug.utils import secure_filename
 import time
-import threading
 from datetime import datetime
 import logging
 # from unidecode import unidecode
 from flask import Flask, render_template, request
+from datetime import datetime
+import threading
+from attendance_checker import load_people_for_website
+
+
+# משתנים גלובליים לשמירת רשימת האנשים
+loaded_people = []
+people_loading_status = {"status": "not_started", "message": ""}
 
 # הגדר את התיקיות החדשות לפלאסק
 app = Flask(__name__,
@@ -38,6 +46,15 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # מגבלת גודל קו�
 
 # אתחול משתנים גלובליים
 people_list = []  # רשימה זמנית של אנשים
+
+# משתנה גלובלי לניהול בדיקות נוכחות
+attendance_status = {
+    "is_running": False,
+    "status": "idle",
+    "message": "",
+    "result": None
+}
+current_checker = None
 
 
 @app.route('/')
@@ -457,7 +474,7 @@ def check_attendance():
 
 
 @app.route('/api/attendance_status')
-def attendance_status():
+def attendance_status_old():
     """קבלת סטטוס בדיקת הנוכחות"""
     # זה סימולציה בלבד
     # נדמה שזיהינו את כל האנשים במערכת
@@ -505,6 +522,395 @@ def export_attendance():
         'message': 'רשימת הנוכחות יוצאה בהצלחה',
         'file_url': f"/static/exports/attendance_{timestamp}.json"
     })
+
+
+@app.route('/api/check_attendance_person', methods=['POST'])
+def check_attendance_person():
+    """בדיקת נוכחות לאדם ספציפי לפי מספר"""
+    global attendance_status, current_checker
+
+    try:
+        data = request.json
+        person_number = data.get('person_number', 1)
+
+        print(f"🔴 DEBUG: התקבלה בקשה לבדיקת נוכחות לאדם מספר: {person_number}")
+        print(f"🔴 DEBUG: attendance_status נוכחי: {attendance_status}")
+
+
+        # בדיקה אם כבר רצה בדיקה
+        # אפס בכוח את הסטטוס
+        attendance_status["is_running"] = False
+        print("🔴 DEBUG: אפסתי סטטוס ומתחיל בדיקה חדשה")
+
+        # התחלת בדיקה ברקע
+        attendance_status["is_running"] = True
+        attendance_status["status"] = "starting"
+        attendance_status["message"] = "מתחיל בדיקה..."
+        attendance_status["result"] = None
+        attendance_status["start_time"] = datetime.now().strftime("%H:%M:%S")
+
+        print("🔴 DEBUG: מתחיל בדיקת נוכחות ברקע...")
+
+        # הפעלת הבדיקה ברקע עם עדכוני סטטוס
+        def run_attendance_check():
+            global attendance_status, current_checker
+            try:
+                print(f"🔴 DEBUG: מפעיל AttendanceChecker עם person_number={person_number}")
+
+                # בדיקה אם הקובץ attendance_checker קיים
+                import os
+                if not os.path.exists('attendance_checker.py'):
+                    print("🔴 DEBUG: הקובץ attendance_checker.py לא קיים!")
+                    raise Exception("הקובץ attendance_checker.py לא קיים")
+
+                print("🔴 DEBUG: נמצא קובץ attendance_checker.py")
+
+                # ניסיון לייבא את AttendanceChecker
+                try:
+                    from attendance_checker import AttendanceChecker
+                    print("🔴 DEBUG: AttendanceChecker יובא בהצלחה")
+                except ImportError as e:
+                    print(f"🔴 DEBUG: שגיאה בייבוא AttendanceChecker: {e}")
+                    raise e
+
+                # יצירת checker instance
+                current_checker = AttendanceChecker()
+                print("🔴 DEBUG: נוצר AttendanceChecker instance")
+
+                # פונקציית callback לעדכון סטטוס
+                def status_callback(status, message):
+                    attendance_status["status"] = status
+                    attendance_status["message"] = message
+                    print(f"🔴 DEBUG: עדכון סטטוס: {status} - {message}")
+
+                print("🔴 DEBUG: קורא לcheck_person_attendance...")
+                # הפעלת הבדיקה
+                success, message, person_name = current_checker.check_person_attendance(
+                    person_number=person_number,
+                    status_callback=status_callback
+                )
+
+                print(f"🔴 DEBUG: בדיקה הושלמה. success={success}, message={message}, person_name={person_name}")
+
+                attendance_status["is_running"] = False
+
+                if success:
+                    attendance_status["status"] = "completed"
+                    attendance_status["message"] = message
+                    attendance_status["result"] = {
+                        "success": True,
+                        "message": message,
+                        "person_name": person_name
+                    }
+                else:
+                    attendance_status["status"] = "not_found"
+                    attendance_status["message"] = message
+                    attendance_status["result"] = {
+                        "success": False,
+                        "message": message
+                    }
+
+                print("🔴 DEBUG: בדיקת נוכחות הושלמה")
+
+            except Exception as e:
+                print(f"🔴 DEBUG: שגיאה בבדיקת נוכחות: {str(e)}")
+                import traceback
+                print(f"🔴 DEBUG: traceback: {traceback.format_exc()}")
+
+                attendance_status["is_running"] = False
+                attendance_status["status"] = "error"
+                attendance_status["message"] = f"שגיאה בבדיקה: {str(e)}"
+                attendance_status["result"] = {
+                    "success": False,
+                    "message": f"שגיאה: {str(e)}"
+                }
+
+        # הפעלת הthread
+        thread = threading.Thread(target=run_attendance_check)
+        thread.daemon = True
+        thread.start()
+
+        print("🔴 DEBUG: Thread נוצר ופועל ברקע")
+
+        return jsonify({
+            'success': True,
+            'message': 'בדיקה החלה ברקע - זה יכול לקחת עד 40 דקות',
+            'person_number': person_number,
+            'start_time': attendance_status.get("start_time", "")
+        })
+
+    except Exception as e:
+        print(f"🔴 DEBUG: שגיאה כללית: {str(e)}")
+        attendance_status["is_running"] = False
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/attendance_check_status', methods=['GET'])
+def get_attendance_check_status():
+    """קבלת סטטוס בדיקת הנוכחות"""
+    global attendance_status, current_checker
+
+    # אם יש checker פעיל, נוכל לקבל סטטוס מפורט יותר
+    if current_checker and attendance_status["is_running"]:
+        try:
+            checker_status = current_checker.get_status()
+            if checker_status:
+                attendance_status["status"] = checker_status.get("status", attendance_status["status"])
+                attendance_status["message"] = checker_status.get("message", attendance_status["message"])
+        except:
+            pass
+
+    # הוספת זמן שחלף
+    response_data = {
+        'is_running': attendance_status["is_running"],
+        'status': attendance_status["status"],
+        'message': attendance_status["message"],
+        'result': attendance_status["result"]
+    }
+
+    # הוספת זמן שחלף אם הבדיקה רצה
+    if attendance_status.get("start_time") and attendance_status["is_running"]:
+        start_time_str = attendance_status["start_time"]
+        try:
+            start_time = datetime.strptime(start_time_str, "%H:%M:%S").time()
+            current_time = datetime.now().time()
+
+            start_seconds = start_time.hour * 3600 + start_time.minute * 60 + start_time.second
+            current_seconds = current_time.hour * 3600 + current_time.minute * 60 + current_time.second
+            elapsed_seconds = current_seconds - start_seconds
+
+            if elapsed_seconds < 0:
+                elapsed_seconds += 24 * 3600
+
+            elapsed_minutes = elapsed_seconds // 60
+            response_data["elapsed_time"] = f"{elapsed_minutes} דקות"
+
+        except:
+            pass
+
+    return jsonify(response_data)
+
+
+@app.route('/api/cancel_attendance_check', methods=['POST'])
+def cancel_attendance_check():
+    """ביטול בדיקת נוכחות"""
+    global attendance_status, current_checker
+
+    print("מבטל בדיקת נוכחות...")
+
+    attendance_status["is_running"] = False
+    attendance_status["status"] = "cancelled"
+    attendance_status["message"] = "הבדיקה בוטלה על ידי המשתמש"
+    attendance_status["result"] = None
+    current_checker = None
+
+    return jsonify({
+        'success': True,
+        'message': 'בדיקה בוטלה'
+    })
+
+@app.route('/api/run_advanced_function', methods=['POST'])
+def run_advanced_function():
+    """הפעלת פונקציות מתקדמות"""
+    data = request.json
+    command = data.get('command')
+    params = data.get('params', {})
+
+    try:
+        # לכידת הפלט הסטנדרטי
+        import io
+        import sys
+        old_stdout = sys.stdout
+        new_stdout = io.StringIO()
+        sys.stdout = new_stdout
+
+        result = {"success": True}
+
+        # הפעלת הפקודה המבוקשת
+        if command == 'load_people':  # תנאי חדש לטיפול בפקודה החדשה
+            # טעינת רשימת האנשים מתיקיית training_faces
+            from main_runner import get_registered_people
+            training_path = "./training_faces"
+
+            print(f"טוען אנשים מהתיקייה: {training_path}")
+            registered_people = get_registered_people(training_path)
+
+            if not registered_people:
+                print("לא נמצאו אנשים בתיקייה")
+            else:
+                print(f"נמצאו {len(registered_people)} אנשים:")
+                for i, person in enumerate(registered_people, 1):
+                    name_parts = person.split('_')
+                    if len(name_parts) >= 3:
+                        first_name, last_name, id_number = name_parts[0], name_parts[1], name_parts[2]
+                        print(f"{i}. {first_name} {last_name} (ת.ז. {id_number})")
+
+            # המרת הנתונים לפורמט המתאים לאתר
+            people_data = []
+            for person_id in registered_people:
+                name_parts = person_id.split('_')
+                if len(name_parts) >= 3:
+                    first_name, last_name, id_number = name_parts[0], name_parts[1], name_parts[2]
+
+                    # בדיקה כמה תמונות יש לאדם
+                    person_folder = os.path.join(training_path, person_id)
+                    image_count = 0
+
+                    if os.path.exists(person_folder) and os.path.isdir(person_folder):
+                        image_files = [f for f in os.listdir(person_folder) if
+                                       f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+                        image_count = len(image_files)
+                    else:
+                        # בדיקה של מבנה ישן
+                        old_format_images = [f for f in os.listdir(training_path) if
+                                             f.startswith(f"{id_number}_") and f.lower().endswith(
+                                                 ('.jpg', '.jpeg', '.png'))]
+                        image_count = len(old_format_images)
+
+                    people_data.append({
+                        'id': id_number,
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'is_present': False,
+                        'has_image': image_count > 0,
+                        'image_count': max(1, image_count)  # לפחות תמונה אחת אם יש תמונות
+                    })
+
+            # עדכון רשימת האנשים הגלובלית
+            global people_list
+            people_list = people_data
+            print(f"\nנטענו {len(people_data)} אנשים למערכת")
+
+        elif command == 'check_all_people':
+            # בדיקת נוכחות לכל האנשים
+            from Data_Manage import check_presence
+
+            print("בודק נוכחות לכל האנשים במערכת...")
+            results = check_presence(check_all=True)
+
+            # עדכון סטטוס הנוכחות של כל האנשים לפי התוצאות
+            # אם check_presence מחזירה מילון עם מזהים ומצב נוכחות
+            if isinstance(results, dict):
+                for person_id, is_present in results.items():
+                    # מציאת האדם ברשימה לפי ת.ז.
+                    person = next((p for p in people_list if p['id'] == person_id), None)
+                    if person:
+                        person['is_present'] = bool(is_present)
+                        print(f"{person['first_name']} {person['last_name']}: {'נוכח' if is_present else 'לא נוכח'}")
+
+            print("בדיקת נוכחות הושלמה")
+
+        elif command == 'check_specific_person':
+            # קבלת פרטי האדם הספציפי מהפרמטרים
+            person_id = params.get('person_id')
+
+            if not person_id:
+                print("שגיאה: לא צוין מזהה אדם")
+                result["success"] = False
+                result["error"] = "לא צוין מזהה אדם"
+            else:
+                print(f"בודק נוכחות עבור: {person_id}")
+
+                # קריאה לפונקציה האמיתית
+                from Data_Manage import check_presence
+
+                # פיצול המזהה לחלקים (שם פרטי, שם משפחה, ת.ז.)
+                # פורמט צפוי: "שם_פרטי שם_משפחה מספר_ת.ז."
+                parts = person_id.split()
+                if len(parts) >= 3:
+                    # הרצת בדיקת הנוכחות
+                    result_present = check_presence(check_all=False, specific_person=person_id)
+
+                    # עדכון סטטוס הנוכחות של האדם ברשימה
+                    person_tz = parts[-1]  # החלק האחרון מכיל את מספר ת.ז.
+
+                    # מציאת האדם ברשימה
+                    person = next((p for p in people_list if p['id'] == person_tz), None)
+                    if person:
+                        # עדכון סטטוס הנוכחות לפי התוצאה
+                        # נניח שהפונקציה מחזירה True אם האדם נוכח
+                        person['is_present'] = bool(result_present)
+
+                        print(f"סטטוס נוכחות עודכן: {'נוכח' if person['is_present'] else 'לא נוכח'}")
+                    else:
+                        print(f"אדם עם ת.ז. {person_tz} לא נמצא ברשימה")
+                else:
+                    print(f"פורמט מזהה לא תקין: {person_id}")
+
+        elif command == 'manage_data':
+            # קוד קיים שהיה כבר בפונקציה - אפשר להשאיר אם רוצים תאימות לאחור
+            pass
+        else:
+            sys.stdout = old_stdout
+            return jsonify({"success": False, "error": "פקודה לא מוכרת"}), 400
+
+        # שחזור הפלט הסטנדרטי וקבלת התוצאה
+        output = new_stdout.getvalue()
+        sys.stdout = old_stdout
+
+        # הוספת הפלט לתוצאה
+        result["output"] = output
+
+        # תמיד להחזיר את רשימת האנשים המעודכנת
+        result["people"] = people_list
+
+        return jsonify(result)
+
+    except Exception as e:
+        import traceback
+        if 'old_stdout' in locals() and 'sys' in locals():
+            sys.stdout = old_stdout
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
+
+def background_load_people():
+    """טעינת אנשים ברקע בהתחלה"""
+    global loaded_people, people_loading_status
+
+    try:
+        people_loading_status["status"] = "loading"
+        people_loading_status["message"] = "טוען רשימת אנשים..."
+        print("🔄 מתחיל טעינת אנשים ברקע...")
+
+        result = load_people_for_website()
+
+        if result["success"]:
+            loaded_people = result["people"]
+            people_loading_status["status"] = "completed"
+            people_loading_status["message"] = f"נטענו {len(loaded_people)} אנשים בהצלחה"
+            print(f"✅ נטענו {len(loaded_people)} אנשים ברקע בהצלחה")
+        else:
+            people_loading_status["status"] = "error"
+            people_loading_status["message"] = result["message"]
+            print(f"❌ שגיאה בטעינת אנשים ברקע: {result['message']}")
+
+    except Exception as e:
+        people_loading_status["status"] = "error"
+        people_loading_status["message"] = f"שגיאה: {str(e)}"
+        print(f"❌ שגיאה קריטית בטעינת אנשים ברקע: {e}")
+
+
+@app.route('/api/get_loaded_people', methods=['GET'])
+def get_loaded_people():
+    """החזרת רשימת האנשים שנטענה"""
+    global loaded_people, people_loading_status
+
+    return jsonify({
+        "success": people_loading_status["status"] == "completed",
+        "status": people_loading_status["status"],
+        "message": people_loading_status["message"],
+        "people": loaded_people,
+        "total": len(loaded_people)
+    })
+
+
+# הפעלת טעינה ברקע כשהשרת עולה
+print("🚀 מתחיל טעינת אנשים ברקע בהפעלת השרת...")
+threading.Thread(target=background_load_people, daemon=True).start()
 
 
 if __name__ == '__main__':

@@ -791,3 +791,572 @@ footer {
     background-color: #f8f9fa;
     border-radius: var(--border-radius);
 }
+/* סגנונות לאזור הפונקציות המתקדמות */
+.advanced-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.advanced-controls .action-button {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    padding: 15px;
+}
+
+/* אזור תוצאות */
+.results-panel {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+.results-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.results-header h3 {
+    margin: 0;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.results-content {
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: monospace;
+    line-height: 1.5;
+}
+/* עיצוב חלון בחירת אדם */
+#select-person-modal .modal-content {
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: auto;
+}
+
+/* תיבת חיפוש */
+.search-container {
+    margin-bottom: 15px;
+    padding: 0 5px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* עיצוב טבלת בחירת אנשים */
+.person-selection-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    direction: rtl;
+}
+
+.person-selection-table th,
+.person-selection-table td {
+    padding: 12px 15px;
+    text-align: right;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+.person-selection-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.person-selection-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.person-selection-row:hover {
+    background-color: #f0f8ff;
+}
+
+.person-selection-row.selected {
+    background-color: #e3f2fd;
+}
+
+.person-image-cell {
+    width: 60px;
+    text-align: center;
+}
+
+.person-selection-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.person-name-cell {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.person-id-cell {
+    color: #7f8c8d;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.no-people-message {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error-message {
+    text-align: center;
+    padding: 20px;
+    color: #e74c3c;
+}
+/* ===== בדיקת נוכחות לפי מספר אדם ===== */
+
+.attendance-checker-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 30px 0;
+    border-right: 4px solid var(--primary-color);
+}
+
+.attendance-checker-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.attendance-checker-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.attendance-checker-controls .form-group {
+    width: 100%;
+    max-width: 300px;
+}
+
+.number-input {
+    width: 120px;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.number-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.input-help {
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+    display: block;
+    font-style: italic;
+}
+
+/* אזור התוצאות */
+.attendance-result {
+    margin-top: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 12px;
+    border-right: 4px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.result-header h4 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.progress-bar {
+    width: 200px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(45deg,
+        var(--primary-color) 25%,
+        transparent 25%,
+        transparent 50%,
+        var(--primary-color) 50%,
+        var(--primary-color) 75%,
+        transparent 75%);
+    background-size: 20px 20px;
+    animation: progress-animation 1s linear infinite;
+    width: 100%;
+}
+
+.progress-bar.completed::after {
+    animation: none;
+    background: var(--success-color);
+}
+
+.progress-bar.error::after {
+    animation: none;
+    background: var(--danger-color);
+}
+
+@keyframes progress-animation {
+    0% { transform: translateX(-20px); }
+    100% { transform: translateX(20px); }
+}
+
+#attendance-status-text {
+    font-size: 14px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.result-content {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* סטטוסי תוצאות */
+.result-success {
+    color: var(--success-color);
+    font-weight: bold;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.result-error {
+    color: var(--danger-color);
+    font-weight: bold;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.result-processing {
+    color: var(--primary-color);
+    font-style: italic;
+    font-size: 16px;
+}
+
+/* כפתור ביטול */
+#cancel-attendance-check {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+#cancel-attendance-check:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* עיצוב רספונסיבי */
+@media (max-width: 768px) {
+    .attendance-checker-section {
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .attendance-checker-controls {
+        align-items: stretch;
+    }
+
+    .attendance-checker-controls .form-group {
+        max-width: none;
+    }
+
+    .number-input {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .progress-indicator {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .progress-bar {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    #attendance-status-text {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .attendance-checker-section h3 {
+        font-size: 1.1rem;
+    }
+
+    .progress-indicator {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .progress-bar {
+        width: 100%;
+    }
+
+    #attendance-status-text {
+        text-align: center;
+    }
+}
+
+/* אנימציות נוספות */
+.attendance-result {
+    animation: slideInResult 0.3s ease-out;
+}
+
+@keyframes slideInResult {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* עיצוב מתקדם לכפתורים */
+.attendance-checker-controls .action-button {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.attendance-checker-controls .action-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.attendance-checker-controls .action-button:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* אפקט מיקוד מתקדם */
+.number-input:focus {
+    animation: inputFocus 0.3s ease;
+}
+
+@keyframes inputFocus {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.person-selector-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.person-selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.person-selector-header h4 {
+    margin: 0;
+    color: #495057;
+}
+
+.loading-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.people-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    background: white;
+}
+
+.person-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.person-card:hover {
+    border-color: #007bff;
+    background: #f8f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+}
+
+.person-card.selected {
+    border-color: #007bff;
+    background: #e7f3ff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.2);
+}
+
+.person-card .person-info {
+    flex: 1;
+}
+
+.person-card .person-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 4px;
+}
+
+.person-card .person-id {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.person-card .person-number {
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.error-message {
+    text-align: center;
+    padding: 20px;
+    color: #dc3545;
+}
+
+.retry-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.retry-button:hover {
+    background: #c82333;
+}
+
+/* הוספת אפקט disabled לכפתור */
+.action-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
