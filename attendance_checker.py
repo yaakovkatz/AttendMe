@@ -4,6 +4,7 @@ import threading
 import queue
 
 
+
 class AttendanceChecker:
     def __init__(self):
         self.status = "idle"
@@ -135,7 +136,7 @@ class AttendanceChecker:
 
                     # זיהוי שלבי עיבוד
                     if "מאתחל מערכת זיהוי פנים" in line:
-                        print("🎯 DEBUG: זיהוי פנים התחיל!")
+                        print("🎯 DEBUG: " + "זיהוי פנים התחיל!"[::-1])
                     elif "חילוץ פנים מתיקייה" in line and "הושלם" in line:
                         print("🎯 DEBUG: חילוץ פנים הושלם!")
                     elif "בודק התאמה מול" in line:

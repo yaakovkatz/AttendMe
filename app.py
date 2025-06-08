@@ -7,8 +7,6 @@ import time
 from datetime import datetime
 import logging
 # from unidecode import unidecode
-from flask import Flask, render_template, request
-from datetime import datetime
 import threading
 from attendance_checker import load_people_for_website
 
@@ -874,7 +872,7 @@ def background_load_people():
     try:
         people_loading_status["status"] = "loading"
         people_loading_status["message"] = "טוען רשימת אנשים..."
-        print("🔄 מתחיל טעינת אנשים ברקע...")
+        print("🔄 מתחיל טעינת רשימת אנשים...".encode('utf-8', errors='ignore').decode('utf-8', errors='ignore'))
 
         result = load_people_for_website()
 
@@ -914,4 +912,4 @@ threading.Thread(target=background_load_people, daemon=True).start()
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='127.0.0.1', port=5000)

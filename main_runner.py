@@ -18,7 +18,7 @@ def main():
                 manage_data()
             elif choice == "2":
                 print("\n=== בדיקת נוכחות ===")
-                print("1. בדיקת נוכחות לכל האנשים")
+                print("1. בדיקת נוכחות לכל ה")
                 print("2. בדיקת נוכחות לאדם ספציפי")
                 print("3. חזרה לתפריט הראשי")
 
@@ -34,15 +34,15 @@ def main():
                     select_method = input("\nבחר שיטת בחירה (1-2): ")
 
                     if select_method == "1":
-                        # קבלת רשימת האנשים מתיקיית training_faces
+                        # קבלת רשימת ה מתיקיית training_faces
                         training_path = "C:/Users/User/PycharmProjects/AttendMe/training_faces"
                         people = get_registered_people(training_path)
 
                         if not people:
-                            print("\nאין אנשים רשומים במערכת")
+                            print("\nאין  רשומים במערכת")
                             continue
 
-                        print("\nאנשים רשומים:")
+                        print("\n רשומים:")
                         for i, person in enumerate(people, 1):
                             # הצגת השם בצורה קריאה
                             name_parts = person.split('_')
@@ -102,13 +102,13 @@ def main():
 
 def get_registered_people(training_path):
     """
-    פונקציה שמחזירה רשימה של כל האנשים הרשומים במערכת
+    פונקציה שמחזירה רשימה של כל ה הרשומים במערכת
 
     Args:
         training_path (str): הנתיב לתיקיית training_faces
 
     Returns:
-        list: רשימת כל האנשים הרשומים
+        list: רשימת כל ה הרשומים
     """
     people = []
 
@@ -118,7 +118,7 @@ def get_registered_people(training_path):
             print(f"התיקייה {training_path} לא קיימת")
             return people
 
-        # סריקת התיקיות כדי למצוא תיקיות של אנשים רשומים
+        # סריקת התיקיות כדי למצוא תיקיות של  רשומים
         for item in os.listdir(training_path):
             item_path = os.path.join(training_path, item)
             # בדיקה אם זו תיקייה ואם היא מתאימה לפורמט של שם_פרטי_שם_משפחה_ת.ז.
@@ -127,7 +127,7 @@ def get_registered_people(training_path):
                 if len(parts) >= 3:  # לפחות שם פרטי, שם משפחה ות.ז.
                     people.append(item)
     except Exception as e:
-        print(f"שגיאה בקבלת רשימת אנשים: {str(e)}")
+        print(f"שגיאה בקבלת רשימת : {str(e)}")
 
     return people
 
