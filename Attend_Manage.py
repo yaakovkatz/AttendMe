@@ -1,4 +1,3 @@
-# Attend_Manage.py
 import os
 from Face_Detection import FaceDetection
 from Data_Manage import people_vector
@@ -15,7 +14,8 @@ def check_presence(check_all=True, specific_person=None):
     # יצירת מופע של FaceDetection שמיד יחתוך את הפנים מתמונת המטרה
     face_detection = FaceDetection("target.jpg")
     with Timer("חילוץ פנים מתיקייה") as timer:
-        face_detection.extract_faces_from_directory("C:\\Users\\User\\PyCharmProjects\\AttendMe\\target")
+        # ודא שהנתיב הזה נכון לסביבת Render או השתמש בנתיב יחסי
+        face_detection.extract_faces_from_directory("./target")
 
     try:
         # בדיקת כל האנשים או אדם ספציפי
@@ -24,17 +24,29 @@ def check_presence(check_all=True, specific_person=None):
         if check_all:
             # בדיקת כל אדם במערכת
             for person in people_vector:
-                personal_image = person.get_first_image_path()
-                print(f"\nChecking {person.get_full_name_and_id()}...")
+                # --- התחלת קוד חדש ---
+                result = False  # אתחול ברירת המחדל
 
-                # מדידת זמן לבדיקת האדם הנוכחי
-                with Timer(f"{person.get_full_name_and_id()}") as timer:
-                    result = face_detection.check_single_image(personal_image)
+                # בדיקה אם לאדם יש תמונות בענן
+                if hasattr(person, 'image_urls') and person.image_urls:
+                    # לקיחת ה-URL של התמונה הראשונה
+                    personal_image_url = person.image_urls[0]
+                    print(f"\nChecking {person.get_full_name_and_id()} from Cloudinary...")
 
+                    with Timer(f"{person.get_full_name_and_id()}") as timer:
+                        # קריאה לפונקציה החדשה עם ה-URL
+                        result = face_detection.check_person_against_environment(personal_image_url)
+                else:
+                    # אם לאדם אין תמונות בענן, דלג עליו
+                    print(f"⚠️ Skipping {person.get_full_name_and_id()}: No image URL found.")
+                    result = False
+                # --- סוף קוד חדש ---
+
+                # עכשיו בודקים את המשתנה result שהתקבל מה-if/else
                 if result:
                     person.mark_present()
                     print(f"✅ {person.get_full_name_and_id()} is present!")
-                    print("\033[1;34m" + "═" * 80 + "\033[0m")  # קו כחול עם תו עבה יותר
+                    print("\033[1;34m" + "═" * 80 + "\033[0m")
                     match_found = True
                 else:
                     person.mark_absent()
@@ -62,12 +74,19 @@ def check_presence(check_all=True, specific_person=None):
                     break
 
             if target_person:
-                personal_image = target_person.get_first_image_path()
-                print(f"\nChecking {target_person.get_full_name_and_id()}...")
+                # --- התחלת קוד חדש ---
+                result = False  # אתחול
 
-                # מדידת זמן לבדיקת האדם הספציפי
-                with Timer(f"{target_person.get_full_name_and_id()}") as timer:
-                    result = face_detection.check_single_image(personal_image)
+                if hasattr(target_person, 'image_urls') and target_person.image_urls:
+                    personal_image_url = target_person.image_urls[0]
+                    print(f"\nChecking {target_person.get_full_name_and_id()} from Cloudinary...")
+
+                    with Timer(f"{target_person.get_full_name_and_id()}") as timer:
+                        result = face_detection.check_person_against_environment(personal_image_url)
+                else:
+                    print(f"⚠️ Skipping {target_person.get_full_name_and_id()}: No image URL found.")
+                    result = False
+                # --- סוף קוד חדש ---
 
                 if result:
                     target_person.mark_present()
@@ -82,8 +101,8 @@ def check_presence(check_all=True, specific_person=None):
         print(f"")
         # מדידת זמן לניקוי התיקייה
         with Timer("ניקוי תיקיית EnviroFaces") as timer:
-            face_detection.clear_directory(r"C:\Users\User\PycharmProjects\AttendMe\EnviroFaces")
-        # face_detection.clear_directory(r"C:\Users\User\PycharmProjects\AttendMe\Identified_Images")
+            # שימוש בנתיב יחסי שעובד גם ברנדר
+            face_detection.clear_directory("./EnviroFaces")
 
         if not match_found:
             print("\nNo matches found in the system")

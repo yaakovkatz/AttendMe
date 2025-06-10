@@ -25,7 +25,28 @@ MIN_SHARPNESS = 000
 MAX_NOISE_THRESHOLD = 100
 MIN_CONTRAST = 0.0
 
-# אאאאאאאאאאאאאאאאאאאאאאאאאא
+# ============================================================================
+
+import requests
+import tempfile
+import contextlib
+import os
+
+@contextlib.contextmanager
+def temp_image_from_url(image_url):
+    """Downloads an image from a URL to a temporary file and yields the path."""
+    temp_file_path = None
+    try:
+        response = requests.get(image_url, stream=True)
+        response.raise_for_status()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+            for chunk in response.iter_content(8192):
+                temp_file.write(chunk)
+            temp_file_path = temp_file.name
+        yield temp_file_path
+    finally:
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
 
 
 class FaceDetection:
@@ -252,6 +273,30 @@ class FaceDetection:
         except Exception as e:
             print_status(f"שגיאה בהשוואת פנים שנייה: {str(e)}", level=1, emoji="⚠️")
             return 0
+
+    # ==================================================================================
+        """Runs DeepFace verification on two images from URLs."""
+    # ==================================================================================
+    def verify_face_from_urls(self, img1_url, img2_url):
+
+        try:
+            with temp_image_from_url(img1_url) as temp_img1_path:
+                with temp_image_from_url(img2_url) as temp_img2_path:
+                    # קריאה ל-DeepFace עם הנתיבים הזמניים
+                    result = DeepFace.verify(
+                        img1_path=temp_img1_path,
+                        img2_path=temp_img2_path,
+                        enforce_detection=False,
+                        detector_backend='retinaface',
+                        model_name='Facenet512',
+                        distance_metric='cosine',
+                        align=True
+                    )
+                    return 1 - result['distance']
+        except Exception as e:
+            print_status(f"שגיאה בהשוואת פנים מ-URL: {str(e)}", level=1, emoji="⚠️")
+            return 0
+
 
 # ==================================================================================
     """בדיקת התאמה מעמיקה למקרים גבוליים עם 4 גישות שונות כולל נקודות ציון"""
@@ -587,6 +632,212 @@ class FaceDetection:
 
         except Exception as e:
             print_status(f"שגיאה בבדיקת תמונה בודדת: {str(e)}", emoji="❌")
+            return False
+
+# ==================================================================================
+            "מקבלת URL של תמונה אישית ובודקת אותה מול תיקיית EnviroFaces המקומית"
+# ==================================================================================
+    def check_person_against_environment(self, personal_image_url):
+
+        try:
+            # 'with' נמצא רמה אחת פנימה מה-def, וזה נכון
+            with temp_image_from_url(personal_image_url) as personal_image_path:
+
+                # כל הקוד הבא מוזח רמה אחת נוספת פנימה, תחת ה-'with'
+                faces_in_db = glob.glob(f"{self.enviro_faces_dir}/*.jpg")
+                if not faces_in_db:
+                    print_status("לא נמצאו פנים במאגר הזמני (EnviroFaces)", emoji="❌")
+                    return False
+
+                if not os.path.exists(personal_image_path):
+                    print_status(f"שגיאה: לא נוצר קובץ זמני עבור התמונה האישית", emoji="❌")
+                    return False
+
+                used_enhanced_verification = False
+
+                faces_in_db = glob.glob(f"{self.enviro_faces_dir}/*.jpg")
+                if not faces_in_db:
+                    print_status("לא נמצאו פנים במאגר", emoji="❌")
+                    return False
+
+                if not os.path.exists(personal_image_path):
+                    print_status(f"לא נמצאה תמונה אישית: {personal_image_path}", emoji="❌")
+                    return False
+
+                parent_dir = os.path.basename(os.path.dirname(personal_image_path))
+                identified_dir = "./Identified_Images"
+                if not os.path.exists(identified_dir):
+                    os.makedirs(identified_dir)
+
+                # הגדרת אזור אפור - טווח ערכים קרובים לסף שדורשים בדיקה נוספת
+                # GRAY_ZONE_FACTOR = 0.05  # 5% מתחת לסף
+                # GRAY_ZONE_THRESHOLD = FIRST_THRESHOLD - (FIRST_THRESHOLD * GRAY_ZONE_FACTOR)
+
+                GRAY_ZONE_LOWER_THRESHOLD = 0.42  # הסף התחתון של האזור האפור - 42%
+
+                found_match = False
+                results = []  # רשימה לשמירת התוצאות להצגתן בטבלה
+                definite_matches = []  # התאמות ודאיות (מעל הסף)
+                gray_zone_matches = []  # התאמות באזור האפור
+                first_pass_only_matches = []  # חדש: התאמות שעברו רק את הבדיקה הראשונה
+
+                # טעינת התמונה האישית פעם אחת
+                personal_img = cv2.imread(personal_image_path)
+                if personal_img is None:
+                    print_status(f"לא ניתן לטעון את התמונה האישית: {personal_image_path}", emoji="❌")
+                    return False
+
+                print_status(f"בודק התאמה מול {len(faces_in_db)} תמונות במאגר", emoji="🔍")
+
+                # טעינת תמונות המאגר מראש לזיכרון - חוסך טעינות חוזרות
+                print_status("טוען תמונות מאגר לזיכרון...", level=1)
+                loaded_faces = {}
+                for face_path in faces_in_db:
+                    face_img = cv2.imread(face_path)
+                    if face_img is not None:
+                        loaded_faces[face_path] = face_img
+                    else:
+                        print_status(f"לא ניתן לטעון תמונה: {os.path.basename(face_path)}", level=1, emoji="⚠️")
+
+                print_status(f"נטענו {len(loaded_faces)} תמונות מתוך {len(faces_in_db)}", level=1)
+
+                # בדיקה ראשונה עם Facenet512
+                for face_in_db in faces_in_db:
+                    face_filename = os.path.basename(face_in_db)
+
+                    # תמיד להפעיל את שני המודלים
+                    first_similarity = self.verify_face(personal_image_path, face_in_db)
+                    second_similarity = self.verify_face_second(personal_image_path, face_in_db)
+
+                    # חישוב דמיון משולב (לשימוש עתידי ב-ROC)
+                    combined_similarity = (first_similarity + second_similarity) / 2
+
+                    # המשך הלוגיקה המקורית
+                    if first_similarity >= FIRST_THRESHOLD:
+                        final_similarity = max(first_similarity, second_similarity)
+
+                        # מקרה 1: עבר גם את הבדיקה השנייה
+                        if second_similarity >= SECOND_THRESHOLD:
+                            status_icon = "✅"
+                            definite_matches.append(face_in_db)
+                            found_match = True
+                        # מקרה 2: עבר רק את הבדיקה הראשונה
+                        else:
+                            status_icon = "ℹ️"
+                            first_pass_only_matches.append((face_in_db, first_similarity))
+
+                    # מקרה 3: באזור האפור, קרוב מאוד לסף
+                    elif first_similarity >= GRAY_ZONE_LOWER_THRESHOLD:
+                        status_icon = "🔍"
+                        gray_zone_matches.append((face_in_db, first_similarity))
+                        final_similarity = first_similarity
+                    # מקרה 4: מתחת לסף
+                    else:
+                        status_icon = "❌"
+                        final_similarity = first_similarity
+
+                    # הוסף את הנתונים לרשימת התוצאות בצורת ציון דמיון
+                    results.append([
+                        os.path.basename(personal_image_path),  # תמונה נבדקת
+                        face_filename,  # תמונה בבסיס הנתונים
+                        f"{self.normalize_similarity_score(first_similarity):.2f}",  # דמיון ראשוני
+                        f"{self.normalize_similarity_score(second_similarity):.2f}",  # דמיון משני
+                        f"{self.normalize_similarity_score(final_similarity):.2f}",  # ציון דמיון סופי
+                        status_icon  # סטטוס
+                    ])
+
+                # הדפסת כל התוצאות בצורה מסודרת בטבלה אחת
+                headers = ["סטטוס", "התאמה סופית", "התאמה שנייה", "התאמה ראשונה", "תמונה בבסיס הנתונים", "תמונה נבדקת"]
+                print("\n" + tabulate(results, headers=headers, tablefmt="grid", stralign="center"))
+
+                # אם לא נמצאו התאמות ודאיות אבל יש התאמות באזור האפור או שעברו רק בדיקה ראשונה
+                if not found_match and (gray_zone_matches or first_pass_only_matches):
+                    all_potential_matches = gray_zone_matches + first_pass_only_matches
+
+                    # סימון שמתבצעת בדיקה מעמיקה
+                    used_enhanced_verification = True
+
+                    # הרצת הבדיקה המעמיקה באמצעות הפונקציה החדשה
+                    deep_matched_faces = self.perform_deep_analysis(personal_image_path, all_potential_matches)
+
+                    # הוספת התוצאות המוצלחות לרשימת ההתאמות הסופית
+                    if deep_matched_faces:
+                        definite_matches.extend(deep_matched_faces)
+                        found_match = True
+
+                if found_match:
+                    print_status(f"נמצאו {len(definite_matches)} פנים מתאימות, בודק התאמת מבנה פנים...", emoji="🔍")
+
+                    # בדיקה אם כבר בוצעה בדיקה מעמיקה שכוללת את בדיקת נקודות הציון
+                    if used_enhanced_verification:
+                        print_status(f"דילוג על בדיקת מבנה פנים נוספת - כבר בוצעה בדיקה מעמיקה", level=1, emoji="↪️")
+                    else:
+                        # נבדוק את יחס הרוחב בכל ההתאמות שנמצאו
+                        matches_to_remove = []
+                        for face_in_db in definite_matches:
+                            # השתמש בתמונות שכבר נטענו לזיכרון
+                            db_img = loaded_faces.get(face_in_db)
+
+                            # אם התמונה לא נטענה בהצלחה, ננסה לטעון שוב
+                            if db_img is None:
+                                db_img = cv2.imread(face_in_db)
+                                if db_img is None:
+                                    print_status(f"לא ניתן לטעון תמונה: {os.path.basename(face_in_db)}", level=1,
+                                                 emoji="⚠️")
+                                    matches_to_remove.append(face_in_db)
+                                    continue
+
+                            # בדיקת נקודות ציון פנים
+                            width_check_result = self.check_face_width_ratio(personal_img, db_img, personal_image_path,
+                                                                             face_in_db)
+
+                            if width_check_result == "NO_FACE_DETECTED":
+                                # אם לא זוהו פנים, ממשיכים ולא מסירים את התמונה
+                                print_status(f"ממשיך עם התמונה למרות כשל בזיהוי מבנה: {os.path.basename(face_in_db)}",
+                                             level=1, emoji="➡️")
+                            elif width_check_result == "ERROR":
+                                # אם הייתה שגיאה, ממשיכים ולא מסירים את התמונה
+                                print_status(f"ממשיך עם התמונה למרות שגיאה בבדיקת מבנה: {os.path.basename(face_in_db)}",
+                                             level=1, emoji="➡️")
+                            elif width_check_result == False:
+                                # רק אם זוהו פנים ונמצא שהן לא מתאימות, מסירים את התמונה
+                                print_status(
+                                    f"התאמה נדחתה עקב הבדל משמעותי במבנה הפנים: {os.path.basename(face_in_db)}",
+                                    level=1, emoji="⛔")
+                                matches_to_remove.append(face_in_db)
+
+                        # הסרת ההתאמות שנכשלו בבדיקת נקודות ציון
+                        for face_to_remove in matches_to_remove:
+                            definite_matches.remove(face_to_remove)
+
+                    # המשך רק אם נשארו התאמות לאחר בדיקת נקודות ציון
+                    if definite_matches:
+                        # המשך הקוד הקיים להעתקת ההתאמות
+                        for face_in_db in definite_matches:
+                            try:
+                                # העתקת התמונה המזוהה ל-Identified_Images
+                                original_number = os.path.basename(face_in_db).split('_')[-1].split('.')[0]
+                                new_filename = f"{parent_dir}_{original_number}.jpg"
+                                new_path = os.path.join(identified_dir, new_filename)
+
+                                shutil.copy2(face_in_db, new_path)
+                                print_status(f"הפנים המתאימות הועתקו ל: {new_filename}", level=1, emoji="📋")
+                            except Exception as file_error:
+                                print_status(f"שגיאה בטיפול בקבצים: {str(file_error)}", level=1, emoji="⚠️")
+                    else:
+                        print_status("לא נשארו התאמות לאחר בדיקת מבנה פנים", emoji="❓")
+                        found_match = False
+                else:
+                    print_status("לא נמצאה התאמה במאגר", emoji="❓")
+
+                # ניקוי זיכרון
+                loaded_faces.clear()
+
+                return found_match
+
+            # ה-except נמצא באותה רמה כמו ה-try
+        except Exception as e:
+            print_status(f"שגיאה בבדיקת תמונה מ-URL: {str(e)}", emoji="❌")
             return False
 
 

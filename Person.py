@@ -1,83 +1,69 @@
-# Person.py
-import os
-
-# Person.py
 import os
 import shutil
 
+
 class Person:
-    def __init__(self, first_name, last_name, id_number, base_path="C:/Users/User/PycharmProjects/AttendMe/training_faces"):
+    def __init__(self, first_name, last_name, id_number):
+        """
+        אתחול אובייקט אדם, מותאם לעבודה עם URL-ים מהענן.
+        האובייקט כבר לא יוצר תיקיות מקומיות.
+        """
         # מידע אישי
         self.first_name = first_name
         self.last_name = last_name
         self.id_number = id_number
         self._is_present = False
-        self._should_delete_folder = False  # דגל חדש למחיקת תיקייה
 
-        # יצירת שם התיקייה בפורמט המבוקש
-        self.folder_name = f"{first_name}_{last_name}_{id_number}"
-        self.person_dir = f"{base_path}/{self.folder_name}"
+        # --- שינוי מרכזי: ניהול URL-ים במקום נתיבים ---
+        self.image_urls = []  # רשימה שתחזיק את הקישורים לתמונות ב-Cloudinary
 
-        # יצירת התיקייה אם היא לא קיימת
-        if not os.path.exists(self.person_dir):
-            os.makedirs(self.person_dir)
-            print(f"Created directory: {self.folder_name}")
+    # --- פונקציות חדשות לניהול URL-ים ---
+    def add_image_url(self, url):
+        """מוסיפה URL של תמונה חדשה לרשימה של האדם."""
+        if url and url not in self.image_urls:
+            self.image_urls.append(url)
 
-        # נתיבים לתמונות
-        self._image1_path = f"{self.person_dir}/person1.jpg"
-        self._image2_path = f"{self.person_dir}/person2.jpg"
-        self._image3_path = f"{self.person_dir}/person3.jpg"
+    def get_primary_image_url(self):
+        """מחזירה את ה-URL של התמונה הראשונה, או None אם אין תמונות."""
+        return self.image_urls[0] if self.image_urls else None
 
-    def __del__(self):
-        """מהרס המחלקה - נקרא כשהאובייקט נמחק"""
-        try:
-            if self._should_delete_folder and os.path.exists(self.person_dir):
-                shutil.rmtree(self.person_dir)
-                print(f"Deleted directory: {self.folder_name}")
-        except Exception as e:
-            print(f"Error deleting directory: {str(e)}")
+    def get_all_image_urls(self):
+        """מחזירה את כל רשימת ה-URL-ים של התמונות."""
+        return self.image_urls
 
-    def mark_for_deletion(self):
-        """סימון האובייקט למחיקת תיקייה"""
-        self._should_delete_folder = True
-
-    # מחזיר את הנתיב לתמונה הראשונה
-    def get_first_image_path(self):
-        return self._image1_path
-
-    # מחזיר את הנתיב לתמונה השנייה
-    def get_second_image_path(self):
-        return self._image2_path
-
-    # מחזיר את הנתיב לתמונה השלישית
-    def get_third_image_path(self):
-        return self._image3_path
-
-    # מסמן את האדם כנוכח
+    # --- פונקציות קיימות שנשארו ---
     def mark_present(self):
+        """מסמן את האדם כנוכח"""
         self._is_present = True
 
-    # מסמן את האדם כלא נוכח
     def mark_absent(self):
+        """מסמן את האדם כלא נוכח"""
         self._is_present = False
 
-    # מחזיר את סטטוס הנוכחות הנוכחי
+    def set_presence(self, status: bool):
+        """קובע את סטטוס הנוכחות"""
+        self._is_present = status
+
     def get_presence_status(self):
+        """מחזיר את סטטוס הנוכחות הנוכחי"""
         return self._is_present
 
-    # מחזיר את השם המלא
     def get_full_name_and_id(self):
+        """מחזיר את השם המלא ומספר ת.ז."""
         return f"{self.first_name} {self.last_name} {self.id_number}"
 
-    # מחזיר את כל פרטי האדם כמילון
     def get_person_details(self):
+        """מחזיר את כל פרטי האדם כמילון, מותאם לעבודה עם ענן."""
         return {
             "first_name": self.first_name,
             "last_name": self.last_name,
             "id_number": self.id_number,
             "is_present": self._is_present,
-            "folder_path": self.person_dir,
-            "image1_path": self._image1_path,
-            "image2_path": self._image2_path,
-            "image3_path": self._image3_path
+            # --- שינוי: החזרת מידע רלוונטי לענן ---
+            "image_urls": self.image_urls,
+            "image_count": len(self.image_urls)
         }
+
+    # --- פונקציות שהוסרו ---
+    # get_first_image_path(), get_second_image_path(), get_third_image_path() - הוחלפו ב-get_primary_image_url()
+    # __del__(), mark_for_deletion() - מחיקת קבצים מנוהלת עכשיו ב-app.py דרך ה-API של Cloudinary
