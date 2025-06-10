@@ -129,6 +129,25 @@ document.addEventListener('DOMContentLoaded', function() {
         tableBody.querySelectorAll('.delete').forEach(b => b.addEventListener('click', handleDeleteClick));
         tableBody.querySelectorAll('.view-images').forEach(b => b.addEventListener('click', handleViewImagesClick));
     }
+    function filterPeopleTable() {
+    const searchValue = document.getElementById('search-people').value.toLowerCase();
+    const tableBody = document.getElementById('people-table-body');
+    if (!tableBody) return;
+
+    const rows = tableBody.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        // Assuming name is in the 2nd cell (index 1) and ID in the 3rd (index 2)
+        const fullName = row.children[1]?.textContent.toLowerCase() || '';
+        const id = row.children[2]?.textContent.toLowerCase() || '';
+
+        if (fullName.includes(searchValue) || id.includes(searchValue)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
 
     function handleViewImagesClick() {
         const personId = this.getAttribute('data-id');
