@@ -23,6 +23,16 @@ cloudinary.config(
 )
 # =============================================================
 
+# --- הוסף את קוד האבחון כאן ---
+print("--- CLOUDINARY DEBUG ---")
+print(f"Cloud Name from ENV: '{os.environ.get('CLOUDINARY_CLOUD_NAME')}'")
+print(f"API Key from ENV is set: {os.environ.get('CLOUDINARY_API_KEY') is not None}")
+print("------------------------")
+# --- סוף קוד אבחון ---
+
+
+
+
 # משתנים גלובליים לשמירת רשימת האנשים
 loaded_people = []
 people_loading_status = {"status": "not_started", "message": ""}
