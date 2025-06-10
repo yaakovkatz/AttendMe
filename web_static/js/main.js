@@ -1,252 +1,335 @@
-// Global variables
-let peopleData = [];
-let cameraActive = false;
-let attendanceInterval = null;
-let settings = {
-    cameraId: 0,
-    detectionFrequency: 0,
-    detectionThreshold: 0.6,
-    enableNotifications: true
-};
-let attendanceCheckInterval = null;
-let loadedPeople = [];
-let selectedPersonNumber = null;
-
-
-// DOM Elements
 document.addEventListener('DOMContentLoaded', function() {
-    // Navigation
-    const navLinks = document.querySelectorAll('.nav-links a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            navLinks.forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
+    // Global variables
+    let peopleData = [];
+    let cameraActive = false;
+    let attendanceInterval = null;
+    let settings = {
+        cameraId: 0,
+        detectionFrequency: 0,
+        detectionThreshold: 0.6,
+        enableNotifications: true
+    };
+    let attendanceCheckInterval = null;
+    let loadedPeople = [];
+    let selectedPersonNumber = null;
+
+    // --- All functions and event listeners will be defined inside this main block ---
+
+    function initializeEventListeners() {
+        // Navigation
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (link.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    document.querySelector(link.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                }
+                document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
         });
-    });
 
-    // Camera controls
-    const startCameraBtn = document.getElementById('start-camera');
-    const stopCameraBtn = document.getElementById('stop-camera');
-    const checkAttendanceBtn = document.getElementById('check-attendance');
-
-    startCameraBtn.addEventListener('click', startCamera);
-    stopCameraBtn.addEventListener('click', stopCamera);
-    checkAttendanceBtn.addEventListener('click', checkAttendance);
-
-    // People management
-    const addPersonBtn = document.getElementById('add-person-btn');
-    const addPersonModal = document.getElementById('add-person-modal');
-    const uploadImageModal = document.getElementById('upload-image-modal');
-    const addPersonForm = document.getElementById('add-person-form');
-    const uploadImageForm = document.getElementById('upload-image-form');
-    const searchPeopleInput = document.getElementById('search-people');
-
-    addPersonBtn.addEventListener('click', () => showModal(addPersonModal));
-    addPersonForm.addEventListener('submit', handleAddPerson);
-    uploadImageForm.addEventListener('submit', handleUploadImage);
-    searchPeopleInput.addEventListener('input', filterPeopleTable);
-
-    // Close modals
-    const closeModalButtons = document.querySelectorAll('.close-modal, .close-modal-btn');
-    closeModalButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            document.getElementById('add-person-modal').classList.remove('active');
-            document.getElementById('upload-image-modal').classList.remove('active');
-            document.getElementById('person-images-modal').classList.remove('active');
+        // People management
+        document.getElementById('add-person-btn')?.addEventListener('click', () => showModal(document.getElementById('add-person-modal')));
+        document.getElementById('add-person-form')?.addEventListener('submit', handleAddPerson);
+        document.getElementById('upload-image-form')?.addEventListener('submit', handleUploadImage);
+        document.getElementById('search-people')?.addEventListener('input', filterPeopleTable);
+        
+        // Close modals
+        document.querySelectorAll('.close-modal, .close-modal-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+            });
         });
-    });
 
-    // הוספת אירוע לכפתור סיום העלאת תמונות
-    const finishUploadButton = document.getElementById('finish-upload-button');
-    if (finishUploadButton) {
-        finishUploadButton.addEventListener('click', function() {
+        document.getElementById('finish-upload-button')?.addEventListener('click', function() {
             document.getElementById('upload-image-modal').classList.remove('active');
             loadPeopleData();
         });
+
+        // Image preview for upload
+        document.getElementById('person-image')?.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('image-preview').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
     }
 
-    // Image preview
-    const imageInput = document.getElementById('person-image');
-    const imagePreview = document.getElementById('image-preview');
+    // ===== Data Loading and Rendering =====
 
-    imageInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+    async function loadPeopleData() {
+        try {
+            const response = await fetch('/api/get_loaded_people');
+            const data = await response.json();
+
+            if (data.success && data.people) {
+                peopleData = data.people;
+            } else {
+                peopleData = [];
+                console.error('Failed to load people:', data.message);
+            }
+            
+            renderPeopleTable();
+
+        } catch (error) {
+            console.error('Error fetching people:', error);
+            showNotification('שגיאה בטעינת רשימת אנשים', 'error');
         }
-    });
-
-    // Attendance
-    const refreshAttendanceBtn = document.getElementById('refresh-attendance');
-    const exportAttendanceBtn = document.getElementById('export-attendance');
-    const attendanceDate = document.getElementById('attendance-date');
-
-    refreshAttendanceBtn.addEventListener('click', refreshAttendance);
-    exportAttendanceBtn.addEventListener('click', exportAttendance);
-
-    // Set today's date as default
-    const today = new Date();
-    attendanceDate.valueAsDate = today;
-
-    // Settings
-    const saveSettingsBtn = document.getElementById('save-settings');
-    const resetSettingsBtn = document.getElementById('reset-settings');
-    const thresholdInput = document.getElementById('detection-threshold');
-    const thresholdValue = document.getElementById('threshold-value');
-
-    // Update the threshold value display
-    thresholdInput.addEventListener('input', function() {
-        thresholdValue.textContent = this.value;
-    });
-
-    saveSettingsBtn.addEventListener('click', saveSettings);
-    resetSettingsBtn.addEventListener('click', resetSettings);
-
-    // Load settings from localStorage if available
-    loadSettings();
-
-    // Initial data load
-    loadSystemStatus();
-    loadPeopleData();
-    setupEventListeners();
-    // טעינת אנשים לפונקציות מתקדמות
-    setTimeout(() => {
-        console.log('🔄 מתחיל טעינת אנשים לפונקציות מתקדמות...');
-        const advancedSection = document.getElementById('advanced-functions');
-        if (advancedSection) {
-            loadPeopleList();
-            setupPeopleSelectorEvents();
-        }
-    }, 2000); // 2 שניות אחרי טעינת הדף
-});
-
-// ===== System Functions =====
-
-async function loadSystemStatus() {
-    try {
-        const response = await fetch('/api/status');
-        const data = await response.json();
-
-        // Update dashboard
-        // document.getElementById('total-people').textContent = data.people_count;
-        document.getElementById('camera-status').textContent = data.camera_active ? 'פעילה' : 'לא פעילה';
-
-        cameraActive = data.camera_active;
-        updateCameraControls();
-
-    } catch (error) {
-        console.error('Error loading system status:', error);
-        showNotification('שגיאה בטעינת סטטוס המערכת', 'error');
     }
-}
 
+    function renderPeopleTable() {
+        const tableBody = document.getElementById('people-table-body');
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
 
-async function loadPeopleData() {
-    try {
-        console.log('🔄 טוען אנשים...');
-        const response = await fetch('/api/get_loaded_people');
-        const data = await response.json();
-        console.log('📊 נתונים שהתקבלו:', data);
+        if (peopleData.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">אין אנשים במערכת</td></tr>`;
+            return;
+        }
 
-        if (data.success && data.people) {
-            // --- שינוי חשוב: שומרים את כל המידע שמגיע מהשרת, כולל image_urls ---
-            peopleData = data.people; 
+        peopleData.forEach(person => {
+            const row = document.createElement('tr');
+            
+            // --- לוגיקה חדשה לקביעת URL של תמונה ---
+            let imageUrl = '/web_static/img/person-placeholder.jpg';
+            if (person.image_urls && person.image_urls.length > 0) {
+                imageUrl = person.image_urls[0]; 
+            }
+
+            const imageCounter = person.image_count > 0 ? `<span class="image-count">${person.image_count}</span>` : '';
+            const statusClass = person.is_present ? 'status-present' : 'status-absent';
+            const statusText = person.is_present ? 'נוכח' : 'נעדר';
+
+            row.innerHTML = `
+                <td>
+                    <img src="${imageUrl}" alt="${person.first_name}" class="person-image">
+                    ${imageCounter}
+                </td>
+                <td>${person.first_name} ${person.last_name}</td>
+                <td>${person.id_number}</td>
+                <td><span class="person-status ${statusClass}">${statusText}</span></td>
+                <td>
+                    <div class="person-actions">
+                        <button class="upload" data-id="${person.id_number}" title="העלאת תמונה"><i class="fas fa-upload"></i></button>
+                        ${person.image_count > 0 ? 
+                          `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>`
+                          : ''}
+                        <button class="delete" data-id="${person.id_number}" title="מחיקה"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Re-attach event listeners after rendering
+        tableBody.querySelectorAll('.upload').forEach(b => b.addEventListener('click', handleUploadClick));
+        tableBody.querySelectorAll('.delete').forEach(b => b.addEventListener('click', handleDeleteClick));
+        tableBody.querySelectorAll('.view-images').forEach(b => b.addEventListener('click', handleViewImagesClick));
+    }
+
+    function handleViewImagesClick() {
+        const personId = this.getAttribute('data-id');
+        const person = peopleData.find(p => p.id_number === personId);
+        if (!person) return;
+
+        const modal = document.getElementById('person-images-modal');
+        const galleryContainer = document.getElementById('person-images-gallery');
+        const personNameElem = document.getElementById('person-images-name');
+
+        galleryContainer.innerHTML = '';
+        personNameElem.textContent = `${person.first_name} ${person.last_name}`;
+
+        if (!person.image_urls || person.image_urls.length === 0) {
+            galleryContainer.innerHTML = '<p class="no-images">אין תמונות זמינות</p>';
         } else {
-            peopleData = [];
+            person.image_urls.forEach((url, index) => {
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'person-image-item';
+                imageContainer.innerHTML = `
+                    <img src="${url}" alt="תמונה ${index + 1}" loading="lazy">
+                    <div class="person-image-counter">${index + 1}</div>
+                `;
+                galleryContainer.appendChild(imageContainer);
+            });
         }
-
-        console.log(`✅ נטענו ${peopleData.length} אנשים`);
-
-        const presentCount = peopleData.filter(person => person.is_present).length;
-        document.getElementById('total-people').textContent = peopleData.length;
-        document.getElementById('present-people').textContent = presentCount;
-        document.getElementById('absent-people').textContent = peopleData.length - presentCount;
-
-        renderPeopleTable();
-        updateAttendanceStats();
-        renderAttendanceTable();
-
-        if (peopleData.length > 0) {
-            // showNotification(`נטענו ${peopleData.length} אנשים בהצלחה`, 'success');
-        }
-
-    } catch (error) {
-        console.error('❌ שגיאה:', error);
-        showNotification('שגיאה בטעינת אנשים', 'error');
-        peopleData = [];
-        renderPeopleTable();
-    }
-}
-
-function updateCameraControls() {
-    const startCameraBtn = document.getElementById('start-camera');
-    const stopCameraBtn = document.getElementById('stop-camera');
-    const checkAttendanceBtn = document.getElementById('check-attendance');
-    const cameraFeedImg = document.getElementById('camera-feed-img');
-
-    if (cameraActive) {
-        startCameraBtn.disabled = true;
-        stopCameraBtn.disabled = false;
-        checkAttendanceBtn.disabled = false;
-        cameraFeedImg.src = `/api/camera_feed?t=${new Date().getTime()}`;
-    } else {
-        startCameraBtn.disabled = false;
-        stopCameraBtn.disabled = true;
-        checkAttendanceBtn.disabled = true;
-        cameraFeedImg.src = '/web_static/img/camera-placeholder.jpg';
-    }
-}
-
-// ===== People Management & Rendering =====
-
-function renderPeopleTable() {
-    const tableBody = document.getElementById('people-table-body');
-    tableBody.innerHTML = '';
-
-    if (peopleData.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="5" style="text-align: center;">אין אנשים במערכת</td>`;
-        tableBody.appendChild(row);
-        return;
+        showModal(modal);
     }
 
-    peopleData.forEach(person => {
-        const row = document.createElement('tr');
-        const statusClass = person.is_present ? 'status-present' : 'status-absent';
-        const statusText = person.is_present ? 'נוכח' : 'נעדר';
+    // ===== Event Handlers =====
 
-        // --- שינוי 1: לוגיקה חדשה לקביעת URL של תמונה ---
-        let imageUrl = '/web_static/img/person-placeholder.jpg';
-        if (person.image_urls && person.image_urls.length > 0) {
-            imageUrl = person.image_urls[0]; // שימוש ישיר ב-URL מהענן
+    async function handleAddPerson(event) {
+        event.preventDefault();
+        const form = event.target;
+        const personData = {
+            first_name: form.querySelector('#first-name').value,
+            last_name: form.querySelector('#last-name').value,
+            id_number: form.querySelector('#id-number').value,
+        };
+
+        try {
+            const response = await fetch('/api/add_person', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(personData)
+            });
+            const data = await response.json();
+            if (data.success) {
+                form.closest('.modal').classList.remove('active');
+                form.reset();
+                await loadPeopleData(); 
+                showNotification(data.message, 'success');
+                
+                const uploadModal = document.getElementById('upload-image-modal');
+                document.getElementById('upload-person-id').value = data.person_id;
+                updateUploadProgress(0);
+                showModal(uploadModal);
+            } else {
+                showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            showNotification('שגיאה בהוספת אדם', 'error');
         }
+    }
 
-        const imageCounter = person.image_count > 0 ? `<span class="image-count">${person.image_count}</span>` : '';
+    async function handleUploadImage(event) {
+        event.preventDefault();
+        const personId = document.getElementById('upload-person-id').value;
+        const fileInput = document.getElementById('person-image');
+        if (!fileInput.files.length) {
+            showNotification('נא לבחור קובץ', 'error');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
 
-        row.innerHTML = `
-            <td>
-                <img src="<span class="math-inline">\{imageUrl\}" alt\="</span>{person.first_name}" class="person-image">
-                <span class="math-inline">\{imageCounter\}
-</td\>
-<td\></span>{person.first_name} <span class="math-inline">\{person\.last\_name\}</td\>
-<td\></span>{person.id_number}</td>
-            <td><span class="person-status <span class="math-inline">\{statusClass\}"\></span>{statusText}</span></td>
-            <td>
-                <div class="person-actions">
-                    <button class="upload" data-id="${person.id_number}" title="העלאת תמונה">
-                        <i class="fas fa-upload"></i>
-                    </button>
-                    ${person.image_count > 0 ?
-                      `<button class="view-images" data-id="${person.id_number}"
-                      data-name="${person.first_name} ${person.last_name}"
-                      data-count="${person.image_count}" title="צפייה בכל התמונות">
-                        <i class="fas fa-images"></i>
-                      </button>` : ''}
-                    <button class="delete" data-id="${person.id_number}" title="מחיקה">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
+        try {
+            const response = await fetch(`/api/upload_image/${personId}`, { method: 'POST', body: formData });
+            const data = await response.json();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                updateUploadProgress(data.image_count);
+                
+                if (!data.can_add_more) {
+                    document.getElementById('upload-image-modal').classList.remove('active');
+                    await loadPeopleData(); // טוען מחדש את כל הנתונים עם ה-URL-ים החדשים
+                } else {
+                     document.getElementById('upload-image-form').reset();
+                     document.getElementById('image-preview').src = '/web_static/img/person-placeholder.jpg';
+                     if (data.image_count >= 3) {
+                         document.getElementById('finish-upload-button').style.display = 'inline-block';
+                     }
+                }
+            } else {
+                showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            showNotification('שגיאה בהעלאת תמונה', 'error');
+        }
+    }
+
+    function handleUploadClick() {
+        const personId = this.getAttribute('data-id');
+        const person = peopleData.find(p => p.id_number === personId);
+        if (!person) return;
+        
+        document.getElementById('upload-person-id').value = personId;
+        updateUploadProgress(person.image_count || 0);
+        showModal(document.getElementById('upload-image-modal'));
+    }
+
+    async function handleDeleteClick() {
+        const personId = this.getAttribute('data-id');
+        const person = peopleData.find(p => p.id_number === personId);
+        if (!person) return;
+
+        if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
+            try {
+                const response = await fetch(`/api/remove_person/${personId}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    await loadPeopleData();
+                } else {
+                    showNotification(data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('שגיאה במחיקת אדם', 'error');
+            }
+        }
+    }
+    
+    // ... כל שאר הפונקציות שלך, כמו updateUploadProgress, showModal, showNotification וכו' ...
+    // (הן לא דורשות שינוי)
+    function updateUploadProgress(currentCount) {
+        const statusEl = document.getElementById('upload-status');
+        const finishBtn = document.getElementById('finish-upload-button');
+        if (!statusEl || !finishBtn) return;
+        for (let i = 1; i <= 5; i++) {
+            const step = document.getElementById(`progress-step-${i}`);
+            if(!step) continue;
+            step.classList.toggle('completed', i <= currentCount);
+            step.classList.toggle('active', i === currentCount + 1);
+        }
+        const remaining = Math.max(0, 3 - currentCount);
+        if (currentCount >= 5) {
+            statusEl.textContent = `הגעת למקסימום של 5 תמונות.`;
+            finishBtn.style.display = 'inline-block';
+        } else if (remaining > 0) {
+            statusEl.textContent = `הועלו ${currentCount} תמונות. נדרשות עוד ${remaining} תמונות לפחות.`;
+            finishBtn.style.display = 'none';
+        } else {
+            statusEl.textContent = `הועלו ${currentCount} תמונות. ניתן להוסיף עוד ${5-currentCount} או לסיים.`;
+            finishBtn.style.display = 'inline-block';
+        }
+    }
+    
+    function showModal(modal) {
+        if(modal) modal.classList.add('active');
+    }
+
+    function showNotification(message, type = 'info') {
+        let container = document.querySelector('.notification-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'notification-container';
+            document.body.appendChild(container);
+        }
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `<span class="notification-message">${message}</span><button class="notification-close">&times;</button>`;
+        container.appendChild(notification);
+        const closeBtn = notification.querySelector('.notification-close');
+        const autoClose = setTimeout(() => closeNotification(notification), 5000);
+        function closeNotification() {
+            notification.classList.add('closing');
+            setTimeout(() => {
+                notification.remove();
+                clearTimeout(autoClose);
+            }, 300);
+        }
+        closeBtn.addEventListener('click', closeNotification);
+    }
+    
+    const notificationStyles = document.createElement('style');
+    notificationStyles.textContent = `
+        .notification-container { position: fixed; top: 20px; left: 20px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+        .notification { background-color: white; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; min-width: 300px; max-width: 400px; transform: translateX(-120%); animation: slide-in 0.3s forwards; }
+        .notification.closing { animation: slide-out 0.3s forwards; }
+        .notification.info { border-right: 4px solid #007bff; }
+        .notification.success { border-right: 4px solid #28a745; }
+        .notification.error { border-right: 4px solid #dc3545; }
+        .notification-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-right: -10px; margin-left: 10px; color: #999; }
+        .notification-close:hover { color: #dc3545; }
+        @keyframes slide-in { 100% { transform: translateX(0); } }
+        @keyframes slide-out { 0% { transform: translateX(0); } 100% { transform: translateX(-120%); } }
+    `;
+    document.head.appendChild(notificationStyles);
+
+    // Initial load
+    initializeEventListeners();
+    loadPeopleData();
+
+}); // --- הסוגר החשוב שסוגר את כל הקובץ ---
