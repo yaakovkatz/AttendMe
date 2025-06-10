@@ -535,7 +535,7 @@ def cancel_attendance_check():
 
 @app.route('/api/run_advanced_function', methods=['POST'])
 def run_advanced_function():
-    """הפעלת פונקציות מתקדמות"""
+    """
     data = request.json
     command = data.get('command')
     params = data.get('params', {})
@@ -689,6 +689,11 @@ def run_advanced_function():
             "error": str(e),
             "traceback": traceback.format_exc()
         }), 500
+    """  # כאן מסתיימת ההערה
+
+    # השאר רק את השורה הזו כדי שהפונקציה תחזיר תשובה מסודרת
+    return jsonify({"success": False, "error": "Advanced functions are currently disabled."}), 404
+
 
 
 def background_load_people():
