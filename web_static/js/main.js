@@ -1,39 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Global variables
     let peopleData = [];
-    let cameraActive = false;
-    let attendanceInterval = null;
-    let settings = {
-        cameraId: 0,
-        detectionFrequency: 0,
-        detectionThreshold: 0.6,
-        enableNotifications: true
-    };
-    let attendanceCheckInterval = null;
-    let loadedPeople = [];
-    let selectedPersonNumber = null;
 
     // --- All functions and event listeners will be defined inside this main block ---
 
     function initializeEventListeners() {
-        // Navigation
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (link.getAttribute('href').startsWith('#')) {
-                    e.preventDefault();
-                    document.querySelector(link.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-                }
-                document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
         // People management
         document.getElementById('add-person-btn')?.addEventListener('click', () => showModal(document.getElementById('add-person-modal')));
         document.getElementById('add-person-form')?.addEventListener('submit', handleAddPerson);
         document.getElementById('upload-image-form')?.addEventListener('submit', handleUploadImage);
-        document.getElementById('search-people')?.addEventListener('input', filterPeopleTable);
-        
+        document.getElementById('search-people')?.addEventListener('input', filterPeopleTable); // This now works because the function is defined
+
         // Close modals
         document.querySelectorAll('.close-modal, .close-modal-btn').forEach(button => {
             button.addEventListener('click', () => {
@@ -53,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = (e) => {
                     document.getElementById('image-preview').src = e.target.result;
                 };
-                reader.readAsDataURL(this.files[0]);
+                reader.readAsDataURL(file);
             }
         });
     }
@@ -71,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 peopleData = [];
                 console.error('Failed to load people:', data.message);
             }
-            
+
             renderPeopleTable();
 
         } catch (error) {
@@ -92,11 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         peopleData.forEach(person => {
             const row = document.createElement('tr');
-            
-            // --- לוגיקה חדשה לקביעת URL של תמונה ---
+
             let imageUrl = '/web_static/img/person-placeholder.jpg';
             if (person.image_urls && person.image_urls.length > 0) {
-                imageUrl = person.image_urls[0]; 
+                imageUrl = person.image_urls[0];
             }
 
             const imageCounter = person.image_count > 0 ? `<span class="image-count">${person.image_count}</span>` : '';
@@ -114,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>
                     <div class="person-actions">
                         <button class="upload" data-id="${person.id_number}" title="העלאת תמונה"><i class="fas fa-upload"></i></button>
-                        ${person.image_count > 0 ? 
+                        ${person.image_count > 0 ?
                           `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>`
                           : ''}
                         <button class="delete" data-id="${person.id_number}" title="מחיקה"><i class="fas fa-trash-alt"></i></button>
@@ -124,30 +100,31 @@ document.addEventListener('DOMContentLoaded', function() {
             tableBody.appendChild(row);
         });
 
-        // Re-attach event listeners after rendering
         tableBody.querySelectorAll('.upload').forEach(b => b.addEventListener('click', handleUploadClick));
         tableBody.querySelectorAll('.delete').forEach(b => b.addEventListener('click', handleDeleteClick));
         tableBody.querySelectorAll('.view-images').forEach(b => b.addEventListener('click', handleViewImagesClick));
     }
+
+    // --- הוספת הפונקציה החסרה ---
     function filterPeopleTable() {
-    const searchValue = document.getElementById('search-people').value.toLowerCase();
-    const tableBody = document.getElementById('people-table-body');
-    if (!tableBody) return;
+        const searchValue = document.getElementById('search-people').value.toLowerCase();
+        const tableBody = document.getElementById('people-table-body');
+        if (!tableBody) return;
 
-    const rows = tableBody.querySelectorAll('tr');
+        const rows = tableBody.querySelectorAll('tr');
 
-    rows.forEach(row => {
-        // Assuming name is in the 2nd cell (index 1) and ID in the 3rd (index 2)
-        const fullName = row.children[1]?.textContent.toLowerCase() || '';
-        const id = row.children[2]?.textContent.toLowerCase() || '';
+        rows.forEach(row => {
+            const fullName = row.children[1]?.textContent.toLowerCase() || '';
+            const id = row.children[2]?.textContent.toLowerCase() || '';
 
-        if (fullName.includes(searchValue) || id.includes(searchValue)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
+            if (fullName.includes(searchValue) || id.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    // --- סוף הפונקציה החסרה ---
 
     function handleViewImagesClick() {
         const personId = this.getAttribute('data-id');
@@ -198,9 +175,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 form.closest('.modal').classList.remove('active');
                 form.reset();
-                await loadPeopleData(); 
+                await loadPeopleData();
                 showNotification(data.message, 'success');
-                
+
                 const uploadModal = document.getElementById('upload-image-modal');
                 document.getElementById('upload-person-id').value = data.person_id;
                 updateUploadProgress(0);
@@ -230,10 +207,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 showNotification(data.message, 'success');
                 updateUploadProgress(data.image_count);
-                
+
                 if (!data.can_add_more) {
                     document.getElementById('upload-image-modal').classList.remove('active');
-                    await loadPeopleData(); // טוען מחדש את כל הנתונים עם ה-URL-ים החדשים
+                    await loadPeopleData();
                 } else {
                      document.getElementById('upload-image-form').reset();
                      document.getElementById('image-preview').src = '/web_static/img/person-placeholder.jpg';
@@ -253,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const personId = this.getAttribute('data-id');
         const person = peopleData.find(p => p.id_number === personId);
         if (!person) return;
-        
+
         document.getElementById('upload-person-id').value = personId;
         updateUploadProgress(person.image_count || 0);
         showModal(document.getElementById('upload-image-modal'));
@@ -279,9 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
-    // ... כל שאר הפונקציות שלך, כמו updateUploadProgress, showModal, showNotification וכו' ...
-    // (הן לא דורשות שינוי)
+
     function updateUploadProgress(currentCount) {
         const statusEl = document.getElementById('upload-status');
         const finishBtn = document.getElementById('finish-upload-button');
