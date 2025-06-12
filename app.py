@@ -22,7 +22,7 @@ cloudinary.config(
 # =============================================================
 
 # --- קוד חדש לניהול קובץ JSON ---
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'people_data.json')  # שם קובץ מסד הנתונים שלנו
+DATA_FILE = os.path.join(os.path.dirname(__file__), 'people_data.json')
 
 
 def load_data():
@@ -104,11 +104,26 @@ def remove_person():
             except Exception as e:
                 app.logger.error(f"Could not parse public_id from URL {url}: {e}")
         if public_ids_to_delete:
+            app.logger.info(f"Deleting from Cloudinary: {public_ids_to_delete}")
+            # --- הנה התיקון ---
             cloudinary.api.delete_resources(public_ids_to_delete, resource_type="image")
 
     people_list = [p for p in people_list if p['id'] != person_id]
     save_data(people_list)
     return jsonify({'success': True, 'message': f"נמחק בהצלחה"})
+
+
+@app.route('/api/edit_person/<person_id>', methods=['POST'])
+def edit_person(person_id):
+    people_list = load_data()
+    person = next((p for p in people_list if p['id'] == person_id), None)
+    if not person:
+        return jsonify({'success': False, 'error': 'אדם לא נמצא'}), 404
+    data = request.json
+    person['first_name'] = data.get('first_name', person['first_name'])
+    person['last_name'] = data.get('last_name', person['last_name'])
+    save_data(people_list)
+    return jsonify({'success': True, 'message': 'הפרטים עודכנו בהצלחה'})
 
 
 @app.route('/api/upload_image/<person_id>', methods=['POST'])
@@ -150,12 +165,9 @@ def upload_image(person_id):
     })
 
 
-# --- שאר הפונקציות המקוריות שלך נשארות, עם שינויים קטנים ---
-
 @app.route('/api/get_loaded_people', methods=['GET'])
 def get_loaded_people():
     people_list = load_data()
-    # מעדכנים את שדות has_image ו-image_count לפי המידע העדכני
     for person in people_list:
         person['has_image'] = bool(person.get('image_urls'))
         person['image_count'] = len(person.get('image_urls', []))

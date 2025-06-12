@@ -1,41 +1,48 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Global variables
+    // Global variable to hold the people data
     let peopleData = [];
 
-    // --- All functions and event listeners will be defined inside this main block ---
+    // --- Main setup function ---
+    function initialize() {
+        initializeEventListeners();
+        loadPeopleData();
+    }
 
+    // --- All event listeners setup ---
     function initializeEventListeners() {
-        // People management
+        // People management buttons
         document.getElementById('add-person-btn')?.addEventListener('click', () => showModal(document.getElementById('add-person-modal')));
         document.getElementById('add-person-form')?.addEventListener('submit', handleAddPerson);
         document.getElementById('upload-image-form')?.addEventListener('submit', handleUploadImage);
-        document.getElementById('search-people')?.addEventListener('input', filterPeopleTable); // This now works because the function is defined
+        document.getElementById('search-people')?.addEventListener('input', filterPeopleTable);
 
-        // Close modals
+        // Modal close buttons
         document.querySelectorAll('.close-modal, .close-modal-btn').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
             });
         });
 
+        // The "Finish" button in the upload modal
         document.getElementById('finish-upload-button')?.addEventListener('click', function() {
             document.getElementById('upload-image-modal').classList.remove('active');
+            // This is the crucial call to refresh the data
             loadPeopleData();
         });
 
-        // Image preview for upload
+        // Image preview for new upload
         document.getElementById('person-image')?.addEventListener('change', function() {
             if (this.files && this.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     document.getElementById('image-preview').src = e.target.result;
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(this.files[0]);
             }
         });
     }
 
-    // ===== Data Loading and Rendering =====
+    // ===== Data Loading and Rendering Functions =====
 
     async function loadPeopleData() {
         try {
@@ -43,13 +50,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success && data.people) {
-                peopleData = data.people;
+                peopleData = data.people; // Store the full data from the server
             } else {
                 peopleData = [];
                 console.error('Failed to load people:', data.message);
             }
 
-            renderPeopleTable();
+            renderPeopleTable(); // Re-render the table with the new data
 
         } catch (error) {
             console.error('Error fetching people:', error);
@@ -70,9 +77,10 @@ document.addEventListener('DOMContentLoaded', function() {
         peopleData.forEach(person => {
             const row = document.createElement('tr');
 
-            let imageUrl = '/web_static/img/person-placeholder.jpg';
+            // --- NEW LOGIC for displaying images ---
+            let imageUrl = '/web_static/img/person-placeholder.jpg'; // Default placeholder
             if (person.image_urls && person.image_urls.length > 0) {
-                imageUrl = person.image_urls[0];
+                imageUrl = person.image_urls[0]; // Use the direct URL from Cloudinary
             }
 
             const imageCounter = person.image_count > 0 ? `<span class="image-count">${person.image_count}</span>` : '';
@@ -80,19 +88,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const statusText = person.is_present ? 'נוכח' : 'נעדר';
 
             row.innerHTML = `
-                <td>
-                    <img src="${imageUrl}" alt="${person.first_name}" class="person-image">
-                    ${imageCounter}
-                </td>
+                <td><img src="${imageUrl}" alt="${person.first_name}" class="person-image">${imageCounter}</td>
                 <td>${person.first_name} ${person.last_name}</td>
                 <td>${person.id_number}</td>
                 <td><span class="person-status ${statusClass}">${statusText}</span></td>
                 <td>
                     <div class="person-actions">
                         <button class="upload" data-id="${person.id_number}" title="העלאת תמונה"><i class="fas fa-upload"></i></button>
-                        ${person.image_count > 0 ?
-                          `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>`
-                          : ''}
+                        ${person.image_count > 0 ? `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>`: ''}
                         <button class="delete" data-id="${person.id_number}" title="מחיקה"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </td>
@@ -100,23 +103,22 @@ document.addEventListener('DOMContentLoaded', function() {
             tableBody.appendChild(row);
         });
 
+        // Re-attach event listeners after rendering the table
         tableBody.querySelectorAll('.upload').forEach(b => b.addEventListener('click', handleUploadClick));
         tableBody.querySelectorAll('.delete').forEach(b => b.addEventListener('click', handleDeleteClick));
         tableBody.querySelectorAll('.view-images').forEach(b => b.addEventListener('click', handleViewImagesClick));
     }
 
-    // --- הוספת הפונקציה החסרה ---
+    // The missing function that caused the error
     function filterPeopleTable() {
         const searchValue = document.getElementById('search-people').value.toLowerCase();
         const tableBody = document.getElementById('people-table-body');
         if (!tableBody) return;
 
         const rows = tableBody.querySelectorAll('tr');
-
         rows.forEach(row => {
             const fullName = row.children[1]?.textContent.toLowerCase() || '';
             const id = row.children[2]?.textContent.toLowerCase() || '';
-
             if (fullName.includes(searchValue) || id.includes(searchValue)) {
                 row.style.display = '';
             } else {
@@ -124,7 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    // --- סוף הפונקציה החסרה ---
 
     function handleViewImagesClick() {
         const personId = this.getAttribute('data-id');
@@ -141,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!person.image_urls || person.image_urls.length === 0) {
             galleryContainer.innerHTML = '<p class="no-images">אין תמונות זמינות</p>';
         } else {
+            // Loop over the Cloudinary URLs directly
             person.image_urls.forEach((url, index) => {
                 const imageContainer = document.createElement('div');
                 imageContainer.className = 'person-image-item';
@@ -154,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showModal(modal);
     }
 
-    // ===== Event Handlers =====
+    // ===== Event Handlers for Forms and Buttons =====
 
     async function handleAddPerson(event) {
         event.preventDefault();
@@ -178,10 +180,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 await loadPeopleData();
                 showNotification(data.message, 'success');
 
-                const uploadModal = document.getElementById('upload-image-modal');
                 document.getElementById('upload-person-id').value = data.person_id;
                 updateUploadProgress(0);
-                showModal(uploadModal);
+                showModal(document.getElementById('upload-image-modal'));
             } else {
                 showNotification(data.error, 'error');
             }
@@ -208,15 +209,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification(data.message, 'success');
                 updateUploadProgress(data.image_count);
 
+                document.getElementById('upload-image-form').reset();
+                document.getElementById('image-preview').src = '/web_static/img/person-placeholder.jpg';
+
                 if (!data.can_add_more) {
                     document.getElementById('upload-image-modal').classList.remove('active');
                     await loadPeopleData();
-                } else {
-                     document.getElementById('upload-image-form').reset();
-                     document.getElementById('image-preview').src = '/web_static/img/person-placeholder.jpg';
-                     if (data.image_count >= 3) {
-                         document.getElementById('finish-upload-button').style.display = 'inline-block';
-                     }
+                } else if (data.image_count >= 3) {
+                    document.getElementById('finish-upload-button').style.display = 'inline-block';
                 }
             } else {
                 showNotification(data.error, 'error');
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
             finishBtn.style.display = 'inline-block';
         }
     }
-    
+
     function showModal(modal) {
         if(modal) modal.classList.add('active');
     }
@@ -306,24 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         closeBtn.addEventListener('click', closeNotification);
     }
-    
-    const notificationStyles = document.createElement('style');
-    notificationStyles.textContent = `
-        .notification-container { position: fixed; top: 20px; left: 20px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-        .notification { background-color: white; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; min-width: 300px; max-width: 400px; transform: translateX(-120%); animation: slide-in 0.3s forwards; }
-        .notification.closing { animation: slide-out 0.3s forwards; }
-        .notification.info { border-right: 4px solid #007bff; }
-        .notification.success { border-right: 4px solid #28a745; }
-        .notification.error { border-right: 4px solid #dc3545; }
-        .notification-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-right: -10px; margin-left: 10px; color: #999; }
-        .notification-close:hover { color: #dc3545; }
-        @keyframes slide-in { 100% { transform: translateX(0); } }
-        @keyframes slide-out { 0% { transform: translateX(0); } 100% { transform: translateX(-120%); } }
-    `;
-    document.head.appendChild(notificationStyles);
 
-    // Initial load
-    initializeEventListeners();
-    loadPeopleData();
-
-}); // --- הסוגר החשוב שסוגר את כל הקובץ ---
+    // Initial load when the DOM is ready
+    initialize();
+});
