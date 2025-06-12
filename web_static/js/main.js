@@ -86,13 +86,13 @@ document.addEventListener('DOMContentLoaded', function() {
             row.innerHTML = `
                 <td><img src="${imageUrl}" alt="${person.first_name}" class="person-image">${imageCounter}</td>
                 <td>${person.first_name} ${person.last_name}</td>
-                <td>${person.id_number}</td>
+                <td>${person.id}</td>
                 <td><span class="person-status ${statusClass}">${statusText}</span></td>
                 <td>
                     <div class="person-actions">
-                        <button class="upload" data-id="${person.id_number}" title="העלאת תמונה"><i class="fas fa-upload"></i></button>
-                        ${person.image_count > 0 ? `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>` : ''}
-                        <button class="delete" data-id="${person.id_number}" title="מחיקה"><i class="fas fa-trash-alt"></i></button>
+                        <button class="upload" data-id="${person.id}" title="העלאת תמונה"><i class="fas fa-upload"></i></button>
+                        ${person.image_count > 0 ? `<button class="view-images" data-id="${person.id}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>` : ''}
+                        <button class="delete" data-id="${person.id}" title="מחיקה"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </td>
             `;
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // This is another missing function
     function handleViewImagesClick(event) {
     const personId = event.currentTarget.getAttribute('data-id');
-    const person = peopleData.find(p => p.id_number === personId);
+    const person = peopleData.find(p => p.id === personId);
     if (!person) return;
 
     const modal = document.getElementById('person-images-modal');
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // This is one of the missing functions
     function handleUploadClick(event) {
     const personId = event.currentTarget.getAttribute('data-id');
-    const person = peopleData.find(p => p.id_number === personId);
+    const person = peopleData.find(p => p.id === personId);
     if (!person) return;
 
     document.getElementById('upload-person-id').value = personId;
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function handleDeleteClick(event) {
     const personId = event.currentTarget.getAttribute('data-id');
-    const person = peopleData.find(p => p.id_number === personId);
+    const person = peopleData.find(p => p.id === personId);
     if (!person) return;
 
     if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
