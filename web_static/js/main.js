@@ -124,33 +124,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // This is another missing function
-    function handleViewImagesClick() {
-        const personId = this.getAttribute('data-id');
-        const person = peopleData.find(p => p.id_number === personId);
-        if (!person) return;
+    function handleViewImagesClick(event) {
+    const personId = event.currentTarget.getAttribute('data-id');
+    const person = peopleData.find(p => p.id_number === personId);
+    if (!person) return;
 
-        const modal = document.getElementById('person-images-modal');
-        const galleryContainer = document.getElementById('person-images-gallery');
-        const personNameElem = document.getElementById('person-images-name');
+    const modal = document.getElementById('person-images-modal');
+    const galleryContainer = document.getElementById('person-images-gallery');
+    const personNameElem = document.getElementById('person-images-name');
 
-        galleryContainer.innerHTML = '';
-        personNameElem.textContent = `${person.first_name} ${person.last_name}`;
+    galleryContainer.innerHTML = '';
+    personNameElem.textContent = `${person.first_name} ${person.last_name}`;
 
-        if (!person.image_urls || person.image_urls.length === 0) {
-            galleryContainer.innerHTML = '<p class="no-images">אין תמונות זמינות</p>';
-        } else {
-            person.image_urls.forEach((url, index) => {
-                const imageContainer = document.createElement('div');
-                imageContainer.className = 'person-image-item';
-                imageContainer.innerHTML = `
-                    <img src="${url}" alt="תמונה ${index + 1}" loading="lazy">
-                    <div class="person-image-counter">${index + 1}</div>
-                `;
-                galleryContainer.appendChild(imageContainer);
-            });
-        }
-        showModal(modal);
+    if (!person.image_urls || person.image_urls.length === 0) {
+        galleryContainer.innerHTML = '<p class="no-images">אין תמונות זמינות</p>';
+    } else {
+        person.image_urls.forEach((url, index) => {
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'person-image-item';
+            imageContainer.innerHTML = `
+                <img src="${url}" alt="תמונה ${index + 1}" loading="lazy">
+                <div class="person-image-counter">${index + 1}</div>
+            `;
+            galleryContainer.appendChild(imageContainer);
+        });
     }
+    showModal(modal);
+}
 
     // ===== Event Handlers =====
 
@@ -223,37 +223,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // This is one of the missing functions
-    function handleUploadClick() {
-        const personId = this.getAttribute('data-id');
-        const person = peopleData.find(p => p.id_number === personId);
-        if (!person) return;
+    function handleUploadClick(event) {
+    const personId = event.currentTarget.getAttribute('data-id');
+    const person = peopleData.find(p => p.id_number === personId);
+    if (!person) return;
 
-        document.getElementById('upload-person-id').value = personId;
-        updateUploadProgress(person.image_count || 0);
-        showModal(document.getElementById('upload-image-modal'));
-    }
+    document.getElementById('upload-person-id').value = personId;
+    updateUploadProgress(person.image_count || 0);
+    showModal(document.getElementById('upload-image-modal'));
+}
 
-    // This is one of the missing functions
-    async function handleDeleteClick() {
-        const personId = this.getAttribute('data-id');
-        const person = peopleData.find(p => p.id_number === personId);
-        if (!person) return;
+    async function handleDeleteClick(event) {
+    const personId = event.currentTarget.getAttribute('data-id');
+    const person = peopleData.find(p => p.id_number === personId);
+    if (!person) return;
 
-        if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
-            try {
-                const response = await fetch(`/api/remove_person/${personId}`, { method: 'DELETE' });
-                const data = await response.json();
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    await loadPeopleData();
-                } else {
-                    showNotification(data.error, 'error');
-                }
-            } catch (error) {
-                showNotification('שגיאה במחיקת אדם', 'error');
+    if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
+        try {
+            const response = await fetch(`/api/remove_person/${personId}`, { method: 'DELETE' });
+            const data = await response.json();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                await loadPeopleData();
+            } else {
+                showNotification(data.error, 'error');
             }
+        } catch (error) {
+            showNotification('שגיאה במחיקת אדם', 'error');
         }
     }
+}
 
     function updateUploadProgress(currentCount) {
         const statusEl = document.getElementById('upload-status');
