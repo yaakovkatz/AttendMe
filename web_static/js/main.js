@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('upload-image-form')?.addEventListener('submit', handleUploadImage);
         document.getElementById('search-people')?.addEventListener('input', filterPeopleTable);
 
-        // Modal close buttons
+        // Close modals
         document.querySelectorAll('.close-modal, .close-modal-btn').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
@@ -26,8 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // The "Finish" button in the upload modal
         document.getElementById('finish-upload-button')?.addEventListener('click', function() {
             document.getElementById('upload-image-modal').classList.remove('active');
-            // This is the crucial call to refresh the data
-            loadPeopleData();
+            loadPeopleData(); // Refresh the list
         });
 
         // Image preview for new upload
@@ -50,14 +49,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success && data.people) {
-                peopleData = data.people; // Store the full data from the server
+                peopleData = data.people;
             } else {
                 peopleData = [];
                 console.error('Failed to load people:', data.message);
             }
-
-            renderPeopleTable(); // Re-render the table with the new data
-
+            renderPeopleTable();
         } catch (error) {
             console.error('Error fetching people:', error);
             showNotification('שגיאה בטעינת רשימת אנשים', 'error');
@@ -77,10 +74,9 @@ document.addEventListener('DOMContentLoaded', function() {
         peopleData.forEach(person => {
             const row = document.createElement('tr');
 
-            // --- NEW LOGIC for displaying images ---
-            let imageUrl = '/web_static/img/person-placeholder.jpg'; // Default placeholder
+            let imageUrl = '/web_static/img/person-placeholder.jpg';
             if (person.image_urls && person.image_urls.length > 0) {
-                imageUrl = person.image_urls[0]; // Use the direct URL from Cloudinary
+                imageUrl = person.image_urls[0];
             }
 
             const imageCounter = person.image_count > 0 ? `<span class="image-count">${person.image_count}</span>` : '';
@@ -95,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>
                     <div class="person-actions">
                         <button class="upload" data-id="${person.id_number}" title="העלאת תמונה"><i class="fas fa-upload"></i></button>
-                        ${person.image_count > 0 ? `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>`: ''}
+                        ${person.image_count > 0 ? `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות"><i class="fas fa-images"></i></button>` : ''}
                         <button class="delete" data-id="${person.id_number}" title="מחיקה"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </td>
@@ -109,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tableBody.querySelectorAll('.view-images').forEach(b => b.addEventListener('click', handleViewImagesClick));
     }
 
-    // The missing function that caused the error
+    // This is one of the missing functions
     function filterPeopleTable() {
         const searchValue = document.getElementById('search-people').value.toLowerCase();
         const tableBody = document.getElementById('people-table-body');
@@ -127,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // This is another missing function
     function handleViewImagesClick() {
         const personId = this.getAttribute('data-id');
         const person = peopleData.find(p => p.id_number === personId);
@@ -142,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!person.image_urls || person.image_urls.length === 0) {
             galleryContainer.innerHTML = '<p class="no-images">אין תמונות זמינות</p>';
         } else {
-            // Loop over the Cloudinary URLs directly
             person.image_urls.forEach((url, index) => {
                 const imageContainer = document.createElement('div');
                 imageContainer.className = 'person-image-item';
@@ -156,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showModal(modal);
     }
 
-    // ===== Event Handlers for Forms and Buttons =====
+    // ===== Event Handlers =====
 
     async function handleAddPerson(event) {
         event.preventDefault();
@@ -226,6 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // This is one of the missing functions
     function handleUploadClick() {
         const personId = this.getAttribute('data-id');
         const person = peopleData.find(p => p.id_number === personId);
@@ -236,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showModal(document.getElementById('upload-image-modal'));
     }
 
+    // This is one of the missing functions
     async function handleDeleteClick() {
         const personId = this.getAttribute('data-id');
         const person = peopleData.find(p => p.id_number === personId);
@@ -309,4 +307,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial load when the DOM is ready
     initialize();
+
 });
