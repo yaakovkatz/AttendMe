@@ -197,33 +197,24 @@ def run_advanced_function():
 
 @app.route('/api/start_check', methods=['POST'])
 def start_check():
-    # בדיקה אם נשלח קובץ בבקשה
     if 'target_image' not in request.files:
-        return jsonify({'success': False, 'error': 'No target image file provided'}), 400
+        return jsonify({'success': False, 'error': 'לא נשלח קובץ'}), 400
 
     file = request.files['target_image']
-
     if file.filename == '':
-        return jsonify({'success': False, 'error': 'No selected file'}), 400
+        return jsonify({'success': False, 'error': 'לא נבחר קובץ'}), 400
 
     try:
-        # יצירת תיקיית 'target' אם היא לא קיימת
-        target_dir = './target'
-        os.makedirs(target_dir, exist_ok=True)
+        upload_result = cloudinary.uploader.upload(file, folder="attendme_targets")
+        image_url = upload_result.get('secure_url')
 
-        # שמירת הקובץ באופן זמני על השרת
-        save_path = os.path.join(target_dir, "latest_target.jpg")
-        file.save(save_path)
+        if not image_url:
+            return jsonify({'success': False, 'error': 'העלאה ל-Cloudinary נכשלה'}), 500
 
-        app.logger.info(f"SUCCESS: Target image saved to {save_path}")
-
-        # --- כאן, בשלב הבא, נוסיף את הקוד שמפעיל את תהליך הרקע ---
-
-        return jsonify({'success': True, 'message': f"File saved to {save_path}"})
-
+        return jsonify({'success': True, 'message': 'קובץ הועלה בהצלחה', 'target_url': image_url})
     except Exception as e:
-        app.logger.error(f"Error saving target file: {e}")
-        return jsonify({'success': False, 'error': 'Server failed to save file'}), 500
+        app.logger.error(f"Error uploading to Cloudinary: {e}")
+        return jsonify({'success': False, 'error': 'שגיאה בצד השרת'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
