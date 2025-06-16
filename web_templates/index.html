@@ -8,6 +8,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+<hr>
+<div style="padding: 20px; text-align: center;">
+    <h3>אזור בדיקות: העלאת תמונת מטרה</h3>
+    <form id="target-upload-form">
+      <input type="file" name="target_image" required>
+      <button type="submit" style="padding: 5px 10px;">שלח תמונת מטרה</button>
+    </form>
+    <div id="target-upload-result" style="margin-top: 10px; font-weight: bold;"></div>
+</div>
+
+<script>
+  document.getElementById('target-upload-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const resultDiv = document.getElementById('target-upload-result');
+    resultDiv.textContent = 'מעלה קובץ...';
+
+    try {
+        const response = await fetch('/api/start_check', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        resultDiv.textContent = 'תגובת השרת: ' + JSON.stringify(data);
+    } catch (error) {
+        resultDiv.textContent = 'שגיאת תקשורת: ' + error.message;
+    }
+  });
+</script>
     <!-- Header -->
     <header>
         <div class="container">

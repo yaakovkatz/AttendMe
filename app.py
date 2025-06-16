@@ -195,6 +195,36 @@ def run_advanced_function():
     return jsonify({"success": False, "error": "Advanced functions are currently disabled."}), 404
 
 
+@app.route('/api/start_check', methods=['POST'])
+def start_check():
+    # בדיקה אם נשלח קובץ בבקשה
+    if 'target_image' not in request.files:
+        return jsonify({'success': False, 'error': 'No target image file provided'}), 400
+
+    file = request.files['target_image']
+
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No selected file'}), 400
+
+    try:
+        # יצירת תיקיית 'target' אם היא לא קיימת
+        target_dir = './target'
+        os.makedirs(target_dir, exist_ok=True)
+
+        # שמירת הקובץ באופן זמני על השרת
+        save_path = os.path.join(target_dir, "latest_target.jpg")
+        file.save(save_path)
+
+        app.logger.info(f"SUCCESS: Target image saved to {save_path}")
+
+        # --- כאן, בשלב הבא, נוסיף את הקוד שמפעיל את תהליך הרקע ---
+
+        return jsonify({'success': True, 'message': f"File saved to {save_path}"})
+
+    except Exception as e:
+        app.logger.error(f"Error saving target file: {e}")
+        return jsonify({'success': False, 'error': 'Server failed to save file'}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
