@@ -391,44 +391,59 @@
 </section>
 
 <section id="target-upload" class="section">
-    <div class="container">
-        <h2 class="section-title">העלאת תמונה / סרטון לבדיקה</h2>
-        <form id="target-upload-form">
-            <input type="file" name="target_image" accept="image/*,video/*" required>
-            <button type="submit" class="action-button">העלה לקובץ מטרה</button>
-        </form>
-        <div id="target-upload-result" style="margin-top: 10px; font-weight: bold;"></div>
-    </div>
+  <div class="container" style="max-width: 500px; margin: auto; text-align: center;">
+    <h2 class="section-title">📸 העלאת תמונת מטרה לבדיקה</h2>
+
+    <form id="target-upload-form" style="margin-top: 20px;">
+      <label for="target-image" style="display: block; margin-bottom: 10px;">בחר תמונה או סרטון:</label>
+      <input type="file" id="target-image" name="target_image" accept="image/*,video/*" required style="margin-bottom: 15px;">
+      <br>
+      <button type="submit" class="action-button">📤 העלה</button>
+    </form>
+
+    <div id="target-upload-result" style="margin-top: 25px; font-weight: bold;"></div>
+
+    <div id="target-preview" style="margin-top: 15px;"></div>
+  </div>
 </section>
+
 
 <script>
 document.getElementById('target-upload-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const resultDiv = document.getElementById('target-upload-result');
-    resultDiv.textContent = 'מעלה קובץ...';
+  e.preventDefault();
+  const form = this;
+  const fileInput = form.querySelector('input[type="file"]');
+  const resultDiv = document.getElementById('target-upload-result');
+  const previewDiv = document.getElementById('target-preview');
+  const formData = new FormData(form);
 
-    try {
-        const response = await fetch('/api/start_check', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
+  resultDiv.textContent = '📡 מעלה קובץ...';
+  previewDiv.innerHTML = '';
 
-        if (data.success) {
-            resultDiv.innerHTML = `
-                ✅ קובץ הועלה בהצלחה<br>
-                <a href="${data.target_url}" target="_blank">צפייה בקובץ</a><br>
-                ${data.target_url.match(/\.(jpg|jpeg|png)$/) ? `<img src="${data.target_url}" style="max-width: 300px; margin-top: 10px;">` : ''}
-            `;
-        } else {
-            resultDiv.textContent = '❌ שגיאה: ' + data.error;
-        }
-    } catch (error) {
-        resultDiv.textContent = 'שגיאת תקשורת: ' + error.message;
+  try {
+    const response = await fetch('/api/start_check', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      resultDiv.innerHTML = `<span style="color: green;">✅ קובץ הועלה בהצלחה</span><br><a href="${data.target_url}" target="_blank">צפייה בקובץ</a>`;
+
+      if (data.target_url.match(/\.(jpg|jpeg|png|webp)$/)) {
+        previewDiv.innerHTML = `<img src="${data.target_url}" style="max-width: 100%; margin-top: 10px; border-radius: 12px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">`;
+      } else if (data.target_url.match(/\.(mp4|webm)$/)) {
+        previewDiv.innerHTML = `<video controls style="max-width: 100%; margin-top: 10px; border-radius: 12px; box-shadow: 0 0 8px rgba(0,0,0,0.2);"><source src="${data.target_url}"></video>`;
+      }
+    } else {
+      resultDiv.innerHTML = `<span style="color: red;">❌ שגיאה: ${data.error}</span>`;
     }
+  } catch (error) {
+    resultDiv.innerHTML = `<span style="color: red;">שגיאת תקשורת: ${error.message}</span>`;
+  }
 });
 </script>
+
 
 
 
