@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('add-person-form')?.addEventListener('submit', handleAddPerson);
         document.getElementById('upload-image-form')?.addEventListener('submit', handleUploadImage);
         document.getElementById('search-people')?.addEventListener('input', filterPeopleTable);
+        document.getElementById('target-upload-form')?.addEventListener('submit', handleSingleTargetUpload);
+
 
         // Close modals
         document.querySelectorAll('.close-modal, .close-modal-btn').forEach(button => {
@@ -390,6 +392,38 @@ async function deleteSelectedTargetImages() {
         }
         closeBtn.addEventListener('click', closeNotification);
     }
+
+
+    function handleSingleTargetUpload(e) {
+  e.preventDefault();
+  const form = e.target;
+  const fileInput = form.querySelector('input[type="file"]');
+  const resultDiv = document.getElementById('target-upload-result');
+  const previewDiv = document.getElementById('target-preview');
+  const formData = new FormData(form);
+
+  resultDiv.textContent = '📡 מעלה קובץ...';
+  previewDiv.innerHTML = '';
+
+  fetch('/api/start_check', {
+    method: 'POST',
+    body: formData
+  }).then(response => response.json()).then(data => {
+    if (data.success) {
+      resultDiv.innerHTML = `<span style="color: green;">✅ קובץ הועלה בהצלחה</span><br><a href="${data.target_url}" target="_blank">צפייה בקובץ</a>`;
+      if (data.target_url.match(/\.(jpg|jpeg|png|webp)$/)) {
+        previewDiv.innerHTML = `<img src="${data.target_url}" style="max-width: 100%; margin-top: 10px; border-radius: 12px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">`;
+      } else if (data.target_url.match(/\.(mp4|webm)$/)) {
+        previewDiv.innerHTML = `<video controls style="max-width: 100%; margin-top: 10px; border-radius: 12px; box-shadow: 0 0 8px rgba(0,0,0,0.2);"><source src="${data.target_url}"></video>`;
+      }
+    } else {
+      resultDiv.innerHTML = `<span style="color: red;">❌ שגיאה: ${data.error}</span>`;
+    }
+  }).catch(error => {
+    resultDiv.innerHTML = `<span style="color: red;">שגיאת תקשורת: ${error.message}</span>`;
+  });
+}
+
 
     // Initial load when the DOM is ready
     initialize();
