@@ -1360,3 +1360,55 @@ footer {
     cursor: not-allowed;
     opacity: 0.6;
 }
+.upload-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.upload-sidebar {
+  width: 220px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 10px #ccc;
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.upload-sidebar h3 {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.upload-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 15px;
+  flex-grow: 1;
+}
+
+.image-card {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+  position: relative;
+  background: #fff;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.image-card:hover {
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.image-card.selected {
+  border: 2px solid #007bff;
+}
+
+.image-card img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
