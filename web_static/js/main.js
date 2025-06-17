@@ -81,6 +81,7 @@ loadTargetImages();
 
     async function handleTargetUpload(e) {
   e.preventDefault();
+
   const files = document.getElementById('target-images').files;
   if (!files.length) {
     showNotification('נא לבחור קבצים', 'error');
@@ -89,13 +90,18 @@ loadTargetImages();
 
   const formData = new FormData();
   for (const file of files) {
-    formData.append('target_images', file);
+    formData.append('target_images[]', file);  // כאן חשוב השם עם סוגריים []
+  }
 
   try {
-    const response = await fetch('/api/start_check', { method: 'POST', body: formData });
+    const response = await fetch('/api/start_check', {
+      method: 'POST',
+      body: formData
+    });
+
     const data = await response.json();
     if (data.success) {
-      showNotification('תמונה הועלתה בהצלחה', 'success');
+      showNotification('הקבצים הועלו בהצלחה', 'success');
       loadTargetImages();
     } else {
       showNotification(data.error, 'error');
@@ -104,6 +110,7 @@ loadTargetImages();
     showNotification('שגיאה בהעלאת קבצים', 'error');
   }
 }
+
 
 async function loadTargetImages() {
   const gallery = document.getElementById('target-gallery');
