@@ -197,7 +197,7 @@ def run_advanced_function():
 
 @app.route('/api/start_check', methods=['POST'])
 def start_check():
-    files = request.files.getlist('target_images[]')
+    files = request.files.getlist('target_images')
     if not files:
         return jsonify({'success': False, 'error': 'לא נשלחו קבצים'}), 400
 

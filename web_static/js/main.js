@@ -89,8 +89,7 @@ loadTargetImages();
 
   const formData = new FormData();
   for (const file of files) {
-    formData.append('target_images[]', file); // יש להחליף ל־target_images[] אם אתה תומך בשרת
-  }
+    formData.append('target_images', file);
 
   try {
     const response = await fetch('/api/start_check', { method: 'POST', body: formData });
