@@ -197,24 +197,27 @@ def run_advanced_function():
 
 @app.route('/api/start_check', methods=['POST'])
 def start_check():
-    if 'target_image' not in request.files:
-        return jsonify({'success': False, 'error': 'לא נשלח קובץ'}), 400
+    files = request.files.getlist('target_images[]')
+    if not files:
+        return jsonify({'success': False, 'error': 'לא נשלחו קבצים'}), 400
 
-    file = request.files['target_image']
-    if file.filename == '':
-        return jsonify({'success': False, 'error': 'לא נבחר קובץ'}), 400
+    uploaded_urls = []
+    for file in files:
+        if file.filename == '':
+            continue
+        try:
+            result = cloudinary.uploader.upload(file, folder="attendme_targets")
+            if result.get('secure_url'):
+                uploaded_urls.append(result['secure_url'])
+        except Exception as e:
+            app.logger.error(f"שגיאה בהעלאה: {e}")
+            continue
 
-    try:
-        upload_result = cloudinary.uploader.upload(file, folder="attendme_targets")
-        image_url = upload_result.get('secure_url')
+    if not uploaded_urls:
+        return jsonify({'success': False, 'error': 'לא הועלו קבצים'}), 500
 
-        if not image_url:
-            return jsonify({'success': False, 'error': 'העלאה ל-Cloudinary נכשלה'}), 500
+    return jsonify({'success': True, 'message': 'קבצים הועלו בהצלחה', 'target_urls': uploaded_urls})
 
-        return jsonify({'success': True, 'message': 'קובץ הועלה בהצלחה', 'target_url': image_url})
-    except Exception as e:
-        app.logger.error(f"Error uploading to Cloudinary: {e}")
-        return jsonify({'success': False, 'error': 'שגיאה בצד השרת'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
