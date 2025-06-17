@@ -89,7 +89,7 @@ def add_person():
 
 
 @app.route('/api/remove_person/<person_id>', methods=['DELETE'])
-def remove_person():
+def remove_person(person_id):
     people_list = load_data()
     person_to_remove = next((p for p in people_list if p['id'] == person_id), None)
     if not person_to_remove:
@@ -195,28 +195,137 @@ def run_advanced_function():
     return jsonify({"success": False, "error": "Advanced functions are currently disabled."}), 404
 
 
+# *** תיקנתי את הפונקציה הזו ***
 @app.route('/api/start_check', methods=['POST'])
 def start_check():
+    """תיקון פונקציית העלאת תמונות/סרטונים"""
     files = request.files.getlist('target_images')
-    if not files:
+
+    if not files or all(f.filename == '' for f in files):
         return jsonify({'success': False, 'error': 'לא נשלחו קבצים'}), 400
 
-    uploaded_urls = []
+    uploaded_files = []
+    failed_uploads = []
+
     for file in files:
         if file.filename == '':
             continue
+
         try:
-            result = cloudinary.uploader.upload(file, folder="attendme_targets")
+            # בדיקת סוג הקובץ
+            if file.content_type.startswith('image/'):
+                resource_type = "image"
+            elif file.content_type.startswith('video/'):
+                resource_type = "video"
+            else:
+                failed_uploads.append(f"{file.filename} - סוג קובץ לא נתמך")
+                continue
+
+            # העלאה לקלאודינרי
+            result = cloudinary.uploader.upload(
+                file,
+                folder="attendme_targets",
+                resource_type=resource_type,
+                unique_filename=True,
+                overwrite=False
+            )
+
             if result.get('secure_url'):
-                uploaded_urls.append(result['secure_url'])
+                uploaded_files.append({
+                    'url': result['secure_url'],
+                    'public_id': result['public_id'],
+                    'filename': file.filename,
+                    'type': resource_type
+                })
+                app.logger.info(f"הועלה בהצלחה: {file.filename}")
+
         except Exception as e:
-            app.logger.error(f"שגיאה בהעלאה: {e}")
+            app.logger.error(f"שגיאה בהעלאת {file.filename}: {e}")
+            failed_uploads.append(f"{file.filename} - שגיאה בהעלאה")
             continue
 
-    if not uploaded_urls:
-        return jsonify({'success': False, 'error': 'לא הועלו קבצים'}), 500
+    # תגובה
+    if not uploaded_files and failed_uploads:
+        return jsonify({
+            'success': False,
+            'error': f'כל ההעלאות נכשלו: {", ".join(failed_uploads)}'
+        }), 500
 
-    return jsonify({'success': True, 'message': 'קבצים הועלו בהצלחה', 'target_urls': uploaded_urls})
+    response_data = {
+        'success': True,
+        'message': f'הועלו בהצלחה {len(uploaded_files)} קבצים',
+        'uploaded_files': uploaded_files,
+        'uploaded_count': len(uploaded_files)
+    }
+
+    if failed_uploads:
+        response_data['warnings'] = failed_uploads
+        response_data['message'] += f' (נכשלו {len(failed_uploads)} קבצים)'
+
+    return jsonify(response_data)
+
+
+# *** הוספתי פונקציה חדשה ***
+@app.route('/api/get_target_images', methods=['GET'])
+def get_target_images():
+    """קבלת רשימת כל התמונות המועלות"""
+    try:
+        # חיפוש כל הקבצים בתיקיית targets
+        result = cloudinary.api.resources(
+            type="upload",
+            prefix="attendme_targets/",
+            max_results=100,
+            resource_type="auto"  # כולל גם תמונות וגם סרטונים
+        )
+
+        files = []
+        for resource in result.get('resources', []):
+            files.append({
+                'url': resource['secure_url'],
+                'public_id': resource['public_id'],
+                'created_at': resource['created_at'],
+                'resource_type': resource['resource_type'],
+                'format': resource.get('format', ''),
+                'bytes': resource.get('bytes', 0)
+            })
+
+        return jsonify({'success': True, 'files': files})
+
+    except Exception as e:
+        app.logger.error(f"שגיאה בקבלת תמונות: {e}")
+        return jsonify({'success': False, 'error': 'שגיאה בטעינת התמונות'}), 500
+
+
+# *** הוספתי פונקציה חדשה ***
+@app.route('/api/delete_target_images', methods=['POST'])
+def delete_target_images():
+    """מחיקת תמונות נבחרות"""
+    try:
+        data = request.json
+        public_ids = data.get('public_ids', [])
+
+        if not public_ids:
+            return jsonify({'success': False, 'error': 'לא נבחרו קבצים למחיקה'}), 400
+
+        # מחיקה מקלאודינרי
+        deletion_result = cloudinary.api.delete_resources(
+            public_ids,
+            resource_type="auto"  # יכול להיות image או video
+        )
+
+        deleted_count = len(deletion_result.get('deleted', {}))
+
+        app.logger.info(f"נמחקו {deleted_count} קבצים מ-Cloudinary")
+
+        return jsonify({
+            'success': True,
+            'message': f'נמחקו {deleted_count} קבצים',
+            'deleted_count': deleted_count
+        })
+
+    except Exception as e:
+        app.logger.error(f"שגיאה במחיקת תמונות: {e}")
+        return jsonify({'success': False, 'error': 'שגיאה במחיקת התמונות'}), 500
 
 
 if __name__ == '__main__':

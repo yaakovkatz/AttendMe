@@ -390,36 +390,43 @@
     </div>
 </section>
 
+<!-- *** תיקנתי את כל החלק הזה *** -->
 <section id="target-upload" class="section">
   <div class="container">
     <h2 class="section-title">העלאת תמונת מטרה 📸<br><span style="font-size: 20px; font-weight: 400;">לבדיקה</span></h2>
 
+    <!-- טופס העלאה ראשי -->
     <form id="target-upload-form" enctype="multipart/form-data">
-  <label for="target-file">בחר תמונה או סרטון:</label>
-  <input type="file" name="target_images" id="target-file" accept="image/*,video/*" multiple required>
-  <button type="submit" class="action-button">העלה 📤</button>
-</form>
+      <label for="target-file">בחר תמונה או סרטון:</label>
+      <input type="file" name="target_images" id="target-file" accept="image/*,video/*" multiple required>
+      <button type="submit" class="action-button">העלה 📤</button>
+    </form>
 
-
+    <!-- תוצאת העלאה -->
     <div id="target-upload-result" style="margin-top: 10px; font-weight: bold;"></div>
     <div id="target-preview" style="margin-top: 20px;"></div>
 
-    <!-- תוספות חדשות -->
+    <!-- קו הפרדה -->
     <hr style="margin: 40px 0;">
-    <h3 style="text-align: center;">העלאת תמונות נוספות ומחיקה</h3>
 
+    <!-- כותרת לחלק התמונות הקיימות -->
+    <h3 style="text-align: center;">ניהול תמונות קיימות</h3>
+
+    <!-- כפתורי פעולה -->
     <div style="text-align: center; margin-bottom: 20px;">
-      <input type="file" id="target-images" accept="image/*" multiple style="margin-bottom: 10px;">
+      <input type="file" id="target-images" accept="image/*,video/*" multiple style="margin-bottom: 10px;">
       <br>
       <button id="upload-more-btn" class="action-button">העלה תמונות נוספות</button>
       <button id="delete-selected-btn" class="action-button secondary">מחק תמונות נבחרות</button>
+      <button id="refresh-gallery-btn" class="action-button">רענן גלריה</button>
     </div>
 
-    <div id="target-gallery" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
+    <!-- גלריית התמונות -->
+    <div id="target-gallery" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+      <!-- התמונות יתווספו כאן דינמית -->
+    </div>
   </div>
 </section>
-
-
 
     <!-- Footer -->
     <footer>
