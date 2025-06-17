@@ -395,10 +395,11 @@
     <h2 class="section-title">העלאת תמונת מטרה 📸<br><span style="font-size: 20px; font-weight: 400;">לבדיקה</span></h2>
 
     <form id="target-upload-form" enctype="multipart/form-data">
-      <label for="target-file">בחר תמונה או סרטון:</label>
-      <input type="file" name="target_image" id="target-file" accept="image/*,video/*" required>
-      <button type="submit" class="action-button">העלה 📤</button>
-    </form>
+  <label for="target-file">בחר תמונה או סרטון:</label>
+  <input type="file" name="target_images" id="target-file" accept="image/*,video/*" multiple required>
+  <button type="submit" class="action-button">העלה 📤</button>
+</form>
+
 
     <div id="target-upload-result" style="margin-top: 10px; font-weight: bold;"></div>
     <div id="target-preview" style="margin-top: 20px;"></div>
