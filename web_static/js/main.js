@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('upload-image-form')?.addEventListener('submit', handleUploadImage);
         document.getElementById('search-people')?.addEventListener('input', filterPeopleTable);
         document.getElementById('target-upload-form')?.addEventListener('submit', handleSingleTargetUpload);
+        document.getElementById('upload-more-btn')?.addEventListener('click', handleTargetUpload);
+
 
 
         // Close modals
