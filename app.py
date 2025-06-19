@@ -8,6 +8,9 @@ from datetime import datetime
 import logging
 import threading
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
