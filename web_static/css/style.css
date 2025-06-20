@@ -416,7 +416,7 @@ tr:hover {
     transform: scale(1.2);
 }
 
-/* Modal */
+/* Modal - עדכון עם הקטנת תוכן */
 .modal {
     display: none;
     position: fixed;
@@ -440,10 +440,10 @@ tr:hover {
 .modal-content {
     background-color: white;
     border-radius: var(--border-radius);
-    padding: 30px;
+    padding: 15px 20px; /* הקטנה מ-30px ל-15px/20px */
     max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
+    width: 80%;
+    max-height: 85vh; /* הקטנה מ-90vh ל-85vh */
     overflow-y: auto;
     position: relative;
     transform: translateY(-20px);
@@ -470,26 +470,28 @@ tr:hover {
 
 .modal h3 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 12px; /* הקטנה מ-20px ל-12px */
     color: var(--primary-color);
+    font-size: 18px; /* הקטנה מ-24px ל-18px */
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px; /* הקטנה מ-20px ל-12px */
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px; /* הקטנה מ-5px ל-4px */
     font-weight: 500;
+    font-size: 14px; /* הקטנה מ-16px ל-14px */
 }
 
 .form-group input, .form-group select {
     width: 100%;
-    padding: 10px 15px;
+    padding: 8px 12px; /* הקטנה מ-10px 15px ל-8px 12px */
     border: 1px solid #ddd;
     border-radius: var(--border-radius);
-    font-size: 1rem;
+    font-size: 14px; /* הקטנה מ-1rem ל-14px */
 }
 
 .checkbox-group {
@@ -503,13 +505,13 @@ tr:hover {
 }
 
 .image-preview {
-    margin: 20px 0;
+    margin: 15px 0; /* הקטנה מ-20px ל-15px */
     text-align: center;
 }
 
 .image-preview img {
     max-width: 100%;
-    max-height: 300px;
+    max-height: 250px; /* הקטנה מ-300px ל-250px */
     border-radius: var(--border-radius);
     border: 1px solid #ddd;
 }
@@ -517,7 +519,15 @@ tr:hover {
 .form-actions {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    margin-top: 12px; /* הקטנה מ-10px ל-12px */
+    margin-bottom: 8px; /* הוספת מרווח תחתון */
+}
+
+/* עדכון כפתורים בחלון */
+.form-actions .action-button {
+    padding: 8px 14px; /* הקטנה מ-10px 20px ל-8px 14px */
+    font-size: 14px; /* הקטנה מ-1rem ל-14px */
+    margin: 0 4px; /* הקטנה מ-5px ל-4px */
 }
 
 /* Attendance */
@@ -700,27 +710,37 @@ footer {
     }
 }
 
-/* Upload status and progress bar */
+/* Upload status and progress bar - עדכון */
 .upload-status {
-    margin: 10px 0;
-    padding: 10px;
+    margin: 8px 0; /* הקטנה מ-10px ל-8px */
+    padding: 6px 8px; /* הקטנה מ-10px ל-6px 8px */
     background-color: #f8f9fa;
     border-radius: var(--border-radius);
     text-align: center;
     font-weight: 500;
+    font-size: 13px; /* הקטנה מ-14px ל-13px */
 }
 
 .upload-progress {
     display: flex;
     justify-content: space-between;
-    margin: 15px 0;
+    margin: 8px 0; /* הקטנה מ-15px ל-8px */
+    padding: 8px; /* הקטנה מ-10px ל-8px */
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
 }
 
 .progress-step {
-    width: 18%;
-    height: 8px;
-    background-color: #e9ecef;
+    width: 40px; /* הקטנה מ-50px ל-40px */
+    height: 6px; /* הקטנה מ-8px ל-6px */
     border-radius: 4px;
+    border: none;
+    background-color: #ddd;
+    display: inline-block;
+    margin: 0 2px; /* הקטנה מ-5px ל-2px */
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 .progress-step.active {
@@ -791,6 +811,7 @@ footer {
     background-color: #f8f9fa;
     border-radius: var(--border-radius);
 }
+
 /* סגנונות לאזור הפונקציות המתקדמות */
 .advanced-controls {
     display: flex;
@@ -844,10 +865,11 @@ footer {
     font-family: monospace;
     line-height: 1.5;
 }
+
 /* עיצוב חלון בחירת אדם */
 #select-person-modal .modal-content {
     max-width: 600px;
-    max-height: 80vh;
+    max-height: 95vh;
     overflow: auto;
 }
 
@@ -938,6 +960,7 @@ footer {
     padding: 20px;
     color: #e74c3c;
 }
+
 /* ===== בדיקת נוכחות לפי מספר אדם ===== */
 
 .attendance-checker-section {

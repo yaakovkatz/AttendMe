@@ -376,39 +376,208 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function handleUploadImage(event) {
-        event.preventDefault();
-        const personId = document.getElementById('upload-person-id').value;
-        const fileInput = document.getElementById('person-image');
-        if (!fileInput.files.length) {
-            showNotification('נא לבחור קובץ', 'error');
-            return;
-        }
-        const formData = new FormData();
-        formData.append('image', fileInput.files[0]);
+    event.preventDefault();
+
+    const personId = document.getElementById('upload-person-id').value;
+    const fileInput = document.getElementById('person-image');
+
+    if (!fileInput.files.length) {
+        showNotification('נא לבחור קבצים', 'error');
+        return;
+    }
+
+    const files = Array.from(fileInput.files);
+
+    if (files.length > 5) {
+        showNotification('ניתן להעלות עד 5 תמונות בלבד', 'error');
+        return;
+    }
+
+    console.log(`מתחיל להעלות ${files.length} תמונות...`);
+
+    // משתנים למעקב
+    let successCount = 0;
+    let errorCount = 0;
+    let totalImages = 0;
+
+    const form = event.target;
+
+    // *** תיקון: בדיקה אם כבר קיים אלמנט progress ***
+    let progressContainer = form.querySelector('.upload-progress-container');
+
+    if (!progressContainer) {
+        // יצירת אלמנט התקדמות רק אם לא קיים
+        progressContainer = document.createElement('div');
+        progressContainer.className = 'upload-progress-container';
+        progressContainer.innerHTML = `
+            <div style="margin: 15px 0; padding: 10px; background: #f0f8ff; border-radius: 5px;">
+                <div style="font-weight: bold; margin-bottom: 5px;">מעלה תמונות...</div>
+                <div id="upload-progress-text">מתחיל העלאה...</div>
+                <div style="background: #e0e0e0; height: 8px; border-radius: 4px; margin: 8px 0; overflow: hidden;">
+                    <div id="upload-progress-bar" style="background: #4CAF50; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+        `;
+        form.appendChild(progressContainer);
+    }
+
+    // *** תיקון: השגת אלמנטים מהקונטיינר הקיים ***
+    const progressBar = progressContainer.querySelector('#upload-progress-bar');
+    const progressText = progressContainer.querySelector('#upload-progress-text');
+
+    progressContainer.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center'
+});
+    // איפוס להתחלה חדשה
+    progressBar.style.width = '0%';
+    progressText.textContent = 'מתחיל העלאה...';
+
+    // העלאה של כל הקבצים אחד אחרי השני
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
         try {
-            const response = await fetch(`/api/upload_image/${personId}`, { method: 'POST', body: formData });
+            progressText.textContent = `מעלה תמונה ${i + 1} מתוך ${files.length}: ${file.name.substring(0, 20)}...`;
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            console.log(`מעלה קובץ: ${file.name}`);
+
+            const response = await fetch(`/api/upload_image/${personId}`, {
+                method: 'POST',
+                body: formData
+            });
+
             const data = await response.json();
+            console.log(`תגובה עבור ${file.name}:`, data);
+
             if (data.success) {
-                showNotification(data.message, 'success');
-                updateUploadProgress(data.image_count);
+                successCount++;
+                totalImages = data.image_count || (successCount);
 
-                document.getElementById('upload-image-form').reset();
-                document.getElementById('image-preview').src = '/web_static/img/person-placeholder.jpg';
+                // עדכון progress bar
+                const progress = ((i + 1) / files.length) * 100;
+                progressBar.style.width = `${progress}%`;
 
+                console.log(`✅ הועלה בהצלחה: ${file.name} (סה"כ תמונות: ${totalImages})`);
+
+                // עדכון מד התקדמות הוויזואלי
+                updateUploadProgress(totalImages);
+
+                // אם הגענו למקסימום תמונות
                 if (!data.can_add_more) {
-                    document.getElementById('upload-image-modal').classList.remove('active');
-                    await loadPeopleData();
-                } else if (data.image_count >= 3) {
-                    document.getElementById('finish-upload-button').style.display = 'inline-block';
+                    progressText.textContent = `הגעת למקסימום תמונות (5). הועלו ${successCount} תמונות.`;
+                    showNotification('הגעת למקסימום תמונות (5)', 'warning');
+                    break;
                 }
             } else {
-                showNotification(data.error, 'error');
+                errorCount++;
+                console.error(`❌ שגיאה בהעלאת ${file.name}:`, data.error);
+
+                // עדכון המד גם במקרה של שגיאה
+                const progress = ((i + 1) / files.length) * 100;
+                progressBar.style.width = `${progress}%`;
+
+                // אם זה שגיאת מקסימום תמונות, עצור
+                if (data.error && data.error.includes('מקסימום')) {
+                    progressText.textContent = `הגעת למקסימום תמונות. הועלו ${successCount} תמונות.`;
+                    break;
+                }
             }
         } catch (error) {
-            showNotification('שגיאה בהעלאת תמונה', 'error');
+            errorCount++;
+            console.error(`❌ שגיאת רשת בהעלאת ${file.name}:`, error);
+
+            // עדכון המד גם במקרה של שגיאת רשת
+            const progress = ((i + 1) / files.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // המתנה קצרה בין העלאות (למנוע עומס)
+        if (i < files.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
     }
+
+    // עדכון סופי
+    progressBar.style.width = '100%';
+
+    // הודעת סיכום
+    let summaryMessage = '';
+    let notificationType = 'success';
+
+    if (successCount > 0 && errorCount === 0) {
+        summaryMessage = `🎉 כל התמונות הועלו בהצלחה! (${successCount}/${files.length})`;
+        progressText.textContent = `הושלם! הועלו ${successCount} תמונות בהצלחה`;
+        progressContainer.style.background = '#e8f5e8'; // רקע ירוק
+        notificationType = 'success';
+    } else if (successCount > 0 && errorCount > 0) {
+        summaryMessage = `⚠️ הועלו ${successCount} תמונות, נכשלו ${errorCount}`;
+        progressText.textContent = `הושלם חלקית: ${successCount} הצליחו, ${errorCount} נכשלו`;
+        progressContainer.style.background = '#fff3cd'; // רקע כתום
+        notificationType = 'warning';
+    } else {
+        summaryMessage = `❌ כל ההעלאות נכשלו (${errorCount} שגיאות)`;
+        progressText.textContent = `כל ההעלאות נכשלו`;
+        progressContainer.style.background = '#ffebee'; // רקע אדום
+        notificationType = 'error';
+    }
+
+    console.log('סיכום העלאה:', summaryMessage);
+    showNotification(summaryMessage, notificationType);
+
+    // רענון רשימת האנשים
+    await loadPeopleList();
+
+    // *** תיקון: איפוס והסרה מתוזמנת ***
+    setTimeout(() => {
+        // איפוס הטופס
+        document.getElementById('upload-image-form').reset();
+
+        // הסרת הקונטיינר
+        if (progressContainer && progressContainer.parentNode) {
+            progressContainer.remove();
+        }
+
+        // אם הועלו לפחות 3 תמונות, סגור את החלון
+        if (totalImages >= 3) {
+            closeModal('upload-image-modal');
+        }
+    }, 3000);
+}
+
+// *** פונקציה עזר לעדכון מד ההתקדמות הויזואלי - ללא שינויים ***
+function updateUploadProgress(imageCount) {
+    // עדכון הנקודות בחלק העליון
+    for (let i = 1; i <= 5; i++) {
+        const step = document.getElementById(`progress-step-${i}`);
+        if (step) {
+            if (i <= imageCount) {
+                step.classList.add('completed');
+            } else {
+                step.classList.remove('completed');
+            }
+        }
+    }
+
+    // עדכון הטקסט
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) {
+        const remaining = Math.max(0, 3 - imageCount);
+        if (remaining > 0) {
+            statusEl.textContent = `יש לך ${imageCount} תמונות. נדרשות עוד ${remaining} תמונות לפחות.`;
+            statusEl.style.color = '#ff9800';
+        } else if (imageCount < 5) {
+            statusEl.textContent = `יש לך ${imageCount} תמונות. ניתן להוסיף עד ${5 - imageCount} תמונות נוספות.`;
+            statusEl.style.color = '#4caf50';
+        } else {
+            statusEl.textContent = `יש לך ${imageCount} תמונות (מקסימום).`;
+            statusEl.style.color = '#4caf50';
+        }
+    }
+}
 
     // This is one of the missing functions
     function handleUploadClick(event) {
