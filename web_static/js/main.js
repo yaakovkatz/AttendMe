@@ -1,16 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Global variable to hold the people data
     let peopleData = [];
-    let selectedTargetFiles = [];
-    let allTargetImages = [];
 
     // --- Main setup function ---
     function initialize() {
         initializeEventListeners();
         loadPeopleData();
         loadTargetImages();
-        setupTargetDragAndDrop();
-        setupTargetFileInput();
     }
 
     // --- All event listeners setup ---
@@ -50,6 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Target upload events
+        document.getElementById('target-upload-form')?.addEventListener('submit', handleTargetUpload);
+        document.getElementById('upload-more-btn')?.addEventListener('click', handleMultipleTargetUpload);
+        document.getElementById('delete-selected-btn')?.addEventListener('click', deleteSelectedTargetImages);
+
         // Modal background click to close
         document.getElementById('upload-image-modal')?.addEventListener('click', function(e) {
             if (e.target === this) {
@@ -58,269 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===== TARGET IMAGES FUNCTIONALITY =====
-
-    // Setup drag and drop for target images
-    function setupTargetDragAndDrop() {
-        const uploadArea = document.querySelector('.upload-area');
-        if (!uploadArea) return;
-
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
-        });
-
-        uploadArea.addEventListener('drop', handleTargetDrop, false);
-    }
-
-    function handleTargetDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        const fileInput = document.getElementById('target-file-input');
-        if (fileInput) {
-            fileInput.files = files;
-            updateTargetFileDisplay();
-        }
-    }
-
-    // Setup file input for target images
-    function setupTargetFileInput() {
-        const fileInput = document.getElementById('target-file-input');
-        if (fileInput) {
-            fileInput.addEventListener('change', updateTargetFileDisplay);
-        }
-    }
-
-    function updateTargetFileDisplay() {
-        const fileInput = document.getElementById('target-file-input');
-        const uploadText = document.querySelector('.upload-text');
-
-        if (fileInput && uploadText) {
-            if (fileInput.files.length > 0) {
-                uploadText.textContent = `נבחרו ${fileInput.files.length} קבצים`;
-                uploadText.style.color = '#27ae60';
-            } else {
-                uploadText.textContent = 'לחץ כאן או גרור קבצים להעלאה';
-                uploadText.style.color = '#2c3e50';
-            }
-        }
-    }
-
-    // Upload target files - GLOBAL FUNCTION
-    window.uploadTargetFiles = async function() {
-        const fileInput = document.getElementById('target-file-input');
-
-        if (!fileInput || !fileInput.files.length) {
-            showNotification('נא לבחור קבצים להעלאה', 'error');
-            return;
-        }
-
-        const formData = new FormData();
-        for (const file of fileInput.files) {
-            formData.append('target_images', file);
-        }
-
-        showTargetLoading(true);
-
-        try {
-            const response = await fetch('/api/append_target_images', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showNotification(`הועלו בהצלחה ${data.uploaded_count} קבצים! סה"כ: ${data.total_count}`, 'success');
-                fileInput.value = '';
-                updateTargetFileDisplay();
-                await loadTargetImages();
-            } else {
-                showNotification(data.error, 'error');
-            }
-        } catch (error) {
-            showNotification('שגיאה בהעלאת קבצים', 'error');
-            console.error('Target upload error:', error);
-        } finally {
-            showTargetLoading(false);
-        }
-    };
-
-    // Delete selected targets - GLOBAL FUNCTION
-    window.deleteSelectedTargets = async function() {
-        const checkboxes = document.querySelectorAll('.target-image-checkbox:checked');
-        const publicIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-public-id'));
-
-        if (!publicIds.length) {
-            showNotification('לא נבחרו קבצים למחיקה', 'error');
-            return;
-        }
-
-        const confirmed = confirm(`האם למחוק ${publicIds.length} קבצים?`);
-        if (!confirmed) return;
-
-        showTargetLoading(true);
-
-        try {
-            const response = await fetch('/api/delete_target_images', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ public_ids: publicIds })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showNotification(`נמחקו ${data.deleted_count} קבצים`, 'success');
-                await loadTargetImages();
-            } else {
-                showNotification(data.error, 'error');
-            }
-        } catch (error) {
-            showNotification('שגיאה במחיקת קבצים', 'error');
-            console.error('Delete target images error:', error);
-        } finally {
-            showTargetLoading(false);
-        }
-    };
-
-    // Update target delete button - GLOBAL FUNCTION
-    window.updateTargetDeleteButton = function() {
-        const checkboxes = document.querySelectorAll('.target-image-checkbox:checked');
-        const deleteBtn = document.getElementById('target-delete-btn');
-
-        if (deleteBtn) {
-            deleteBtn.disabled = checkboxes.length === 0;
-
-            if (checkboxes.length > 0) {
-                deleteBtn.textContent = `🗑️ מחק ${checkboxes.length} נבחרים`;
-            } else {
-                deleteBtn.textContent = '🗑️ מחק נבחרים';
-            }
-        }
-    };
-
-    // Load target images
-    async function loadTargetImages() {
-        // Only try to load if we're in the target upload section
-        if (!document.getElementById('target-gallery-grid')) {
-            return;
-        }
-
-        showTargetLoading(true);
-
-        try {
-            const response = await fetch('/api/get_target_images');
-            const data = await response.json();
-
-            if (data.success) {
-                allTargetImages = data.files || [];
-                renderTargetGallery();
-                updateTargetGalleryStats(data);
-            } else {
-                console.log('No target images available yet');
-                renderEmptyTargetGallery();
-            }
-        } catch (error) {
-            console.log('Target images not available yet:', error);
-            renderEmptyTargetGallery();
-        } finally {
-            showTargetLoading(false);
-        }
-    }
-
-    function renderEmptyTargetGallery() {
-        const galleryGrid = document.getElementById('target-gallery-grid');
-        if (galleryGrid) {
-            galleryGrid.innerHTML = `
-                <div class="target-empty-state" style="grid-column: 1 / -1;">
-                    <div class="target-empty-icon">📷</div>
-                    <h3>אין תמונות מטרה</h3>
-                    <p>העלה תמונות כדי להתחיל</p>
-                </div>
-            `;
-        }
-    }
-
-    // Render target gallery
-    function renderTargetGallery() {
-        const galleryGrid = document.getElementById('target-gallery-grid');
-        if (!galleryGrid) return;
-
-        if (!allTargetImages.length) {
-            galleryGrid.innerHTML = `
-                <div class="target-empty-state" style="grid-column: 1 / -1;">
-                    <div class="target-empty-icon">📷</div>
-                    <h3>אין תמונות מטרה</h3>
-                    <p>העלה תמונות כדי להתחיל</p>
-                </div>
-            `;
-            return;
-        }
-
-        galleryGrid.innerHTML = '';
-
-        allTargetImages.forEach((image, index) => {
-            const card = document.createElement('div');
-            card.className = 'target-image-card';
-
-            let mediaElement = '';
-            if (image.resource_type === 'video') {
-                mediaElement = `<video controls><source src="${image.url}"></video>`;
-            } else {
-                mediaElement = `<img src="${image.url}" alt="תמונה ${index + 1}">`;
-            }
-
-            card.innerHTML = `
-                <input type="checkbox" class="target-image-checkbox" data-public-id="${image.public_id}" onchange="updateTargetDeleteButton()">
-                ${mediaElement}
-                <div class="target-image-info">
-                    ${image.resource_type === 'video' ? '🎬' : '📷'} קובץ #${index + 1}
-                    ${image.bytes ? `<br>${Math.round(image.bytes / 1024)} KB` : ''}
-                </div>
-            `;
-
-            galleryGrid.appendChild(card);
-        });
-    }
-
-    // Update target gallery stats
-    function updateTargetGalleryStats(data) {
-        const statsElement = document.getElementById('target-gallery-stats');
-        if (!statsElement) return;
-
-        const total = data.total_count || 0;
-        const images = data.images_count || 0;
-        const videos = data.videos_count || 0;
-
-        statsElement.innerHTML = `
-            סה"כ: ${total} קבצים |
-            תמונות: ${images} |
-            סרטונים: ${videos}
-        `;
-    }
-
-    // Show/hide target loading
-    function showTargetLoading(show) {
-        const loading = document.getElementById('target-loading');
-        if (loading) {
-            loading.classList.toggle('show', show);
-        }
-    }
-
-    // ===== PEOPLE DATA LOADING AND RENDERING =====
+    // ===== Data Loading and Rendering Functions =====
 
     async function loadPeopleData() {
         try {
@@ -329,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.success && data.people) {
                 peopleData = data.people;
+                // שמירה ב-localStorage לעדכון מד ההתקדמות
                 localStorage.setItem('peopleData', JSON.stringify(data.people));
             } else {
                 peopleData = [];
@@ -340,6 +80,369 @@ document.addEventListener('DOMContentLoaded', function() {
             showNotification('שגיאה בטעינת רשימת אנשים', 'error');
         }
     }
+
+    async function handleTargetUpload(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const fileInput = form.querySelector('#target-file');
+    const resultDiv = document.getElementById('target-upload-result');
+    const previewDiv = document.getElementById('target-preview');
+
+    if (!fileInput.files.length) {
+        showNotification('נא לבחור קבצים', 'error');
+        return;
+    }
+
+    // בדיקת מספר תמונות קיימות לפני העלאה
+    let existingCount = 0;
+    try {
+        const existingResponse = await fetch('/api/get_target_images');
+        const existingData = await existingResponse.json();
+        if (existingData.success && existingData.files) {
+            existingCount = existingData.files.length;
+        }
+    } catch (error) {
+        console.log('לא הצלחנו לבדוק תמונות קיימות, ממשיכים...');
+    }
+
+    const formData = new FormData();
+
+    // *** השינוי הקריטי: משתמשים ב-append_target_images במקום start_check ***
+    for (const file of fileInput.files) {
+        formData.append('target_images', file);
+    }
+
+    resultDiv.textContent = `📡 מעלה ${fileInput.files.length} קבצים נוספים...`;
+    previewDiv.innerHTML = '';
+
+    try {
+        // *** שימוש ב-API חדש שמוסיף במקום להחליף ***
+        const response = await fetch('/api/append_target_images', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            const newCount = data.total_count || (existingCount + data.uploaded_count);
+            showNotification(
+                `הועלו בהצלחה ${data.uploaded_count} קבצים! סה"כ: ${newCount} תמונות`,
+                'success'
+            );
+
+            resultDiv.innerHTML = `
+                <span style="color: green;">✅ ${data.uploaded_count} קבצים הועלו בהצלחה</span><br>
+                <small>סה"כ תמונות במערכת: ${newCount}</small>
+            `;
+
+            // הצגת תצוגה מקדימה של התמונות החדשות
+            if (data.uploaded_files && data.uploaded_files.length > 0) {
+                let previewHTML = '<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">';
+                previewHTML += '<h4 style="width: 100%; margin: 0 0 10px 0; color: #4caf50;">תמונות שהועלו כעת:</h4>';
+
+                data.uploaded_files.forEach((file, index) => {
+                    if (file.type === 'image') {
+                        previewHTML += `<img src="${file.url}" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border: 2px solid #4caf50;" alt="תמונה חדשה ${index + 1}">`;
+                    } else if (file.type === 'video') {
+                        previewHTML += `<video controls style="width: 150px; height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border: 2px solid #4caf50;"><source src="${file.url}"></video>`;
+                    }
+                });
+                previewHTML += '</div>';
+                previewDiv.innerHTML = previewHTML;
+            }
+
+            // ניקוי הטופס
+            form.reset();
+
+            // רענון הגלריה כדי להראות את כל התמונות (קיימות + חדשות)
+            await loadTargetImages();
+
+        } else {
+            showNotification(data.error || 'שגיאה בהעלאת קבצים', 'error');
+            resultDiv.innerHTML = `<span style="color: red;">❌ שגיאה: ${data.error}</span>`;
+        }
+    } catch (error) {
+        console.error('שגיאה בהעלאת קבצים:', error);
+        showNotification('שגיאה בהעלאת קבצים', 'error');
+        resultDiv.innerHTML = `<span style="color: red;">שגיאת תקשורת: ${error.message}</span>`;
+    }
+}
+
+    async function handleMultipleTargetUpload() {
+    const fileInput = document.getElementById('target-images');
+
+    if (!fileInput.files.length) {
+        showNotification('נא לבחור קבצים', 'error');
+        return;
+    }
+
+    // ספירת תמונות קיימות
+    let existingCount = 0;
+    try {
+        const existingResponse = await fetch('/api/get_target_images');
+        const existingData = await existingResponse.json();
+        if (existingData.success && existingData.files) {
+            existingCount = existingData.files.length;
+        }
+    } catch (error) {
+        console.log('לא הצלחנו לבדוק תמונות קיימות');
+    }
+
+    const formData = new FormData();
+    for (const file of fileInput.files) {
+        formData.append('target_images', file);
+    }
+
+    // הצגת הודעה עם מספר תמונות קיימות
+    showNotification(`מעלה ${fileInput.files.length} תמונות נוספות (יש כבר ${existingCount} תמונות)...`, 'info');
+
+    try {
+        // *** שימוש ב-API שמוסיף במקום להחליף ***
+        const response = await fetch('/api/append_target_images', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const newTotal = data.total_count || (existingCount + data.uploaded_count);
+            showNotification(
+                `הועלו ${data.uploaded_count} תמונות נוספות! סה"כ: ${newTotal} תמונות`,
+                'success'
+            );
+
+            fileInput.value = ''; // ניקוי הטופס
+            await loadTargetImages(); // רענון הגלריה
+        } else {
+            showNotification(data.error || 'שגיאה בהעלאת קבצים', 'error');
+        }
+    } catch (error) {
+        console.error('שגיאה בהעלאת קבצים:', error);
+        showNotification('שגיאה בהעלאת קבצים', 'error');
+    }
+}
+
+    async function loadTargetImages() {
+    try {
+        const response = await fetch('/api/get_target_images');
+        const data = await response.json();
+
+        const gallery = document.getElementById('target-gallery');
+        if (!gallery) return;
+
+        gallery.innerHTML = '';
+
+        if (data.success && data.files && data.files.length > 0) {
+            // הוספת כותרת עם מונה
+            const header = document.createElement('div');
+            header.style.cssText = `
+                width: 100%;
+                text-align: center;
+                margin-bottom: 15px;
+                padding: 10px;
+                background: #f0f8ff;
+                border-radius: 8px;
+                border-right: 4px solid #3498db;
+            `;
+            header.innerHTML = `
+                <h3 style="margin: 0; color: #3498db; font-size: 18px;">
+                    📸 תמונות מטרה (${data.files.length} תמונות)
+                </h3>
+            `;
+            gallery.appendChild(header);
+
+            // יצירת הגלריה
+            const imageGrid = document.createElement('div');
+            imageGrid.style.cssText = `
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+                margin-top: 15px;
+            `;
+
+            data.files.forEach((file, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.style.cssText = `
+                    position: relative;
+                    display: block;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                    transition: transform 0.3s ease;
+                `;
+
+                let mediaElement = '';
+                if (file.resource_type === 'image') {
+                    mediaElement = `<img src="${file.url}" style="width: 100%; height: 160px; object-fit: cover;" alt="תמונה ${index + 1}">`;
+                } else if (file.resource_type === 'video') {
+                    mediaElement = `<video controls style="width: 100%; height: 160px;"><source src="${file.url}"></video>`;
+                }
+
+                card.innerHTML = `
+                    <input type="checkbox" class="image-checkbox" data-public-id="${file.public_id}"
+                           style="position: absolute; top: 8px; right: 8px; z-index: 10; width: 18px; height: 18px; cursor: pointer;">
+                    ${mediaElement}
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 12px; text-align: center;">
+                        תמונה #${index + 1}
+                    </div>
+                `;
+
+                // אפקט hover
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'scale(1.05)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'scale(1)';
+                });
+
+                imageGrid.appendChild(card);
+            });
+
+            gallery.appendChild(imageGrid);
+
+        } else {
+            gallery.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666; background: #f9f9f9; border-radius: 8px; border: 2px dashed #ddd;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">📷</div>
+                    <h3>אין תמונות מטרה</h3>
+                    <p>העלה תמונות כדי להתחיל</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('שגיאה בטעינת תמונות:', error);
+        showNotification('שגיאה בטעינת תמונות', 'error');
+
+        const gallery = document.getElementById('target-gallery');
+        if (gallery) {
+            gallery.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: #e74c3c; background: #ffebee; border-radius: 8px;">
+                    ❌ שגיאה בטעינת התמונות
+                    <button onclick="loadTargetImages()" style="display: block; margin: 10px auto; padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        נסה שוב
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+
+    async function deleteSelectedTargetImages() {
+    const selected = [...document.querySelectorAll('.image-checkbox:checked')];
+    const publicIds = selected.map(cb => cb.getAttribute('data-public-id'));
+
+    if (!publicIds.length) {
+        showNotification('לא נבחרו תמונות למחיקה', 'error');
+        return;
+    }
+
+    // ספירת תמונות כוללות לפני המחיקה
+    let totalBeforeDelete = 0;
+    try {
+        const response = await fetch('/api/get_target_images');
+        const data = await response.json();
+        if (data.success && data.files) {
+            totalBeforeDelete = data.files.length;
+        }
+    } catch (error) {
+        console.log('לא הצלחנו לבדוק מספר תמונות');
+    }
+
+    const confirmed = confirm(
+        `האם למחוק ${publicIds.length} תמונות?\n` +
+        `(יישארו ${totalBeforeDelete - publicIds.length} תמונות)`
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/delete_target_images', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ public_ids: publicIds })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const remaining = totalBeforeDelete - data.deleted_count;
+            showNotification(
+                `נמחקו ${data.deleted_count} תמונות. נותרו ${remaining} תמונות`,
+                'success'
+            );
+            await loadTargetImages(); // רענון הגלריה
+        } else {
+            showNotification(data.error || 'שגיאה במחיקה', 'error');
+        }
+    } catch (error) {
+        console.error('שגיאה במחיקה:', error);
+        showNotification('שגיאה במחיקה', 'error');
+    }
+}
+
+function showTargetStats() {
+    fetch('/api/get_target_images')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.files) {
+                const count = data.files.length;
+                const images = data.files.filter(f => f.resource_type === 'image').length;
+                const videos = data.files.filter(f => f.resource_type === 'video').length;
+
+                showNotification(
+                    `📊 סטטיסטיקות: ${count} קבצים (${images} תמונות, ${videos} סרטונים)`,
+                    'info'
+                );
+            }
+        })
+        .catch(error => {
+            console.error('שגיאה בקבלת סטטיסטיקות:', error);
+        });
+}
+
+// *** הוספת כפתור לרענון ידני ***
+function addRefreshButton() {
+    const gallery = document.getElementById('target-gallery');
+    if (!gallery) return;
+
+    const refreshBtn = document.createElement('button');
+    refreshBtn.id = 'refresh-gallery-btn';
+    refreshBtn.className = 'action-button';
+    refreshBtn.innerHTML = '🔄 רענן גלריה';
+    refreshBtn.style.cssText = `
+        position: sticky;
+        top: 10px;
+        z-index: 20;
+        margin: 10px 0;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    `;
+
+    refreshBtn.addEventListener('click', () => {
+        loadTargetImages();
+        showTargetStats();
+    });
+
+    // הוספת הכפתור לפני הגלריה אם הוא לא קיים
+    if (!document.getElementById('refresh-gallery-btn')) {
+        gallery.parentNode.insertBefore(refreshBtn, gallery);
+    }
+}
+
+// *** יתיחת הכל כשהדף נטען ***
+document.addEventListener('DOMContentLoaded', function() {
+    // הוספת כפתור רענון
+    setTimeout(addRefreshButton, 1000);
+
+    // הוספת טיפ לכפתור העלאה נוספת
+    const uploadMoreBtn = document.getElementById('upload-more-btn');
+    if (uploadMoreBtn) {
+        uploadMoreBtn.title = 'העלה תמונות נוספות (יתווספו לתמונות הקיימות)';
+    }
+});
 
     function renderPeopleTable() {
         const tableBody = document.getElementById('people-table-body');
@@ -354,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function() {
         peopleData.forEach(person => {
             const row = document.createElement('tr');
 
-            let imageUrl = 'https://via.placeholder.com/50x50/3498db/ffffff?text=👤';
+            let imageUrl = '/web_static/img/person-placeholder.jpg';
             if (person.image_urls && person.image_urls.length > 0) {
                 imageUrl = person.image_urls[0];
             }
@@ -430,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showModal(modal);
     }
 
-    // ===== EVENT HANDLERS =====
+    // ===== Event Handlers =====
 
     async function handleAddPerson(event) {
         event.preventDefault();
@@ -454,6 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 await loadPeopleData();
                 showNotification(data.message, 'success');
 
+                // *** תיקון: פתיחת חלון העלאה לאדם החדש עם איפוס נכון ***
                 openUploadModal(data.person_id, `${personData.first_name} ${personData.last_name}`);
             } else {
                 showNotification(data.error, 'error');
@@ -463,27 +567,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Upload Modal Management
+    // *** פונקציות עזר - איפוס וטיפול במד התקדמות ***
     function resetUploadModal() {
         console.log('🧹 מאפס את חלון העלאה');
 
+        // איפוס הטופס
         const form = document.getElementById('upload-image-form');
         if (form) {
             form.reset();
         }
 
+        // הסרת הודעות progress קודמות
         const existingProgress = document.querySelector('.upload-progress-container');
         if (existingProgress) {
             existingProgress.remove();
             console.log('🗑️ הוסר progress container קודם');
         }
 
+        // איפוס מד ההתקדמות ל-0
         updateUploadProgress(0);
+
         console.log('✅ חלון העלאה אופס במלואו');
     }
 
     function getPersonImageCount(personId) {
         try {
+            // קודם נבדוק ב-localStorage
             const people = JSON.parse(localStorage.getItem('peopleData') || '[]');
             const person = people.find(p => p.id === personId);
 
@@ -492,6 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return person.image_urls.length;
             }
 
+            // אם לא נמצא באחסון מקומי, נבדוק ב-peopleData גלובלי
             const globalPerson = peopleData.find(p => p.id === personId);
             if (globalPerson && globalPerson.image_urls) {
                 console.log(`נמצא ב-peopleData: ${globalPerson.image_urls.length} תמונות`);
@@ -509,20 +619,26 @@ document.addEventListener('DOMContentLoaded', function() {
     function openUploadModal(personId, personName) {
         console.log(`📂 פותח חלון העלאה עבור ${personName} (ID: ${personId})`);
 
+        // איפוס מלא קודם
         resetUploadModal();
 
+        // מילוי פרטי האדם
         document.getElementById('upload-person-id').value = personId;
 
+        // עדכון כותרת עם שם האדם
         const titleElement = document.querySelector('#upload-image-modal h3');
         if (titleElement) {
             titleElement.textContent = `העלאת תמונות עבור ${personName}`;
         }
 
+        // קבלת מספר התמונות הנוכחי ועדכון המד
         const currentImageCount = getPersonImageCount(personId);
         console.log(`📊 מספר תמונות נוכחי: ${currentImageCount}`);
 
+        // עדכון מד ההתקדמות
         updateUploadProgress(currentImageCount);
 
+        // פתיחת החלון
         showModal(document.getElementById('upload-image-modal'));
 
         console.log('🎉 חלון העלאה נפתח בהצלחה');
@@ -531,7 +647,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function closeUploadModal() {
         console.log('❌ סוגר חלון העלאה');
 
+        // סגירת החלון
         document.getElementById('upload-image-modal').classList.remove('active');
+
+        // איפוס החלון לקראת הפעם הבאה
         resetUploadModal();
 
         console.log('✅ חלון העלאה נסגר ואופס');
@@ -694,6 +813,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateUploadProgress(imageCount) {
         console.log(`🎯 מעדכן מד התקדמות ל: ${imageCount} תמונות`);
 
+        // עדכון הפסים בחלק העליון
         for (let i = 1; i <= 5; i++) {
             const step = document.getElementById(`progress-step-${i}`);
             if (step) {
@@ -713,6 +833,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // עדכון הטקסט
         const statusEl = document.getElementById('upload-status');
         if (statusEl) {
             const remaining = Math.max(0, 3 - imageCount);
@@ -737,6 +858,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.warn('❌ לא נמצא אלמנט upload-status');
         }
 
+        // עדכון כפתור סיום
         const finishBtn = document.getElementById('finish-upload-button');
         if (finishBtn) {
             if (imageCount >= 3) {
@@ -776,8 +898,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ===== UTILITY FUNCTIONS =====
-
     function showModal(modal) {
         if(modal) modal.classList.add('active');
     }
@@ -790,294 +910,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showNotification(message, type = 'info') {
-        // Check if notification function exists in main.js
-        if (typeof window.showNotification === 'function') {
-            window.showNotification(message, type);
-            return;
-        }
-
-        // Create notification container if it doesn't exist
         let container = document.querySelector('.notification-container');
         if (!container) {
             container = document.createElement('div');
             container.className = 'notification-container';
-            container.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 10000;
-                max-width: 400px;
-            `;
             document.body.appendChild(container);
         }
-
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        notification.style.cssText = `
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            animation: slideInRight 0.3s ease;
-            position: relative;
-            ${type === 'success' ? 'background: linear-gradient(135deg, #27ae60, #2ecc71);' : ''}
-            ${type === 'error' ? 'background: linear-gradient(135deg, #e74c3c, #c0392b);' : ''}
-            ${type === 'warning' ? 'background: linear-gradient(135deg, #f39c12, #e67e22);' : ''}
-            ${type === 'info' ? 'background: linear-gradient(135deg, #3498db, #2980b9);' : ''}
-        `;
-
-        notification.innerHTML = `
-            <span class="notification-message">${message}</span>
-            <button class="notification-close" style="
-                position: absolute;
-                top: 5px;
-                left: 5px;
-                background: none;
-                border: none;
-                color: white;
-                font-size: 18px;
-                cursor: pointer;
-                padding: 5px;
-                line-height: 1;
-            ">&times;</button>
-        `;
-
+        notification.innerHTML = `<span class="notification-message">${message}</span><button class="notification-close">&times;</button>`;
         container.appendChild(notification);
-
-        // Add close functionality
         const closeBtn = notification.querySelector('.notification-close');
         const autoClose = setTimeout(() => closeNotification(notification), 5000);
-
         function closeNotification() {
-            notification.style.animation = 'slideOutRight 0.3s ease';
+            notification.classList.add('closing');
             setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
+                notification.remove();
                 clearTimeout(autoClose);
             }, 300);
         }
-
         closeBtn.addEventListener('click', closeNotification);
-
-        // Add CSS animations if not already added
-        if (!document.querySelector('#notification-animations')) {
-            const style = document.createElement('style');
-            style.id = 'notification-animations';
-            style.textContent = `
-                @keyframes slideInRight {
-                    from {
-                        transform: translateX(100%);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateX(0);
-                        opacity: 1;
-                    }
-                }
-                @keyframes slideOutRight {
-                    from {
-                        transform: translateX(0);
-                        opacity: 1;
-                    }
-                    to {
-                        transform: translateX(100%);
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
     }
 
-    // Make showNotification globally available
-    window.showNotification = showNotification;
-
-    // ===== LEGACY TARGET UPLOAD HANDLERS =====
-    // These are kept for backward compatibility with existing HTML
-
-    async function handleTargetUpload(e) {
-        e.preventDefault();
-
-        const form = e.target;
-        const fileInput = form.querySelector('#target-file');
-        const resultDiv = document.getElementById('target-upload-result');
-        const previewDiv = document.getElementById('target-preview');
-
-        if (!fileInput || !fileInput.files.length) {
-            showNotification('נא לבחור קבצים', 'error');
-            return;
-        }
-
-        let existingCount = 0;
-        try {
-            const existingResponse = await fetch('/api/get_target_images');
-            const existingData = await existingResponse.json();
-            if (existingData.success && existingData.files) {
-                existingCount = existingData.files.length;
-            }
-        } catch (error) {
-            console.log('לא הצלחנו לבדוק תמונות קיימות, ממשיכים...');
-        }
-
-        const formData = new FormData();
-        for (const file of fileInput.files) {
-            formData.append('target_images', file);
-        }
-
-        if (resultDiv) {
-            resultDiv.textContent = `📡 מעלה ${fileInput.files.length} קבצים נוספים...`;
-        }
-        if (previewDiv) {
-            previewDiv.innerHTML = '';
-        }
-
-        try {
-            const response = await fetch('/api/append_target_images', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                const newCount = data.total_count || (existingCount + data.uploaded_count);
-                showNotification(
-                    `הועלו בהצלחה ${data.uploaded_count} קבצים! סה"כ: ${newCount} תמונות`,
-                    'success'
-                );
-
-                if (resultDiv) {
-                    resultDiv.innerHTML = `
-                        <span style="color: green;">✅ ${data.uploaded_count} קבצים הועלו בהצלחה</span><br>
-                        <small>סה"כ תמונות במערכת: ${newCount}</small>
-                    `;
-                }
-
-                form.reset();
-                await loadTargetImages();
-
-            } else {
-                showNotification(data.error || 'שגיאה בהעלאת קבצים', 'error');
-                if (resultDiv) {
-                    resultDiv.innerHTML = `<span style="color: red;">❌ שגיאה: ${data.error}</span>`;
-                }
-            }
-        } catch (error) {
-            console.error('שגיאה בהעלאת קבצים:', error);
-            showNotification('שגיאה בהעלאת קבצים', 'error');
-            if (resultDiv) {
-                resultDiv.innerHTML = `<span style="color: red;">שגיאת תקשורת: ${error.message}</span>`;
-            }
-        }
-    }
-
-    async function handleMultipleTargetUpload() {
-        const fileInput = document.getElementById('target-images');
-
-        if (!fileInput || !fileInput.files.length) {
-            showNotification('נא לבחור קבצים', 'error');
-            return;
-        }
-
-        let existingCount = 0;
-        try {
-            const existingResponse = await fetch('/api/get_target_images');
-            const existingData = await existingResponse.json();
-            if (existingData.success && existingData.files) {
-                existingCount = existingData.files.length;
-            }
-        } catch (error) {
-            console.log('לא הצלחנו לבדוק תמונות קיימות');
-        }
-
-        const formData = new FormData();
-        for (const file of fileInput.files) {
-            formData.append('target_images', file);
-        }
-
-        showNotification(`מעלה ${fileInput.files.length} תמונות נוספות (יש כבר ${existingCount} תמונות)...`, 'info');
-
-        try {
-            const response = await fetch('/api/append_target_images', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                const newTotal = data.total_count || (existingCount + data.uploaded_count);
-                showNotification(
-                    `הועלו ${data.uploaded_count} תמונות נוספות! סה"כ: ${newTotal} תמונות`,
-                    'success'
-                );
-
-                fileInput.value = '';
-                await loadTargetImages();
-            } else {
-                showNotification(data.error || 'שגיאה בהעלאת קבצים', 'error');
-            }
-        } catch (error) {
-            console.error('שגיאה בהעלאת קבצים:', error);
-            showNotification('שגיאה בהעלאת קבצים', 'error');
-        }
-    }
-
-    async function deleteSelectedTargetImages() {
-        const selected = [...document.querySelectorAll('.image-checkbox:checked')];
-        const publicIds = selected.map(cb => cb.getAttribute('data-public-id'));
-
-        if (!publicIds.length) {
-            showNotification('לא נבחרו תמונות למחיקה', 'error');
-            return;
-        }
-
-        let totalBeforeDelete = 0;
-        try {
-            const response = await fetch('/api/get_target_images');
-            const data = await response.json();
-            if (data.success && data.files) {
-                totalBeforeDelete = data.files.length;
-            }
-        } catch (error) {
-            console.log('לא הצלחנו לבדוק מספר תמונות');
-        }
-
-        const confirmed = confirm(
-            `האם למחוק ${publicIds.length} תמונות?\n` +
-            `(יישארו ${totalBeforeDelete - publicIds.length} תמונות)`
-        );
-
-        if (!confirmed) return;
-
-        try {
-            const response = await fetch('/api/delete_target_images', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ public_ids: publicIds })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                const remaining = totalBeforeDelete - data.deleted_count;
-                showNotification(
-                    `נמחקו ${data.deleted_count} תמונות. נותרו ${remaining} תמונות`,
-                    'success'
-                );
-                await loadTargetImages();
-            } else {
-                showNotification(data.error || 'שגיאה במחיקה', 'error');
-            }
-        } catch (error) {
-            console.error('שגיאה במחיקה:', error);
-            showNotification('שגיאה במחיקה', 'error');
-        }
-    }
-
-    // Initialize everything
+    // Initial load when the DOM is ready
     initialize();
 });

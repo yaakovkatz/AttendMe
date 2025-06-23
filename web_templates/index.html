@@ -4,9 +4,238 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AttendMe - מערכת זיהוי נוכחות באמצעות פנים</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👁️</text></svg>">
     <link rel="stylesheet" href="/web_static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- *** הוספת סטיילים לממשק המאוחד *** -->
+    <style>
+        /* סטיילים ממוקדים לאזור תמונות המטרה */
+        .target-upload-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8fcff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: #e8f5e8;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .upload-hint {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .target-buttons-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .target-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            min-width: 180px;
+            justify-content: center;
+        }
+
+        .target-btn-upload {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .target-btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .target-btn-delete {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .target-btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .target-btn-delete:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .target-gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .target-gallery-title {
+            font-size: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .target-gallery-stats {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .target-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .target-image-card {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .target-image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .target-image-card img,
+        .target-image-card video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .target-image-checkbox {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            z-index: 10;
+            accent-color: #3498db;
+        }
+
+        .target-image-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 15px 10px 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .target-loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .target-loading.show {
+            display: block;
+        }
+
+        .target-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .target-empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .target-empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        #target-file-input {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .target-buttons-row {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .target-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .target-gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -166,9 +395,11 @@
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
                 <h3>העלאת תמונה</h3>
+                <!-- סטטוס העלאת תמונות - חדש -->
                 <div id="upload-status" class="upload-status">
                     יש להעלות לפחות 3 תמונות ועד 5 תמונות בסך הכל
                 </div>
+                <!-- מד התקדמה חזותי - חדש -->
                 <div class="upload-progress">
                     <div class="progress-step" id="progress-step-1"></div>
                     <div class="progress-step" id="progress-step-2"></div>
@@ -194,7 +425,7 @@
             </div>
         </div>
 
-        <!-- Modal for viewing all person images -->
+        <!-- Modal for viewing all person images - חדש -->
         <div id="person-images-modal" class="modal">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
@@ -311,129 +542,132 @@
     </section>
 
     <!-- Advanced Functions Section -->
-    <section id="advanced-functions" class="section">
-        <div class="container">
-            <h2 class="section-title">פונקציות מתקדמות</h2>
+<section id="advanced-functions" class="section">
+    <div class="container">
+        <h2 class="section-title">פונקציות מתקדמות</h2>
 
-            <div class="advanced-controls">
-                <button id="check-all-people" class="action-button primary">
-                    <i class="fas fa-users-cog"></i> בדיקת נוכחות כללית
-                </button>
-                <button id="check-specific-person" class="action-button">
-                    <i class="fas fa-user-check"></i> בדיקת נוכחות לאדם ספציפי
-                </button>
-                <button id="load-people" class="action-button secondary">
-                    <i class="fas fa-user-plus"></i> טעינת אנשים
-                </button>
-            </div>
+        <div class="advanced-controls">
+            <button id="check-all-people" class="action-button primary">
+                <i class="fas fa-users-cog"></i> בדיקת נוכחות כללית
+            </button>
+            <button id="check-specific-person" class="action-button">
+                <i class="fas fa-user-check"></i> בדיקת נוכחות לאדם ספציפי
+            </button>
+            <button id="load-people" class="action-button secondary">
+                <i class="fas fa-user-plus"></i> טעינת אנשים
+            </button>
+        </div>
 
-            <div class="attendance-checker-section">
-                <h3>בדיקת נוכחות לפי מספר אדם</h3>
-                <div class="attendance-checker-controls">
-                    <!-- Person Selector Component -->
-                    <div class="person-selector-container">
-                        <div class="person-selector-header">
-                            <h4>👥 בחר אדם לבדיקת נוכחות:</h4>
-                            <div class="loading-status" id="people-loading-status">
-                                <span class="loading-spinner">⏳</span>
-                                <span id="loading-message">טוען רשימת אנשים...</span>
-                            </div>
-                        </div>
+        <div class="attendance-checker-section">
+    <h3>בדיקת נוכחות לפי מספר אדם</h3>
+    <div class="attendance-checker-controls">
 
-                        <div class="people-grid" id="people-grid" style="display: none;">
-                            <!-- הרשימה תתמלא דינמית ע"י JavaScript -->
-                        </div>
-
-                        <div class="error-message" id="people-error" style="display: none;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>שגיאה בטעינת רשימת אנשים</span>
-                            <button id="retry-load-people" class="retry-button">נסה שוב</button>
-                        </div>
-                    </div>
-
-                    <button id="check-person-attendance" class="action-button primary" disabled>
-                        <i class="fas fa-user-check"></i> בדוק נוכחות
-                    </button>
-                    <button id="cancel-attendance-check" class="action-button secondary" style="display: none;">
-                        <i class="fas fa-times"></i> בטל בדיקה
-                    </button>
-                </div>
-
-                <!-- Results Area -->
-                <div id="attendance-result-area" class="attendance-result" style="display: none;">
-                    <div class="result-header">
-                        <h4 id="attendance-result-title">תוצאת בדיקה</h4>
-                        <div id="attendance-progress" class="progress-indicator">
-                            <div class="progress-bar"></div>
-                            <span id="attendance-status-text">מתחיל בדיקה...</span>
-                        </div>
-                    </div>
-                    <div id="attendance-result-content" class="result-content">
-                        <!-- התוצאות יוצגו כאן -->
-                    </div>
+        <!-- הרכיב החדש לבחירת אדם -->
+        <div class="person-selector-container">
+            <div class="person-selector-header">
+                <h4>👥 בחר אדם לבדיקת נוכחות:</h4>
+                <div class="loading-status" id="people-loading-status">
+                    <span class="loading-spinner">⏳</span>
+                    <span id="loading-message">טוען רשימת אנשים...</span>
                 </div>
             </div>
 
-            <!-- Results Panel -->
-            <div class="results-panel" id="results-panel" style="display: none;">
-                <div class="results-header">
-                    <h3 id="results-title">תוצאות</h3>
-                    <button id="close-results" class="close-button">&times;</button>
-                </div>
-                <div class="results-content" id="results-content"></div>
+            <!-- רשימת האנשים -->
+            <div class="people-grid" id="people-grid" style="display: none;">
+                <!-- הרשימה תתמלא דינמית ע"י JavaScript -->
+            </div>
+
+            <!-- הודעת שגיאה -->
+            <div class="error-message" id="people-error" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>שגיאה בטעינת רשימת אנשים</span>
+                <button id="retry-load-people" class="retry-button">נסה שוב</button>
             </div>
         </div>
-    </section>
 
-    <!-- Target Upload Section -->
-    <section id="target-upload" class="section">
-        <div class="container">
-            <h2 class="section-title">📸 ניהול תמונות מטרה</h2>
-            <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px;">העלה, נהל ומחק תמונות לבדיקת נוכחות</p>
+        <button id="check-person-attendance" class="action-button primary" disabled>
+            <i class="fas fa-user-check"></i> בדוק נוכחות
+        </button>
+        <button id="cancel-attendance-check" class="action-button secondary" style="display: none;">
+            <i class="fas fa-times"></i> בטל בדיקה
+        </button>
+    </div>
 
-            <div class="target-upload-container">
-                <!-- Upload Area -->
-                <div class="upload-area" onclick="document.getElementById('target-file-input').click()">
-                    <div class="upload-icon">📁</div>
-                    <div class="upload-text">לחץ כאן או גרור קבצים להעלאה</div>
-                    <div class="upload-hint">תמיכה בתמונות וסרטונים (JPG, PNG, MP4, וכו')</div>
-                </div>
-
-                <input type="file" id="target-file-input" multiple accept="image/*,video/*">
-
-                <!-- Action Buttons -->
-                <div class="target-buttons-row">
-                    <button class="target-btn target-btn-upload" onclick="uploadTargetFiles()">
-                        📤 העלה קבצים
-                    </button>
-                    <button class="target-btn target-btn-delete" id="target-delete-btn" onclick="deleteSelectedTargets()" disabled>
-                        🗑️ מחק נבחרים
-                    </button>
-                </div>
-
-                <!-- Loading -->
-                <div class="target-loading" id="target-loading">
-                    <div class="target-spinner"></div>
-                    <div>טוען...</div>
-                </div>
-
-                <!-- Gallery -->
-                <div class="target-gallery">
-                    <div class="target-gallery-header">
-                        <div class="target-gallery-title">
-                            🖼️ גלריית תמונות מטרה
-                        </div>
-                        <div class="target-gallery-stats" id="target-gallery-stats">
-                            טוען...
-                        </div>
+            <!-- אזור התוצאות -->
+            <div id="attendance-result-area" class="attendance-result" style="display: none;">
+                <div class="result-header">
+                    <h4 id="attendance-result-title">תוצאת בדיקה</h4>
+                    <div id="attendance-progress" class="progress-indicator">
+                        <div class="progress-bar"></div>
+                        <span id="attendance-status-text">מתחיל בדיקה...</span>
                     </div>
-                    <div class="target-gallery-grid" id="target-gallery-grid">
-                        <!-- תמונות יטענו כאן -->
-                    </div>
+                </div>
+                <div id="attendance-result-content" class="result-content">
+                    <!-- התוצאות יוצגו כאן -->
                 </div>
             </div>
         </div>
-    </section>
+
+        <!-- אזור תוצאות -->
+        <div class="results-panel" id="results-panel" style="display: none;">
+            <div class="results-header">
+                <h3 id="results-title">תוצאות</h3>
+                <button id="close-results" class="close-button">&times;</button>
+            </div>
+            <div class="results-content" id="results-content"></div>
+        </div>
+    </div>
+</section>
+
+<!-- *** חלק תמונות המטרה המאוחד החדש *** -->
+<section id="target-upload" class="section">
+    <div class="container">
+        <h2 class="section-title">📸 ניהול תמונות מטרה</h2>
+        <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px;">העלה, נהל ומחק תמונות לבדיקת נוכחות</p>
+
+        <div class="target-upload-container">
+            <!-- אזור העלאה -->
+            <div class="upload-area" onclick="document.getElementById('target-file-input').click()">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">לחץ כאן או גרור קבצים להעלאה</div>
+                <div class="upload-hint">תמיכה בתמונות וסרטונים (JPG, PNG, MP4, וכו')</div>
+            </div>
+
+            <input type="file" id="target-file-input" multiple accept="image/*,video/*">
+
+            <!-- כפתורי פעולה -->
+            <div class="target-buttons-row">
+                <button class="target-btn target-btn-upload" onclick="uploadTargetFiles()">
+                    📤 העלה קבצים
+                </button>
+                <button class="target-btn target-btn-delete" id="target-delete-btn" onclick="deleteSelectedTargets()" disabled>
+                    🗑️ מחק נבחרים
+                </button>
+            </div>
+
+            <!-- Loading -->
+            <div class="target-loading" id="target-loading">
+                <div class="target-spinner"></div>
+                <div>טוען...</div>
+            </div>
+
+            <!-- גלריה -->
+            <div class="target-gallery">
+                <div class="target-gallery-header">
+                    <div class="target-gallery-title">
+                        🖼️ גלריית תמונות מטרה
+                    </div>
+                    <div class="target-gallery-stats" id="target-gallery-stats">
+                        טוען...
+                    </div>
+                </div>
+                <div class="target-gallery-grid" id="target-gallery-grid">
+                    <!-- תמונות יטענו כאן -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
     <!-- Footer -->
     <footer>
@@ -442,7 +676,279 @@
         </div>
     </footer>
 
-    <!-- Include main JavaScript file only -->
+    <!-- Script imports -->
     <script src="/web_static/js/main.js"></script>
+
+    <!-- *** JavaScript חדש לתמונות מטרה *** -->
+    <script>
+        let selectedTargetFiles = [];
+        let allTargetImages = [];
+
+        // Initialize target images functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTargetImages();
+            setupTargetDragAndDrop();
+            setupTargetFileInput();
+        });
+
+        // Drag and Drop for target images
+        function setupTargetDragAndDrop() {
+            const uploadArea = document.querySelector('.upload-area');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+            });
+
+            uploadArea.addEventListener('drop', handleTargetDrop, false);
+        }
+
+        function handleTargetDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('target-file-input').files = files;
+            updateTargetFileDisplay();
+        }
+
+        // File Input for target images
+        function setupTargetFileInput() {
+            document.getElementById('target-file-input').addEventListener('change', updateTargetFileDisplay);
+        }
+
+        function updateTargetFileDisplay() {
+            const fileInput = document.getElementById('target-file-input');
+            const uploadText = document.querySelector('.upload-text');
+
+            if (fileInput.files.length > 0) {
+                uploadText.textContent = `נבחרו ${fileInput.files.length} קבצים`;
+                uploadText.style.color = '#27ae60';
+            } else {
+                uploadText.textContent = 'לחץ כאן או גרור קבצים להעלאה';
+                uploadText.style.color = '#2c3e50';
+            }
+        }
+
+        // Upload target files
+        async function uploadTargetFiles() {
+            const fileInput = document.getElementById('target-file-input');
+
+            if (!fileInput.files.length) {
+                showNotification('נא לבחור קבצים להעלאה', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            for (const file of fileInput.files) {
+                formData.append('target_images', file);
+            }
+
+            showTargetLoading(true);
+
+            try {
+                const response = await fetch('/api/append_target_images', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`הועלו בהצלחה ${data.uploaded_count} קבצים! סה"כ: ${data.total_count}`, 'success');
+                    fileInput.value = '';
+                    updateTargetFileDisplay();
+                    await loadTargetImages();
+                } else {
+                    showNotification(data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('שגיאה בהעלאת קבצים', 'error');
+                console.error('Target upload error:', error);
+            } finally {
+                showTargetLoading(false);
+            }
+        }
+
+        // Load target images
+        async function loadTargetImages() {
+            showTargetLoading(true);
+
+            try {
+                const response = await fetch('/api/get_target_images');
+                const data = await response.json();
+
+                if (data.success) {
+                    allTargetImages = data.files || [];
+                    renderTargetGallery();
+                    updateTargetGalleryStats(data);
+                } else {
+                    showNotification('שגיאה בטעינת תמונות', 'error');
+                }
+            } catch (error) {
+                showNotification('שגיאה בטעינת תמונות', 'error');
+                console.error('Load target images error:', error);
+            } finally {
+                showTargetLoading(false);
+            }
+        }
+
+        // Render target gallery
+        function renderTargetGallery() {
+            const galleryGrid = document.getElementById('target-gallery-grid');
+
+            if (!allTargetImages.length) {
+                galleryGrid.innerHTML = `
+                    <div class="target-empty-state" style="grid-column: 1 / -1;">
+                        <div class="target-empty-icon">📷</div>
+                        <h3>אין תמונות מטרה</h3>
+                        <p>העלה תמונות כדי להתחיל</p>
+                    </div>
+                `;
+                return;
+            }
+
+            galleryGrid.innerHTML = '';
+
+            allTargetImages.forEach((image, index) => {
+                const card = document.createElement('div');
+                card.className = 'target-image-card';
+
+                let mediaElement = '';
+                if (image.resource_type === 'video') {
+                    mediaElement = `<video controls><source src="${image.url}"></video>`;
+                } else {
+                    mediaElement = `<img src="${image.url}" alt="תמונה ${index + 1}">`;
+                }
+
+                card.innerHTML = `
+                    <input type="checkbox" class="target-image-checkbox" data-public-id="${image.public_id}" onchange="updateTargetDeleteButton()">
+                    ${mediaElement}
+                    <div class="target-image-info">
+                        ${image.resource_type === 'video' ? '🎬' : '📷'} קובץ #${index + 1}
+                        ${image.bytes ? `<br>${Math.round(image.bytes / 1024)} KB` : ''}
+                    </div>
+                `;
+
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        // Update target gallery stats
+        function updateTargetGalleryStats(data) {
+            const statsElement = document.getElementById('target-gallery-stats');
+            const total = data.total_count || 0;
+            const images = data.images_count || 0;
+            const videos = data.videos_count || 0;
+
+            statsElement.innerHTML = `
+                סה"כ: ${total} קבצים |
+                תמונות: ${images} |
+                סרטונים: ${videos}
+            `;
+        }
+
+        // Update delete button for targets
+        function updateTargetDeleteButton() {
+            const checkboxes = document.querySelectorAll('.target-image-checkbox:checked');
+            const deleteBtn = document.getElementById('target-delete-btn');
+
+            deleteBtn.disabled = checkboxes.length === 0;
+
+            if (checkboxes.length > 0) {
+                deleteBtn.textContent = `🗑️ מחק ${checkboxes.length} נבחרים`;
+            } else {
+                deleteBtn.textContent = '🗑️ מחק נבחרים';
+            }
+        }
+
+        // Delete selected targets
+        async function deleteSelectedTargets() {
+            const checkboxes = document.querySelectorAll('.target-image-checkbox:checked');
+            const publicIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-public-id'));
+
+            if (!publicIds.length) {
+                showNotification('לא נבחרו קבצים למחיקה', 'error');
+                return;
+            }
+
+            const confirmed = confirm(`האם למחוק ${publicIds.length} קבצים?`);
+            if (!confirmed) return;
+
+            showTargetLoading(true);
+
+            try {
+                const response = await fetch('/api/delete_target_images', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ public_ids: publicIds })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`נמחקו ${data.deleted_count} קבצים`, 'success');
+                    await loadTargetImages();
+                } else {
+                    showNotification(data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('שגיאה במחיקת קבצים', 'error');
+                console.error('Delete target images error:', error);
+            } finally {
+                showTargetLoading(false);
+            }
+        }
+
+        // Show/hide target loading
+        function showTargetLoading(show) {
+            const loading = document.getElementById('target-loading');
+            loading.classList.toggle('show', show);
+        }
+
+        // Helper function for notifications (if not already defined in main.js)
+        function showNotification(message, type = 'info') {
+            // Check if notification function exists in main.js
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(message, type);
+                return;
+            }
+
+            // Fallback notification system
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 25px;
+                border-radius: 10px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                ${type === 'success' ? 'background: linear-gradient(135deg, #27ae60, #2ecc71);' : ''}
+                ${type === 'error' ? 'background: linear-gradient(135deg, #e74c3c, #c0392b);' : ''}
+                ${type === 'warning' ? 'background: linear-gradient(135deg, #f39c12, #e67e22);' : ''}
+                ${type === 'info' ? 'background: linear-gradient(135deg, #3498db, #2980b9);' : ''}
+            `;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+    </script>
 </body>
 </html>
