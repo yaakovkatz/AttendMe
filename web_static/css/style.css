@@ -95,7 +95,8 @@ header {
     background-color: var(--primary-color);
 }
 
-.cta-button {
+/* Buttons */
+.cta-button, .action-button {
     display: inline-block;
     background-color: var(--primary-color);
     color: white;
@@ -107,34 +108,48 @@ header {
     border: none;
     text-align: center;
     margin: 5px;
+    text-decoration: none;
 }
 
-.cta-button:hover {
+.cta-button:hover, .action-button:hover {
     background-color: var(--secondary-color);
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-.cta-button.secondary {
+.cta-button.secondary, .action-button.secondary {
     background-color: white;
     color: var(--primary-color);
     border: 2px solid var(--primary-color);
 }
 
-.cta-button.secondary:hover {
+.cta-button.secondary:hover, .action-button.secondary:hover {
     background-color: var(--primary-color);
     color: white;
 }
 
-.cta-button.primary {
+.cta-button.primary, .action-button.primary {
     background-color: var(--secondary-color);
 }
 
-.cta-button:disabled {
+.action-button.danger {
+    background-color: var(--danger-color);
+}
+
+.action-button.danger:hover {
+    background-color: #c0392b;
+}
+
+.cta-button:disabled, .action-button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+    opacity: 0.6;
+}
+
+.action-button i {
+    margin-left: 8px;
 }
 
 /* Hero Section */
@@ -244,50 +259,6 @@ header {
     justify-content: center;
     margin-bottom: 30px;
     flex-wrap: wrap;
-}
-
-.action-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--primary-color);
-    color: white;
-    padding: 10px 20px;
-    border-radius: var(--border-radius);
-    font-weight: 500;
-    transition: var(--transition);
-    cursor: pointer;
-    border: none;
-    margin: 5px;
-    font-size: 1rem;
-}
-
-.action-button i {
-    margin-left: 8px;
-}
-
-.action-button:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-2px);
-}
-
-.action-button.secondary {
-    background-color: white;
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-}
-
-.action-button.secondary:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.action-button.danger {
-    background-color: var(--danger-color);
-}
-
-.action-button.danger:hover {
-    background-color: #c0392b;
 }
 
 .camera-container {
@@ -416,7 +387,7 @@ tr:hover {
     transform: scale(1.2);
 }
 
-/* Modal - עדכון עם הקטנת תוכן */
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -440,10 +411,10 @@ tr:hover {
 .modal-content {
     background-color: white;
     border-radius: var(--border-radius);
-    padding: 15px 20px; /* הקטנה מ-30px ל-15px/20px */
+    padding: 15px 20px;
     max-width: 500px;
     width: 80%;
-    max-height: 85vh; /* הקטנה מ-90vh ל-85vh */
+    max-height: 85vh;
     overflow-y: auto;
     position: relative;
     transform: translateY(-20px);
@@ -470,28 +441,28 @@ tr:hover {
 
 .modal h3 {
     text-align: center;
-    margin-bottom: 12px; /* הקטנה מ-20px ל-12px */
+    margin-bottom: 12px;
     color: var(--primary-color);
-    font-size: 18px; /* הקטנה מ-24px ל-18px */
+    font-size: 18px;
 }
 
 .form-group {
-    margin-bottom: 12px; /* הקטנה מ-20px ל-12px */
+    margin-bottom: 12px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 4px; /* הקטנה מ-5px ל-4px */
+    margin-bottom: 4px;
     font-weight: 500;
-    font-size: 14px; /* הקטנה מ-16px ל-14px */
+    font-size: 14px;
 }
 
 .form-group input, .form-group select {
     width: 100%;
-    padding: 8px 12px; /* הקטנה מ-10px 15px ל-8px 12px */
+    padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: var(--border-radius);
-    font-size: 14px; /* הקטנה מ-1rem ל-14px */
+    font-size: 14px;
 }
 
 .checkbox-group {
@@ -505,13 +476,13 @@ tr:hover {
 }
 
 .image-preview {
-    margin: 15px 0; /* הקטנה מ-20px ל-15px */
+    margin: 15px 0;
     text-align: center;
 }
 
 .image-preview img {
     max-width: 100%;
-    max-height: 250px; /* הקטנה מ-300px ל-250px */
+    max-height: 250px;
     border-radius: var(--border-radius);
     border: 1px solid #ddd;
 }
@@ -519,15 +490,14 @@ tr:hover {
 .form-actions {
     display: flex;
     justify-content: space-between;
-    margin-top: 12px; /* הקטנה מ-10px ל-12px */
-    margin-bottom: 8px; /* הוספת מרווח תחתון */
+    margin-top: 12px;
+    margin-bottom: 8px;
 }
 
-/* עדכון כפתורים בחלון */
 .form-actions .action-button {
-    padding: 8px 14px; /* הקטנה מ-10px 20px ל-8px 14px */
-    font-size: 14px; /* הקטנה מ-1rem ל-14px */
-    margin: 0 4px; /* הקטנה מ-5px ל-4px */
+    padding: 8px 14px;
+    font-size: 14px;
+    margin: 0 4px;
 }
 
 /* Attendance */
@@ -608,137 +578,35 @@ tr:hover {
     margin-top: 30px;
 }
 
-/* Footer */
-footer {
-    background-color: var(--dark-color);
-    color: white;
-    text-align: center;
-    padding: 30px 0;
-}
-
-/* Responsive Styles */
-@media (max-width: 900px) {
-    .navbar {
-        flex-direction: column;
-    }
-
-    .logo {
-        margin-bottom: 15px;
-    }
-
-    .nav-links {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .nav-links li {
-        margin: 5px;
-    }
-
-    .people-controls {
-        flex-direction: column;
-    }
-
-    .people-controls input {
-        margin-top: 10px;
-        min-width: auto;
-        width: 100%;
-    }
-
-    .attendance-controls {
-        flex-direction: column;
-    }
-
-    .date-filter {
-        margin-bottom: 10px;
-    }
-
-    .date-filter input {
-        width: 100%;
-    }
-
-    .form-actions {
-        flex-direction: column;
-    }
-
-    .form-actions button {
-        margin-bottom: 10px;
-    }
-}
-
-@media (max-width: 600px) {
-    .section {
-        padding: 100px 0 60px;
-    }
-
-    .hero h1 {
-        font-size: 2rem;
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-    }
-
-    .dashboard-overview {
-        grid-template-columns: 1fr;
-    }
-
-    .status-details p {
-        font-size: 1.5rem;
-    }
-
-    .camera-controls {
-        flex-direction: column;
-    }
-
-    .camera-controls button {
-        width: 100%;
-    }
-
-    .stat-value {
-        font-size: 2.5rem;
-    }
-
-    .stat-label {
-        font-size: 1rem;
-    }
-
-    th, td {
-        padding: 10px;
-        font-size: 0.9rem;
-    }
-}
-
-/* Upload status and progress bar - עדכון */
+/* Upload status and progress bar */
 .upload-status {
-    margin: 8px 0; /* הקטנה מ-10px ל-8px */
-    padding: 6px 8px; /* הקטנה מ-10px ל-6px 8px */
+    margin: 8px 0;
+    padding: 6px 8px;
     background-color: #f8f9fa;
     border-radius: var(--border-radius);
     text-align: center;
     font-weight: 500;
-    font-size: 13px; /* הקטנה מ-14px ל-13px */
+    font-size: 13px;
 }
 
 .upload-progress {
     display: flex;
     justify-content: space-between;
-    margin: 8px 0; /* הקטנה מ-15px ל-8px */
-    padding: 8px; /* הקטנה מ-10px ל-8px */
+    margin: 8px 0;
+    padding: 8px;
     background: #f8f9fa;
     border-radius: 8px;
     text-align: center;
 }
 
 .progress-step {
-    width: 40px; /* הקטנה מ-50px ל-40px */
-    height: 6px; /* הקטנה מ-8px ל-6px */
+    width: 40px;
+    height: 6px;
     border-radius: 4px;
     border: none;
     background-color: #ddd;
     display: inline-block;
-    margin: 0 2px; /* הקטנה מ-5px ל-2px */
+    margin: 0 2px;
     transition: all 0.3s ease;
     position: relative;
 }
@@ -778,41 +646,7 @@ footer {
     object-fit: cover;
 }
 
-.person-image-counter {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    font-size: 0.75rem;
-    padding: 2px 6px;
-    border-radius: 10px;
-}
-
-.image-count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--primary-color);
-    color: white;
-    font-size: 0.75rem;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.no-images {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: var(--border-radius);
-}
-
-/* סגנונות לאזור הפונקציות המתקדמות */
+/* Advanced Functions */
 .advanced-controls {
     display: flex;
     flex-wrap: wrap;
@@ -827,7 +661,6 @@ footer {
     padding: 15px;
 }
 
-/* אזור תוצאות */
 .results-panel {
     background-color: white;
     border-radius: var(--border-radius);
@@ -866,103 +699,7 @@ footer {
     line-height: 1.5;
 }
 
-/* עיצוב חלון בחירת אדם */
-#select-person-modal .modal-content {
-    max-width: 600px;
-    max-height: 95vh;
-    overflow: auto;
-}
-
-/* תיבת חיפוש */
-.search-container {
-    margin-bottom: 15px;
-    padding: 0 5px;
-}
-
-.search-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-/* עיצוב טבלת בחירת אנשים */
-.person-selection-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    direction: rtl;
-}
-
-.person-selection-table th,
-.person-selection-table td {
-    padding: 12px 15px;
-    text-align: right;
-    border-bottom: 1px solid #e0e0e0;
-    vertical-align: middle;
-}
-
-.person-selection-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-    color: #333;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.person-selection-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.person-selection-row:hover {
-    background-color: #f0f8ff;
-}
-
-.person-selection-row.selected {
-    background-color: #e3f2fd;
-}
-
-.person-image-cell {
-    width: 60px;
-    text-align: center;
-}
-
-.person-selection-image {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #ddd;
-}
-
-.person-name-cell {
-    font-weight: 500;
-    color: #2c3e50;
-}
-
-.person-id-cell {
-    color: #7f8c8d;
-    font-family: monospace;
-    font-size: 14px;
-}
-
-.no-people-message {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-}
-
-.error-message {
-    text-align: center;
-    padding: 20px;
-    color: #e74c3c;
-}
-
-/* ===== בדיקת נוכחות לפי מספר אדם ===== */
-
+/* Attendance Checker Section */
 .attendance-checker-section {
     background: white;
     padding: 30px;
@@ -1006,6 +743,7 @@ footer {
     border-color: var(--primary-color);
     outline: none;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    animation: inputFocus 0.3s ease;
 }
 
 .input-help {
@@ -1016,7 +754,6 @@ footer {
     font-style: italic;
 }
 
-/* אזור התוצאות */
 .attendance-result {
     margin-top: 30px;
     padding: 25px;
@@ -1024,6 +761,7 @@ footer {
     border-radius: 12px;
     border-right: 4px solid var(--primary-color);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: slideInResult 0.3s ease-out;
 }
 
 .result-header {
@@ -1084,11 +822,6 @@ footer {
     background: var(--danger-color);
 }
 
-@keyframes progress-animation {
-    0% { transform: translateX(-20px); }
-    100% { transform: translateX(20px); }
-}
-
 #attendance-status-text {
     font-size: 14px;
     color: var(--primary-color);
@@ -1100,7 +833,6 @@ footer {
     line-height: 1.6;
 }
 
-/* סטטוסי תוצאות */
 .result-success {
     color: var(--success-color);
     font-weight: bold;
@@ -1125,7 +857,6 @@ footer {
     font-size: 16px;
 }
 
-/* כפתור ביטול */
 #cancel-attendance-check {
     background-color: #dc3545;
     border-color: #dc3545;
@@ -1136,125 +867,7 @@ footer {
     border-color: #bd2130;
 }
 
-/* עיצוב רספונסיבי */
-@media (max-width: 768px) {
-    .attendance-checker-section {
-        padding: 20px;
-        margin: 20px 0;
-    }
-
-    .attendance-checker-controls {
-        align-items: stretch;
-    }
-
-    .attendance-checker-controls .form-group {
-        max-width: none;
-    }
-
-    .number-input {
-        width: 100%;
-        max-width: 200px;
-    }
-
-    .result-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .progress-indicator {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .progress-bar {
-        flex: 1;
-        min-width: 150px;
-    }
-
-    #attendance-status-text {
-        font-size: 13px;
-    }
-}
-
-@media (max-width: 480px) {
-    .attendance-checker-section h3 {
-        font-size: 1.1rem;
-    }
-
-    .progress-indicator {
-        flex-direction: column;
-        gap: 10px;
-        align-items: stretch;
-    }
-
-    .progress-bar {
-        width: 100%;
-    }
-
-    #attendance-status-text {
-        text-align: center;
-    }
-}
-
-/* אנימציות נוספות */
-.attendance-result {
-    animation: slideInResult 0.3s ease-out;
-}
-
-@keyframes slideInResult {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* עיצוב מתקדם לכפתורים */
-.attendance-checker-controls .action-button {
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.attendance-checker-controls .action-button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.attendance-checker-controls .action-button:active::before {
-    width: 300px;
-    height: 300px;
-}
-
-/* אפקט מיקוד מתקדם */
-.number-input:focus {
-    animation: inputFocus 0.3s ease;
-}
-
-@keyframes inputFocus {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.02);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
+/* Person Selector */
 .person-selector-container {
     background: #f8f9fa;
     border-radius: 8px;
@@ -1285,11 +898,6 @@ footer {
 
 .loading-spinner {
     animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
 }
 
 .people-grid {
@@ -1377,131 +985,218 @@ footer {
     background: #c82333;
 }
 
-/* הוספת אפקט disabled לכפתור */
-.action-button:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-/* *** הוספתי את הסטיילים החדשים לחלק העלאת תמונות target *** */
-
-/* סטייל לחלק העלאת תמונות */
-#target-upload {
+/* Target Upload Section */
+.target-upload-container {
     background: #f8f9fa;
-    padding: 30px 0;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 20px 0;
+    border: 2px solid #e9ecef;
 }
 
-#target-upload .container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* טופס העלאה */
-#target-upload-form {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
+.upload-area {
+    border: 3px dashed #3498db;
+    border-radius: 15px;
+    padding: 40px;
     text-align: center;
-}
-
-#target-upload-form label {
-    display: block;
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-#target-upload-form input[type="file"] {
-    display: block;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto 20px;
-    padding: 12px;
-    border: 2px dashed #4CAF50;
-    border-radius: 8px;
-    background: #f9f9f9;
-    font-size: 14px;
+    background: #f8fcff;
     transition: all 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 30px;
 }
 
-#target-upload-form input[type="file"]:hover {
-    border-color: #45a049;
-    background: #f0f8f0;
+.upload-area:hover {
+    border-color: #2980b9;
+    background: #e3f2fd;
+    transform: translateY(-2px);
 }
 
-/* אזור התוצאות */
-#target-upload-result {
-    text-align: center;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 15px 0;
+.upload-area.dragover {
+    border-color: #27ae60;
+    background: #e8f5e8;
 }
 
-#target-preview {
-    background: white;
-    border-radius: 12px;
+.upload-icon {
+    font-size: 48px;
+    color: #3498db;
+    margin-bottom: 20px;
+}
+
+.upload-text {
+    font-size: 18px;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.upload-hint {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.target-buttons-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.target-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    min-width: 180px;
+    justify-content: center;
+}
+
+.target-btn-upload {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+}
+
+.target-btn-upload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+}
+
+.target-btn-delete {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: white;
+}
+
+.target-btn-delete:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 73, 94, 0.3);
+}
+
+.target-btn-delete:disabled {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.target-gallery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-/* גלריית תמונות */
-#target-gallery {
-    min-height: 100px;
-    padding: 20px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+.target-gallery-title {
+    font-size: 20px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.image-card {
+.target-gallery-stats {
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.target-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.target-image-card {
     position: relative;
-    display: inline-block;
-    margin: 5px;
-    border-radius: 8px;
+    border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    transition: transform 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
     cursor: pointer;
 }
 
-.image-card:hover {
-    transform: scale(1.05);
+.target-image-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
 
-.image-card img,
-.image-card video {
-    display: block;
-    width: 150px;
-    height: 150px;
+.target-image-card img,
+.target-image-card video {
+    width: 100%;
+    height: 200px;
     object-fit: cover;
 }
 
-.image-checkbox {
+.target-image-checkbox {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 10;
-    width: 18px;
-    height: 18px;
+    top: 12px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
-    accent-color: #4CAF50;
+    z-index: 10;
+    accent-color: #3498db;
 }
 
-/* כפתור רענון */
-#refresh-gallery-btn {
-    background: linear-gradient(45deg, #2196F3, #1976D2);
+.target-image-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 15px 10px 10px;
+    font-size: 12px;
+    text-align: center;
 }
 
-#refresh-gallery-btn:hover {
-    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+.target-loading {
+    display: none;
+    text-align: center;
+    padding: 30px;
 }
 
-/* הודעות סטטוס */
+.target-loading.show {
+    display: block;
+}
+
+.target-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+.target-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+}
+
+.target-empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+#target-file-input {
+    display: none;
+}
+
+/* Status Messages */
 .status-message {
     text-align: center;
     padding: 15px;
@@ -1522,48 +1217,207 @@ footer {
     border: 1px solid #f5c6cb;
 }
 
-/* רספונסיבי לחלק העלאת תמונות */
-@media (max-width: 768px) {
-    #target-gallery {
+/* Footer */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    text-align: center;
+    padding: 30px 0;
+}
+
+/* Animations */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes progress-animation {
+    0% { transform: translateX(-20px); }
+    100% { transform: translateX(20px); }
+}
+
+@keyframes slideInResult {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes inputFocus {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* Responsive Styles */
+@media (max-width: 900px) {
+    .navbar {
+        flex-direction: column;
+    }
+
+    .logo {
+        margin-bottom: 15px;
+    }
+
+    .nav-links {
+        width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
     }
 
-    .image-card img,
-    .image-card video {
-        width: 120px;
-        height: 120px;
+    .nav-links li {
+        margin: 5px;
     }
 
-    #target-upload-form input[type="file"] {
+    .people-controls {
+        flex-direction: column;
+    }
+
+    .people-controls input {
+        margin-top: 10px;
+        min-width: auto;
+        width: 100%;
+    }
+
+    .attendance-controls {
+        flex-direction: column;
+    }
+
+    .date-filter {
+        margin-bottom: 10px;
+    }
+
+    .date-filter input {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .attendance-checker-section {
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .attendance-checker-controls {
+        align-items: stretch;
+    }
+
+    .attendance-checker-controls .form-group {
         max-width: none;
     }
+
+    .number-input {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .progress-indicator {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .progress-bar {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    #attendance-status-text {
+        font-size: 13px;
+    }
+
+    .target-buttons-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .target-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .target-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
 }
 
-/* סטיילים קיימים שנשארו */
-.upload-layout {
-  display: flex;
-  gap: 20px;
+@media (max-width: 600px) {
+    .section {
+        padding: 100px 0 60px;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .status-details p {
+        font-size: 1.5rem;
+    }
+
+    .camera-controls {
+        flex-direction: column;
+    }
+
+    .camera-controls button {
+        width: 100%;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+    }
+
+    th, td {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
 }
 
-.upload-sidebar {
-  width: 220px;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 0 10px #ccc;
-  height: fit-content;
-  position: sticky;
-  top: 100px;
-}
+@media (max-width: 480px) {
+    .attendance-checker-section h3 {
+        font-size: 1.1rem;
+    }
 
-.upload-sidebar h3 {
-  margin-bottom: 15px;
-  text-align: center;
-}
+    .progress-indicator {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
 
-.upload-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 15px;
-  flex-grow: 1;
+    .progress-bar {
+        width: 100%;
+    }
+
+    #attendance-status-text {
+        text-align: center;
+    }
 }

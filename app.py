@@ -9,6 +9,7 @@ import logging
 import threading
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import cloudinary
@@ -26,6 +27,7 @@ cloudinary.config(
 
 # --- קוד חדש לניהול קובץ JSON ---
 DATA_FILE = os.path.join(os.path.dirname(__file__), 'people_data.json')
+TARGET_IMAGES_FILE = os.path.join(os.path.dirname(__file__), 'target_images.json')
 
 
 def load_data():
@@ -43,6 +45,40 @@ def save_data(data):
     """שומרת את רשימת האנשים לקובץ"""
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+
+
+# *** פונקציות חדשות לטיפול בתמונות מטרה ***
+def load_target_images():
+    """טוענת את רשימת תמונות המטרה מהקובץ"""
+    if os.path.exists(TARGET_IMAGES_FILE):
+        with open(TARGET_IMAGES_FILE, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                return data.get('images', [])
+            except json.JSONDecodeError:
+                return []
+    return []
+
+
+def save_target_images(images_list):
+    """שומרת את רשימת תמונות המטרה לקובץ"""
+    try:
+        data_to_save = {
+            'images': images_list,
+            'last_updated': datetime.now().isoformat(),
+            'total_count': len(images_list)
+        }
+
+        with open(TARGET_IMAGES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data_to_save, f, ensure_ascii=False, indent=2)
+
+        print(f"💾 נשמרו {len(images_list)} תמונות מטרה")
+        return {'success': True}
+
+    except Exception as e:
+        error_msg = f"שגיאה בשמירת תמונות מטרה: {e}"
+        print(f"💥 {error_msg}")
+        return {'success': False, 'error': error_msg}
 
 
 # --- סוף קוד לניהול JSON ---
@@ -198,10 +234,10 @@ def run_advanced_function():
     return jsonify({"success": False, "error": "Advanced functions are currently disabled."}), 404
 
 
-# *** תיקנתי את הפונקציה הזו ***
+# *** הפונקציה הישנה - נותרת לתאימות לאחור ***
 @app.route('/api/start_check', methods=['POST'])
 def start_check():
-    """תיקון פונקציית העלאת תמונות/סרטונים"""
+    """תיקון פונקציית העלאת תמונות/סרטונים (גרסה ישנה - דורסת)"""
     files = request.files.getlist('target_images')
 
     if not files or all(f.filename == '' for f in files):
@@ -268,17 +304,163 @@ def start_check():
     return jsonify(response_data)
 
 
-# *** הוספתי פונקציה חדשה ***
+# *** פונקציה חדשה - מוסיפה תמונות במקום לדרוס ***
+@app.route('/api/append_target_images', methods=['POST'])
+def append_target_images():
+    """
+    מוסיף תמונות חדשות למערך תמונות המטרה הקיימות
+    במקום להחליף אותן
+    """
+    try:
+        # בדיקה שיש קבצים
+        if 'target_images' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'לא נבחרו קבצים להעלאה'
+            }), 400
+
+        files = request.files.getlist('target_images')
+
+        if not files or all(f.filename == '' for f in files):
+            return jsonify({
+                'success': False,
+                'error': 'לא נבחרו קבצים תקינים'
+            }), 400
+
+        # טעינת תמונות קיימות
+        existing_targets = load_target_images()
+        app.logger.info(f"📂 נמצאו {len(existing_targets)} תמונות מטרה קיימות")
+
+        uploaded_files = []
+        upload_errors = []
+
+        for file in files:
+            if file and file.filename:
+                try:
+                    # בדיקת סוג קובץ
+                    filename = secure_filename(file.filename)
+                    file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+
+                    allowed_extensions = {'jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'avi', 'mov', 'webm'}
+                    if file_ext not in allowed_extensions:
+                        upload_errors.append(f"סוג קובץ לא נתמך: {filename}")
+                        continue
+
+                    # העלאה ל-Cloudinary
+                    app.logger.info(f"📤 מעלה קובץ: {filename}")
+
+                    # בחירת resource_type בהתאם לסוג הקובץ
+                    resource_type = 'video' if file_ext in {'mp4', 'avi', 'mov', 'webm'} else 'image'
+
+                    upload_result = cloudinary.uploader.upload(
+                        file,
+                        folder="attendme_targets",  # תיקייה ייעודית לתמונות מטרה
+                        resource_type=resource_type,
+                        public_id=f"target_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(existing_targets) + len(uploaded_files)}",
+                        overwrite=False,  # *** חשוב: לא דורס קבצים קיימים ***
+                        unique_filename=True,
+                        use_filename=True
+                    )
+
+                    # יצירת אובייקט תמונה
+                    image_data = {
+                        'url': upload_result['secure_url'],
+                        'public_id': upload_result['public_id'],
+                        'resource_type': upload_result['resource_type'],
+                        'format': upload_result['format'],
+                        'bytes': upload_result['bytes'],
+                        'width': upload_result.get('width', 0),
+                        'height': upload_result.get('height', 0),
+                        'uploaded_at': datetime.now().isoformat(),
+                        'original_filename': filename,
+                        'file_type': resource_type
+                    }
+
+                    uploaded_files.append(image_data)
+                    app.logger.info(f"✅ הועלה בהצלחה: {filename} -> {upload_result['public_id']}")
+
+                except Exception as e:
+                    error_msg = f"שגיאה בהעלאת {filename}: {str(e)}"
+                    upload_errors.append(error_msg)
+                    app.logger.error(f"❌ {error_msg}")
+                    continue
+
+        # *** הוספת התמונות החדשות לרשימה הקיימת ***
+        all_target_images = existing_targets + uploaded_files
+
+        # שמירת הרשימה המעודכנת
+        save_result = save_target_images(all_target_images)
+
+        if not save_result['success']:
+            return jsonify({
+                'success': False,
+                'error': f"שגיאה בשמירת נתונים: {save_result['error']}"
+            }), 500
+
+        # הכנת תגובה
+        response_data = {
+            'success': True,
+            'uploaded_count': len(uploaded_files),
+            'total_count': len(all_target_images),
+            'existing_count': len(existing_targets),
+            'uploaded_files': uploaded_files,
+            'message': f"הועלו בהצלחה {len(uploaded_files)} תמונות. סה\"כ: {len(all_target_images)} תמונות במערכת"
+        }
+
+        # הוספת שגיאות אם היו
+        if upload_errors:
+            response_data['warnings'] = upload_errors
+            response_data['message'] += f" (היו {len(upload_errors)} שגיאות)"
+
+        app.logger.info(f"🎉 הושלמה העלאה: {len(uploaded_files)} חדשות, {len(all_target_images)} סה\"כ")
+        return jsonify(response_data), 200
+
+    except Exception as e:
+        error_msg = f"שגיאה כללית בהעלאת תמונות: {str(e)}"
+        app.logger.error(f"💥 {error_msg}")
+        return jsonify({
+            'success': False,
+            'error': error_msg
+        }), 500
+
+
+# *** שיפור ה-endpoint הקיים לקבלת תמונות ***
 @app.route('/api/get_target_images', methods=['GET'])
 def get_target_images():
-    """קבלת רשימת כל התמונות המועלות"""
+    """
+    מחזיר את כל תמונות המטרה (גרסה משופרת)
+    """
     try:
-        # חיפוש כל הקבצים בתיקיית targets
+        # קודם ננסה לטעון מהקובץ המקומי
+        local_images = load_target_images()
+
+        if local_images:
+            # מיון לפי תאריך העלאה (החדשות ראשונות)
+            sorted_images = sorted(
+                local_images,
+                key=lambda x: x.get('uploaded_at', ''),
+                reverse=True
+            )
+
+            # הוספת מטה-דטה
+            response_data = {
+                'success': True,
+                'files': sorted_images,
+                'total_count': len(sorted_images),
+                'images_count': len([img for img in sorted_images if img.get('resource_type') == 'image']),
+                'videos_count': len([img for img in sorted_images if img.get('resource_type') == 'video']),
+                'last_updated': max([img.get('uploaded_at', '') for img in sorted_images], default=''),
+                'source': 'local_file'
+            }
+
+            return jsonify(response_data), 200
+
+        # אם אין קובץ מקומי, ננסה מ-Cloudinary (fallback)
         result = cloudinary.api.resources(
             type="upload",
             prefix="attendme_targets/",
             max_results=100,
-            resource_type="auto"  # כולל גם תמונות וגם סרטונים
+            resource_type="auto"
         )
 
         files = []
@@ -286,49 +468,166 @@ def get_target_images():
             files.append({
                 'url': resource['secure_url'],
                 'public_id': resource['public_id'],
-                'created_at': resource['created_at'],
+                'uploaded_at': resource['created_at'],
                 'resource_type': resource['resource_type'],
                 'format': resource.get('format', ''),
-                'bytes': resource.get('bytes', 0)
+                'bytes': resource.get('bytes', 0),
+                'width': resource.get('width', 0),
+                'height': resource.get('height', 0)
             })
 
-        return jsonify({'success': True, 'files': files})
+        # שמירת הנתונים שנמצאו מ-Cloudinary לקובץ מקומי
+        if files:
+            save_target_images(files)
+
+        response_data = {
+            'success': True,
+            'files': files,
+            'total_count': len(files),
+            'images_count': len([f for f in files if f.get('resource_type') == 'image']),
+            'videos_count': len([f for f in files if f.get('resource_type') == 'video']),
+            'source': 'cloudinary_sync'
+        }
+
+        return jsonify(response_data), 200
 
     except Exception as e:
-        app.logger.error(f"שגיאה בקבלת תמונות: {e}")
-        return jsonify({'success': False, 'error': 'שגיאה בטעינת התמונות'}), 500
+        error_msg = f"שגיאה בקבלת תמונות: {str(e)}"
+        app.logger.error(f"💥 {error_msg}")
+        return jsonify({
+            'success': False,
+            'error': error_msg,
+            'files': []
+        }), 500
 
 
-# *** הוספתי פונקציה חדשה ***
+# *** שיפור ה-endpoint למחיקת תמונות ***
 @app.route('/api/delete_target_images', methods=['POST'])
 def delete_target_images():
-    """מחיקת תמונות נבחרות"""
+    """
+    מוחק תמונות נבחרות (גרסה משופרת)
+    """
     try:
         data = request.json
         public_ids = data.get('public_ids', [])
 
         if not public_ids:
-            return jsonify({'success': False, 'error': 'לא נבחרו קבצים למחיקה'}), 400
+            return jsonify({
+                'success': False,
+                'error': 'לא נבחרו תמונות למחיקה'
+            }), 400
 
-        # מחיקה מקלאודינרי
-        deletion_result = cloudinary.api.delete_resources(
-            public_ids,
-            resource_type="auto"  # יכול להיות image או video
-        )
+        # טעינת תמונות קיימות
+        existing_images = load_target_images()
 
-        deleted_count = len(deletion_result.get('deleted', {}))
+        deleted_count = 0
+        deletion_errors = []
 
-        app.logger.info(f"נמחקו {deleted_count} קבצים מ-Cloudinary")
+        # מחיקה מ-Cloudinary
+        for public_id in public_ids:
+            try:
+                # בדיקה איזה סוג קובץ זה (תמונה או וידאו)
+                image_info = next((img for img in existing_images if img['public_id'] == public_id), None)
 
-        return jsonify({
+                if image_info:
+                    resource_type = image_info.get('resource_type', 'image')
+
+                    # מחיקה מ-Cloudinary
+                    result = cloudinary.uploader.destroy(public_id, resource_type=resource_type)
+
+                    if result.get('result') == 'ok':
+                        deleted_count += 1
+                        app.logger.info(f"🗑️ נמחק מ-Cloudinary: {public_id}")
+                    else:
+                        deletion_errors.append(f"כשל במחיקת {public_id} מ-Cloudinary")
+                else:
+                    # אם לא נמצא בקובץ המקומי, ננסה למחוק בכל זאת
+                    result = cloudinary.api.delete_resources([public_id], resource_type="auto")
+                    if result.get('deleted', {}).get(public_id) == 'deleted':
+                        deleted_count += 1
+                        app.logger.info(f"🗑️ נמחק מ-Cloudinary (fallback): {public_id}")
+                    else:
+                        deletion_errors.append(f"לא נמצא קובץ עם ID: {public_id}")
+
+            except Exception as e:
+                deletion_errors.append(f"שגיאה במחיקת {public_id}: {str(e)}")
+                app.logger.error(f"❌ שגיאה במחיקת {public_id}: {e}")
+
+        # *** הסרת התמונות הנמחקות מהרשימה המקומית ***
+        remaining_images = [
+            img for img in existing_images
+            if img['public_id'] not in public_ids
+        ]
+
+        # שמירת הרשימה המעודכנת
+        save_result = save_target_images(remaining_images)
+
+        if not save_result['success']:
+            return jsonify({
+                'success': False,
+                'error': f"שגיאה בעדכון רשימת תמונות: {save_result['error']}"
+            }), 500
+
+        response_data = {
             'success': True,
-            'message': f'נמחקו {deleted_count} קבצים',
-            'deleted_count': deleted_count
-        })
+            'deleted_count': deleted_count,
+            'remaining_count': len(remaining_images),
+            'total_requested': len(public_ids),
+            'message': f"נמחקו {deleted_count} תמונות. נותרו {len(remaining_images)} תמונות"
+        }
+
+        if deletion_errors:
+            response_data['warnings'] = deletion_errors
+
+        app.logger.info(f"🧹 הושלמה מחיקה: {deleted_count} נמחקו, {len(remaining_images)} נותרו")
+        return jsonify(response_data), 200
 
     except Exception as e:
-        app.logger.error(f"שגיאה במחיקת תמונות: {e}")
-        return jsonify({'success': False, 'error': 'שגיאה במחיקת התמונות'}), 500
+        error_msg = f"שגיאה במחיקת תמונות: {str(e)}"
+        app.logger.error(f"💥 {error_msg}")
+        return jsonify({
+            'success': False,
+            'error': error_msg
+        }), 500
+
+
+# *** Endpoint בונוס: סטטיסטיקות על תמונות המטרה ***
+@app.route('/api/target_images_stats', methods=['GET'])
+def get_target_images_stats():
+    """
+    מחזיר סטטיסטיקות על תמונות המטרה
+    """
+    try:
+        images = load_target_images()
+
+        total_size = sum(img.get('bytes', 0) for img in images)
+
+        stats = {
+            'success': True,
+            'total_files': len(images),
+            'images_count': len([img for img in images if img.get('resource_type') == 'image']),
+            'videos_count': len([img for img in images if img.get('resource_type') == 'video']),
+            'total_size_bytes': total_size,
+            'total_size_mb': round(total_size / (1024 * 1024), 2),
+            'formats': {},
+            'upload_dates': []
+        }
+
+        # ספירת פורמטים
+        for img in images:
+            format_type = img.get('format', 'unknown')
+            stats['formats'][format_type] = stats['formats'].get(format_type, 0) + 1
+
+        # תאריכי העלאה
+        stats['upload_dates'] = [img.get('uploaded_at', '') for img in images]
+
+        return jsonify(stats), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f"שגיאה בקבלת סטטיסטיקות: {str(e)}"
+        }), 500
 
 
 if __name__ == '__main__':
