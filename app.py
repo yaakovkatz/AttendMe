@@ -105,26 +105,195 @@ def get_people():
     return jsonify(people_list)
 
 
+# *** הfункציה הישנה לא בשימוש יותר ***
 @app.route('/api/add_person', methods=['POST'])
 def add_person():
-    people_list = load_data()
-    data = request.json
-    if not all(key in data for key in ['first_name', 'last_name', 'id_number']):
-        return jsonify({'success': False, 'error': 'חסרים פרטים'}), 400
-    if any(p['id'] == data['id_number'] for p in people_list):
-        return jsonify({'success': False, 'error': 'אדם עם מספר זהות זה כבר קיים במערכת'}), 400
+    """פונקציה ישנה - לא בשימוש במצב הנוכחי"""
+    return jsonify({'success': False, 'error': 'שימוש בפונקציה ישנה. השתמש ב-create_person_with_images'}), 400
 
-    new_person = {
-        'id': data['id_number'],
-        'first_name': data['first_name'],
-        'last_name': data['last_name'],
-        'is_present': False,
-        'image_urls': []
-    }
-    people_list.append(new_person)
-    save_data(people_list)
-    return jsonify({'success': True, 'message': f"נוצר בהצלחה: {data['first_name']} {data['last_name']}",
-                    'person_id': data['id_number']})
+
+# *** פונקציה חדשה - יוצרת אדם רק עם תמונות ***
+@app.route('/api/create_person_with_images', methods=['POST'])
+def create_person_with_images():
+    """יוצר אדם חדש רק לאחר העלאת לפחות 3 תמונות"""
+    try:
+        data = request.json
+
+        if not data:
+            return jsonify({'success': False, 'error': 'לא התקבלו נתונים'}), 400
+
+        person_details = data.get('person_details')
+        image_public_ids = data.get('image_public_ids', [])
+
+        app.logger.info(f"📥 בקשת יצירת אדם: {person_details}")
+        app.logger.info(f"📸 תמונות שהתקבלו: {len(image_public_ids)} תמונות")
+
+        # בדיקות בסיסיות
+        if not person_details or not all(key in person_details for key in ['first_name', 'last_name', 'id_number']):
+            return jsonify({'success': False, 'error': 'פרטי האדם לא שלמים'}), 400
+
+        if len(image_public_ids) < 3:
+            return jsonify({'success': False, 'error': 'נדרשות לפחות 3 תמונות ליצירת אדם'}), 400
+
+        if len(image_public_ids) > 5:
+            return jsonify({'success': False, 'error': 'ניתן להעלות עד 5 תמונות בלבד'}), 400
+
+        # בדיקה שהאדם לא קיים כבר
+        people_list = load_data()
+        if any(p['id'] == person_details['id_number'] for p in people_list):
+            return jsonify({'success': False, 'error': 'אדם עם מספר זהות זה כבר קיים במערכת'}), 400
+
+        # קבלת URL-ים של התמונות מ-Cloudinary
+        image_urls = []
+        valid_public_ids = []
+
+        for public_id in image_public_ids:
+            try:
+                # בדיקה שהתמונה קיימת ב-Cloudinary וקבלת ה-URL
+                resource_info = cloudinary.api.resource(public_id)
+                image_urls.append(resource_info['secure_url'])
+                valid_public_ids.append(public_id)
+                app.logger.info(f"✅ אומתה תמונה: {public_id}")
+
+            except Exception as e:
+                app.logger.error(f"❌ תמונה לא נמצאה: {public_id} - {e}")
+                continue
+
+        # בדיקה שנותרו מספיק תמונות תקינות
+        if len(valid_public_ids) < 3:
+            return jsonify({
+                'success': False,
+                'error': f'נמצאו רק {len(valid_public_ids)} תמונות תקינות. נדרשות לפחות 3'
+            }), 400
+
+        # העברת התמונות לתיקייה הקבועה של האדם
+        final_image_urls = []
+        folder_name = secure_filename(
+            f"{person_details['first_name']}_{person_details['last_name']}_{person_details['id_number']}")
+
+        for i, public_id in enumerate(valid_public_ids):
+            try:
+                # שינוי שם התמונה לתיקייה הקבועה
+                new_public_id = f"attendme_faces/{folder_name}/image_{i + 1}_{int(time.time())}"
+
+                # העתקת התמונה לתיקייה החדשה
+                result = cloudinary.uploader.rename(public_id, new_public_id)
+                final_image_urls.append(result['secure_url'])
+                app.logger.info(f"📁 הועברה תמונה: {public_id} -> {new_public_id}")
+
+            except Exception as e:
+                app.logger.error(f"❌ שגיאה בהעברת תמונה {public_id}: {e}")
+                # אם ההעברה נכשלה, נשתמש ב-URL המקורי
+                final_image_urls.append(image_urls[i])
+
+        # יצירת האדם החדש
+        new_person = {
+            'id': person_details['id_number'],
+            'first_name': person_details['first_name'],
+            'last_name': person_details['last_name'],
+            'is_present': False,
+            'image_urls': final_image_urls,
+            'created_at': datetime.now().isoformat(),
+            'image_count': len(final_image_urls)
+        }
+
+        # הוספת האדם לרשימה ושמירה
+        people_list.append(new_person)
+        save_data(people_list)
+
+        app.logger.info(
+            f"🎉 נוצר בהצלחה: {person_details['first_name']} {person_details['last_name']} עם {len(final_image_urls)} תמונות")
+
+        return jsonify({
+            'success': True,
+            'message': f"נוצר בהצלחה: {person_details['first_name']} {person_details['last_name']} עם {len(final_image_urls)} תמונות",
+            'person_id': person_details['id_number'],
+            'image_count': len(final_image_urls)
+        })
+
+    except Exception as e:
+        error_msg = f"שגיאה ביצירת אדם: {str(e)}"
+        app.logger.error(f"💥 {error_msg}")
+        return jsonify({'success': False, 'error': error_msg}), 500
+
+
+# *** פונקציה חדשה - העלאת תמונה זמנית ***
+@app.route('/api/upload_temp_image', methods=['POST'])
+def upload_temp_image():
+    """מעלה תמונה לתיקייה זמנית לפני יצירת האדם"""
+    try:
+        if 'image' not in request.files or request.files['image'].filename == '':
+            return jsonify({'success': False, 'error': 'לא נבחר קובץ'}), 400
+
+        file_to_upload = request.files['image']
+
+        # העלאה לתיקייה זמנית
+        timestamp = int(time.time())
+        public_id = f"attendme_temp/temp_image_{timestamp}"
+
+        upload_result = cloudinary.uploader.upload(
+            file_to_upload,
+            public_id=public_id,
+            folder="attendme_temp"
+        )
+
+        image_url = upload_result.get('secure_url')
+        public_id = upload_result.get('public_id')
+
+        if not image_url:
+            return jsonify({'success': False, 'error': 'שגיאה בהעלאה לענן'}), 500
+
+        app.logger.info(f"📤 הועלתה תמונה זמנית: {public_id}")
+
+        return jsonify({
+            'success': True,
+            'message': 'התמונה הועלתה בהצלחה',
+            'image_url': image_url,
+            'public_id': public_id
+        })
+
+    except Exception as e:
+        error_msg = f"שגיאה בהעלאת תמונה זמנית: {str(e)}"
+        app.logger.error(f"💥 {error_msg}")
+        return jsonify({'success': False, 'error': error_msg}), 500
+
+
+# *** פונקציה חדשה - מחיקת תמונות זמניות ***
+@app.route('/api/delete_temp_images', methods=['POST'])
+def delete_temp_images():
+    """מוחקת תמונות זמניות במקרה של ביטול"""
+    try:
+        data = request.json
+        public_ids = data.get('public_ids', [])
+
+        if not public_ids:
+            return jsonify({'success': True, 'message': 'אין תמונות למחיקה'})
+
+        deleted_count = 0
+
+        for public_id in public_ids:
+            try:
+                result = cloudinary.uploader.destroy(public_id)
+                if result.get('result') == 'ok':
+                    deleted_count += 1
+                    app.logger.info(f"🗑️ נמחקה תמונה זמנית: {public_id}")
+                else:
+                    app.logger.warning(f"⚠️ לא הצליח למחוק תמונה זמנית: {public_id}")
+            except Exception as e:
+                app.logger.error(f"❌ שגיאה במחיקת תמונה זמנית {public_id}: {e}")
+
+        app.logger.info(f"🧹 נמחקו {deleted_count} תמונות זמניות מתוך {len(public_ids)}")
+
+        return jsonify({
+            'success': True,
+            'message': f'נמחקו {deleted_count} תמונות זמניות',
+            'deleted_count': deleted_count
+        })
+
+    except Exception as e:
+        error_msg = f"שגיאה במחיקת תמונות זמניות: {str(e)}"
+        app.logger.error(f"💥 {error_msg}")
+        return jsonify({'success': False, 'error': error_msg}), 500
 
 
 @app.route('/api/remove_person/<person_id>', methods=['DELETE'])
@@ -144,7 +313,6 @@ def remove_person(person_id):
                 app.logger.error(f"Could not parse public_id from URL {url}: {e}")
         if public_ids_to_delete:
             app.logger.info(f"Deleting from Cloudinary: {public_ids_to_delete}")
-            # --- הנה התיקון ---
             cloudinary.api.delete_resources(public_ids_to_delete, resource_type="image")
 
     people_list = [p for p in people_list if p['id'] != person_id]
@@ -167,6 +335,7 @@ def edit_person(person_id):
 
 @app.route('/api/upload_image/<person_id>', methods=['POST'])
 def upload_image(person_id):
+    """העלאת תמונה לאדם קיים"""
     people_list = load_data()
     person = next((p for p in people_list if p['id'] == person_id), None)
     if not person:
@@ -191,6 +360,7 @@ def upload_image(person_id):
     if 'image_urls' not in person:
         person['image_urls'] = []
     person['image_urls'].append(image_url)
+    person['image_count'] = len(person['image_urls'])
 
     save_data(people_list)
 
