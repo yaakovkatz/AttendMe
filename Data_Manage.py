@@ -1,151 +1,130 @@
-import os
-import re
 from Person import Person
-from Face_Detection import FaceDetection
+from Target import Target
 
 # וקטור גלובלי לשמירת האנשים
 people_vector = []
+targets_vector = []
 
 
-def add_new_person():
-    print("\n=== הוספת אדם חדש ===")
-    first_name = input("הכנס שם פרטי: ")
-    last_name = input("הכנס שם משפחה: ")
-    id_number = input("הכנס מספר תעודת זהות: ")
+"""==================================Person========================="""
 
+
+def add_new_person(first_name, last_name, id_number, images_url):
+
+    # בדיקה אם האדם כבר קיים
     if any(person.id_number == id_number for person in people_vector):
-        print("אדם עם מספר תעודת זהות זה כבר קיים במערכת")
-        return None
+        return {
+            'success': False,
+            'person': None,
+            'message': f"אדם עם מספר תעודת זהות {id_number} כבר קיים במערכת",
+            'error': 'DUPLICATE_ID'
+        }
 
-    try:
-        new_person = Person(first_name, last_name, id_number)
-        people_vector.append(new_person)
-        print(f"\nנוצר בהצלחה: {new_person.get_full_name_and_id()}")
-        print(f"מספר אנשים במערכת: {len(people_vector)}")
-        return new_person
-    except Exception as e:
-        print(f"שגיאה ביצירת אדם חדש: {str(e)}")
-        return None
+    # יצירת אדם חדש
+    new_person = Person(first_name, last_name, id_number, images_url)
+    # הוספה ל-people_vector
+    people_vector.append(new_person)
+
+    return {
+        'success': True,
+        'person': new_person,  # מחזיר את האובייקט עצמו
+        'message': f"האדם {new_person.get_full_name_and_id()} נוצר בהצלחה",
+        'error': None
+    }
 
 
-def remove_person():
-    print("\n=== הסרת אדם ===")
-    id_number = input("הכנס מספר תעודת זהות להסרה: ")
+def remove_person(id_number):
+    """מחיקת אדם מהמערכת"""
+    print(f"\n=== מחיקת אדם עם ת.ז. {id_number} ===")
 
+    # חיפוש האדם
     for i, person in enumerate(people_vector):
         if person.id_number == id_number:
-            removed_person = people_vector[i]
-            # הלוגיקה של מחיקת קבצים ותמונות מהענן נמצאת ב-app.py, כאן רק נסיר מהרשימה
-            people_vector.pop(i)
-            print(f"האדם {removed_person.get_full_name_and_id()} הוסר בהצלחה")
-            print(f"מספר אנשים במערכת: {len(people_vector)}")
+            # מחיקה
+            removed_person = people_vector.pop(i)
+            print(f"✅ נמחק: {removed_person.get_full_name_and_id()}")
             return
 
-    print("לא נמצא אדם עם מספר תעודת זהות זה")
+    print(f"❌ לא נמצא אדם עם ת.ז. {id_number}")
 
 
-def display_all_people():
-    print("\n=== רשימת כל האנשים במערכת ===")
-    if not people_vector:
-        print("אין אנשים במערכת")
-        return
-
-    for i, person in enumerate(people_vector, 1):
-        details = person.get_person_details()
-        print(f"\n{i}. {details['first_name']} {details['last_name']}")
-        print(f"   ת.ז: {details['id_number']}")
-        print(f"   סטטוס נוכחות: {'נוכח' if details['is_present'] else 'לא נוכח'}")
+def get_all_people():
+    return people_vector
 
 
-def load_existing_people(base_path=None):
-    """
-    פונקציה זו אינה רלוונטית יותר במודל הענן.
-    טעינת האנשים מתבצעת דרך ה-API של האתר.
-    """
-    print("\n=== פונקציה זו אינה בשימוש במודל הענן ===")
-    print("טעינת האנשים מתבצעת כעת דרך ה-API של האתר,")
-    print("שמושך את הנתונים העדכניים ביותר, כולל תמונות מהענן.")
-    return True
+def get_person(person_id):
+    """מחזיר אדם לפי מספר תעודת זהות - נתונים רגילים"""
+    for person in people_vector:
+        if person.id_number == person_id:
+            return person.get_person_details()
+    return None
 
 
-def check_presence(check_all=True, specific_person=None):
-    """
-    בדיקת נוכחות - עכשיו עובדת עם URL-ים מהענן.
-    """
-    # יצירת מופע של מערכת זיהוי פנים
-    face_detector = FaceDetection()
-
-    # בדיקת נוכחות לאדם ספציפי
-    if not check_all and specific_person:
-        print(f"\n=== בדיקת נוכחות לאדם ספציפי ===")
-        print(f"בודק נוכחות עבור: {specific_person}")
-
-        parts = specific_person.split()
-        id_number = parts[2] if len(parts) >= 3 else None
-
-        person_obj = next((p for p in people_vector if p.id_number == id_number), None)
-
-        if not person_obj:
-            print(f"לא נמצא אדם עם ת.ז. {id_number} ברשימה שנטענה.")
-            return False
-
-        # --- שינוי מרכזי: שימוש ב-URL ---
-        is_present = False
-        if hasattr(person_obj, 'image_urls') and person_obj.image_urls:
-            personal_image_url = person_obj.image_urls[0]
-            is_present = face_detector.check_person_against_environment(personal_image_url)
-        else:
-            print(f"לא נמצאו תמונות בענן עבור {specific_person}")
-        # --- סוף שינוי ---
-
-        person_obj.set_presence(is_present)
-        print(f"תוצאת בדיקה: {'נוכח' if is_present else 'לא נוכח'}")
-        return is_present
-
-    # בדיקת נוכחות לכל האנשים
-    else:
-        print("\n=== בדיקת נוכחות לכל האנשים ===")
-        results = {}
-        for person in people_vector:
-            is_present = False
-            # --- שינוי מרכזי: שימוש ב-URL ---
-            if hasattr(person, 'image_urls') and person.image_urls:
-                personal_image_url = person.image_urls[0]
-                print(f"בודק את {person.get_full_name_and_id()}...")
-                is_present = face_detector.check_person_against_environment(personal_image_url)
-            else:
-                print(f"מדלג על {person.get_full_name_and_id()} - אין תמונות בענן.")
-            # --- סוף שינוי ---
-
-            person.set_presence(is_present)
-            results[person.id_number] = is_present
-            print(f"{person.first_name} {person.last_name}: {'נוכח' if is_present else 'לא נוכח'}")
-
-        print(f"\nהושלמה בדיקת נוכחות עבור {len(results)} אנשים")
-        return results
+def update_person(person_id, new_first_name, new_last_name):
+    """מעדכן פרטי אדם קיים"""
+    for person in people_vector:
+        if person.id_number == person_id:
+            # עדכון הפרטים
+            person.first_name = new_first_name
+            person.last_name = new_last_name
+            return
 
 
-def manage_data():
-    while True:
-        print("\n=== ניהול נתונים ===")
-        print("1. הוספת אדם חדש")
-        print("2. הסרת אדם")
-        print("3. הצגת כל האנשים במערכת")
-        print("4. טעינת אנשים קיימים (לא פעיל)")
-        print("5. חזרה לתפריט ראשי")
+def toggle_presence(person_id, new_presence_status):
+    """מעדכן סטטוס נוכחות של אדם לפי תעודת זהות"""
+    for person in people_vector:
+        if person.id_number == person_id:
+            person._is_present = new_presence_status
+            return
 
-        choice = input("\nבחר אפשרות (1-5): ")
 
-        if choice == "1":
-            add_new_person()
-        elif choice == "2":
-            remove_person()
-        elif choice == "3":
-            display_all_people()
-        elif choice == "4":
-            load_existing_people()
-        elif choice == "5":
-            print("חוזר לתפריט ראשי...")
-            break
-        else:
-            print("אפשרות לא חוקית, אנא נסה שנית")
+"""============================Target====================================="""
+
+
+def add_new_target(camera_number, images_url, enable_face_detection=False):
+    try:
+        # יצירת מטרה חדשה
+        new_target = Target(camera_number, images_url, enable_face_detection=enable_face_detection)
+
+        # הוספה ל-targets_vector
+        targets_vector.append(new_target)
+
+        # ✅ החזר dictionary בלבד, לא את האובייקט
+        return {
+            'success': True,
+            'message': f"מטרה במצלמה {camera_number} נוצרה בהצלחה",
+            'camera_number': camera_number,
+            'image_url': images_url,
+            'faces_count': new_target.faces_count
+        }
+
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f"שגיאה ביצירת המטרה: {str(e)}",
+            'error': 'CREATION_ERROR'
+        }
+
+
+def remove_target(camera_number):
+    """מחיקת מטרה מהמערכת"""
+    print(f"\n=== מחיקת מטרה במצלמה {camera_number} ===")
+
+    # חיפוש המטרה
+    for i, target in enumerate(targets_vector):
+        if target.camera_number == camera_number:
+            # מחיקה
+            removed_target = targets_vector.pop(i)
+            print(f"✅ נמחקה מטרה: מצלמה {removed_target.camera_number} ({removed_target.image_urls})")
+            return
+
+    print(f"❌ לא נמצאה מטרה עם מספר מצלמה {camera_number}")
+
+
+def get_all_targets():
+    return targets_vector
+
+
+def clear_all_targets():
+    targets_vector.clear()
+    print("✅ הווקטור נוקה בהצלחה")

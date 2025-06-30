@@ -3,19 +3,13 @@ import shutil
 
 
 class Person:
-    def __init__(self, first_name, last_name, id_number):
-        """
-        אתחול אובייקט אדם, מותאם לעבודה עם URL-ים מהענן.
-        האובייקט כבר לא יוצר תיקיות מקומיות.
-        """
+    def __init__(self, first_name, last_name, id_number, images_url):
         # מידע אישי
         self.first_name = first_name
         self.last_name = last_name
         self.id_number = id_number
-        self._is_present = False
-
-        # --- שינוי מרכזי: ניהול URL-ים במקום נתיבים ---
-        self.image_urls = []  # רשימה שתחזיק את הקישורים לתמונות ב-Cloudinary
+        self.image_urls = images_url
+        self.is_present = False
 
     # --- פונקציות חדשות לניהול URL-ים ---
     def add_image_url(self, url):
@@ -34,19 +28,19 @@ class Person:
     # --- פונקציות קיימות שנשארו ---
     def mark_present(self):
         """מסמן את האדם כנוכח"""
-        self._is_present = True
+        self.is_present = True
 
     def mark_absent(self):
         """מסמן את האדם כלא נוכח"""
-        self._is_present = False
+        self.is_present = False
 
     def set_presence(self, status: bool):
         """קובע את סטטוס הנוכחות"""
-        self._is_present = status
+        self.is_present = status
 
     def get_presence_status(self):
         """מחזיר את סטטוס הנוכחות הנוכחי"""
-        return self._is_present
+        return self.is_present
 
     def get_full_name_and_id(self):
         """מחזיר את השם המלא ומספר ת.ז."""
@@ -59,11 +53,6 @@ class Person:
             "last_name": self.last_name,
             "id_number": self.id_number,
             "is_present": self._is_present,
-            # --- שינוי: החזרת מידע רלוונטי לענן ---
             "image_urls": self.image_urls,
             "image_count": len(self.image_urls)
         }
-
-    # --- פונקציות שהוסרו ---
-    # get_first_image_path(), get_second_image_path(), get_third_image_path() - הוחלפו ב-get_primary_image_url()
-    # __del__(), mark_for_deletion() - מחיקת קבצים מנוהלת עכשיו ב-app.py דרך ה-API של Cloudinary
