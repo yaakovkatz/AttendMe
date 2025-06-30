@@ -50,7 +50,7 @@ class Person:
             "first_name": self.first_name,
             "last_name": self.last_name,
             "id_number": self.id_number,
-            "is_present": self._is_present,
+            "is_present": self.is_present,
             "image_urls": self.image_urls,
             "image_count": len(self.image_urls)
         }

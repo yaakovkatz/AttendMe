@@ -4,7 +4,7 @@
 =================================================================
 מבנה הקובץ מחולק לפי נושאים:
 1. Imports והגדרות
-2. הגדרות ופונקציות עזר
+הגדרות ופונקציות עזר .2
 3. Routes עיקריים (עמוד בית)
 4. API - ניהול אנשים
 5. API - ניהול תמונות זמניות
@@ -22,15 +22,10 @@ from Data_Manage import (add_new_person, remove_person, get_all_people, get_pers
                          update_person, toggle_presence, add_new_target, remove_target,
                          get_all_targets, clear_all_targets)
 from Attend_Manage import (extract_all_faces_from_targets, check_attendance_for_all_people)
-from flask import Flask, render_template, request, jsonify, send_from_directory, redirect
+from flask import Flask, render_template, request, jsonify
 import os
-import json
-from werkzeug.utils import secure_filename
 import time
-from datetime import datetime
 import logging
-import threading
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -183,7 +178,7 @@ def get_people_stats():
 
 
 # ===============================================================================
-#                           API - ניהול תמונות מטרה לזיהוי
+#                           API - ניהול תמונות מטרה
 # ===============================================================================
 
 
@@ -290,7 +285,7 @@ def delete_person_image(person_id, image_id):
 
 
 # ===============================================================================
-#                             פונקציות ניהול נתונים ונוכחות
+#                        פונקציות ניהול נתונים ובדיקת נוכחות
 # ===============================================================================
 
 @app.route('/api/face-recognition/extract-faces', methods=['POST'])
@@ -353,29 +348,6 @@ def check_attendance_all():
         }), 500
 
 
-def load_target_images():
-    """טוענת את רשימת תמונות המטרה מקובץ JSON"""
-    # TODO: מלא את הפונקציה
-    pass
-
-
-def save_target_images(images_list):
-    """שומרת את רשימת תמונות המטרה לקובץ JSON עם מטא-דטה"""
-    # TODO: מלא את הפונקציה
-    pass
-
-
-# ===============================================================================
-#                             API - יצירת אדם עם תמונות
-# ===============================================================================
-
-@app.route('/api/people/create-with-images', methods=['POST'])
-def create_person_with_images():
-    """יוצר אדם חדש במערכת רק לאחר העלאת לפחות 3 תמונות"""
-    # TODO: מלא את הפונקציה
-    pass
-
-
 # ===============================================================================
 #                            API - ניהול תמונות זמניות
 # ===============================================================================
@@ -433,12 +405,6 @@ def get_temp_images():
 #                               API - פעולות מתקדמות
 # ===============================================================================
 
-@app.route('/api/face-recognition/start', methods=['POST'])
-def start_face_recognition():
-    """מתחיל תהליך זיהוי פנים על תמונות המטרה"""
-    # TODO: מלא את הפונקציה
-    pass
-
 
 @app.route('/api/face-recognition/status', methods=['GET'])
 def get_face_recognition_status():
@@ -471,38 +437,6 @@ def mark_all_absent():
 @app.route('/api/attendance/export', methods=['GET'])
 def export_attendance():
     """מייצא דו"ח נוכחות (CSV/Excel)"""
-    # TODO: מלא את הפונקציה
-    pass
-
-
-# ===============================================================================
-#                                API - ניהול מערכת
-# ===============================================================================
-
-@app.route('/api/system/backup', methods=['POST'])
-def backup_system():
-    """יוצר גיבוי של כל נתוני המערכת"""
-    # TODO: מלא את הפונקציה
-    pass
-
-
-@app.route('/api/system/restore', methods=['POST'])
-def restore_system():
-    """משחזר נתונים מקובץ גיבוי"""
-    # TODO: מלא את הפונקציה
-    pass
-
-
-@app.route('/api/system/health', methods=['GET'])
-def system_health():
-    """בודק את תקינות המערכת (Cloudinary, קבצים וכו')"""
-    # TODO: מלא את הפונקציה
-    pass
-
-
-@app.route('/api/system/logs', methods=['GET'])
-def get_system_logs():
-    """מחזיר לוגים של המערכת"""
     # TODO: מלא את הפונקציה
     pass
 
