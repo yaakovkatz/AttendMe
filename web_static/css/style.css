@@ -230,14 +230,16 @@ header {
 /* ==================== HERO SECTION ==================== */
 /* סקציית הגיבור - דף הבית */
 .hero {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* רקע גרדיינט */
-    color: white;                  /* טקסט לבן */
-    text-align: center;            /* יישור למרכז */
-    padding: 180px 20px 100px;     /* מרווח פנימי */
-    min-height: 100vh;             /* גובה מלא */
-    display: flex;                 /* פריסה גמישה */
-    align-items: center;           /* יישור אנכי במרכז */
-    justify-content: center;       /* יישור אופקי במרכז */
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('../img/background.jpg') no-repeat;
+    background-size: cover;
+    background-position: center -10px; /* הזז 100px למעלה */
+    color: white;
+    text-align: center;
+    padding: 180px 20px 100px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* כותרת ראשית בהיירו */

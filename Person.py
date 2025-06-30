@@ -1,5 +1,3 @@
-import os
-import shutil
 
 
 class Person:

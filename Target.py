@@ -1,22 +1,12 @@
 import os
-import glob
 import cv2
 import numpy as np
 from ultralytics import YOLO
-import time
-from tabulate import tabulate
 import requests
 from io import BytesIO
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-
-# הגדרת Cloudinary (החלף בנתונים שלך)
-cloudinary.config(
-    cloud_name="your_cloud_name",
-    api_key="your_api_key",
-    api_secret="your_api_secret"
-)
 
 
 def print_status(message, emoji="ℹ️", level=0):
