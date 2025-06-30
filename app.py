@@ -520,8 +520,21 @@ if __name__ == '__main__':
         - Host: 0.0.0.0 (מאפשר גישה מכל IP)
         - Debug: False (לייצור)
     """
+    # קבלת פורט מ-Render או ברירת מחדל
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+
+    # הדפסת מידע לדיבוג
+    print(f"🚀 Starting Flask server on port {port}")
+    print(f"🌐 Host: 0.0.0.0")
+    print(f"🔧 Debug mode: False")
+
+    # הפעלת השרת
+    app.run(
+        debug=False,
+        host='0.0.0.0',
+        port=port,
+        threaded=True  # מאפשר קריאות מרובות במקביל
+    )
 
 # ===============================================================================
 #                                    הערות למימוש
