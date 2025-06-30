@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # הגדרות סף
-FIRST_THRESHOLD = 0.8
+FIRST_THRESHOLD = 0.72
 SECOND_THRESHOLD = 0.6
 GRAY_ZONE_LOWER_THRESHOLD = 0.7
 
