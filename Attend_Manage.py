@@ -127,7 +127,7 @@ def extract_all_faces_from_targets():
             print_status(f"נוצרה תיקיית מאגר פנים חדשה: {enviro_faces_dir}", emoji="📁", level=1)
 
         # בדיקה שמודל YOLO קיים
-        yolo_model_path = "yolov8n.pt"
+        yolo_model_path = "face_yolov8n.pt"
         if not os.path.exists(yolo_model_path):
             return {
                 'success': False,
