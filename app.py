@@ -65,6 +65,17 @@ def index():
     return render_template('home.html')
 
 
+@app.route('/login')
+def login_page():
+    """דף התחברות למערכת"""
+    return render_template('login.html')
+
+
+@app.route('/login.html')
+def login_page_html():
+    """דף התחברות עם סיומת .html"""
+    return render_template('login.html')
+
 # ===============================================================================
 #                               API - ניהול אנשים (CRUD)
 # ===============================================================================
