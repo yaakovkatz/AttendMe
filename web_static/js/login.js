@@ -2,6 +2,16 @@
 let currentTab = 'login';
 let isSubmitting = false;
 
+// משתנה זמני להחזקת פרטי ההרשמה
+let tempRegistrationData = {
+    school_name: '',
+    school_email: '',
+    school_phone: '',
+    school_address: '',
+    admin_username: '',
+    admin_password: ''
+};
+
 // ==================== INITIALIZATION ====================
 /**
  * אתחול הדף כשהוא נטען
@@ -13,16 +23,135 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('login-form').addEventListener('submit', handleLogin);
     document.getElementById('register-form').addEventListener('submit', handleRegister);
 
-    // מעקב שינויים בטופס הרשמה לתצוגה מקדימה
+    // מעקב שינויים בטופס הרשמה לתצוגה מקדימה ועדכון משתנה זמני
     ['school-name', 'school-email', 'school-phone', 'school-address', 'admin-username'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updatePreview);
+        document.getElementById(id).addEventListener('input', function() {
+            updateTempData(id);
+            updatePreview();
+        });
     });
 
-    // מעקב דרישות סיסמה
-    document.getElementById('admin-password').addEventListener('input', checkPasswordRequirements);
+    // מעקב דרישות סיסמה ועדכון משתנה זמני
+    document.getElementById('admin-password').addEventListener('input', function() {
+        updateTempData('admin-password');
+        checkPasswordRequirements();
+    });
 
-    showMessage('🎯 זהו דף ההתחברות לצורכי ההדגמה - ההתחברות תחזיר אותך לדף הבית', 'success');
+    showMessage('🎯 זהו דף ההתחברות - כעת מחובר למערכת Python', 'success');
 });
+
+// ==================== TEMP DATA MANAGEMENT ====================
+/**
+ * עדכון המשתנה הזמני עם נתונים מהטופס
+ * @param {string} fieldId - מזהה השדה שהשתנה
+ */
+function updateTempData(fieldId) {
+    const fieldValue = document.getElementById(fieldId).value.trim();
+
+    switch(fieldId) {
+        case 'school-name':
+            tempRegistrationData.school_name = fieldValue;
+            break;
+        case 'school-email':
+            tempRegistrationData.school_email = fieldValue;
+            break;
+        case 'school-phone':
+            tempRegistrationData.school_phone = fieldValue;
+            break;
+        case 'school-address':
+            tempRegistrationData.school_address = fieldValue;
+            break;
+        case 'admin-username':
+            tempRegistrationData.admin_username = fieldValue;
+            break;
+        case 'admin-password':
+            tempRegistrationData.admin_password = document.getElementById(fieldId).value; // ללא trim לסיסמה
+            break;
+    }
+
+    console.log('📝 עדכון נתונים זמניים:', {
+        field: fieldId,
+        value: fieldId === 'admin-password' ? '***' : fieldValue
+    });
+}
+
+/**
+ * בדיקת תקינות כל הנתונים הזמניים
+ * @returns {object} תוצאת הבדיקה
+ */
+function validateTempData() {
+    console.log('🔍 בודק תקינות נתונים זמניים...');
+
+    // בדיקת שדות חובה
+    const requiredFields = ['school_name', 'school_email', 'school_phone', 'admin_username', 'admin_password'];
+    const missingFields = [];
+
+    for (const field of requiredFields) {
+        if (!tempRegistrationData[field] || tempRegistrationData[field].length === 0) {
+            missingFields.push(field);
+        }
+    }
+
+    if (missingFields.length > 0) {
+        return {
+            valid: false,
+            error: 'missing_fields',
+            message: `השדות הבאים חובה: ${missingFields.join(', ')}`,
+            missingFields: missingFields
+        };
+    }
+
+    // בדיקת תקינות אימייל
+    if (!isValidEmail(tempRegistrationData.school_email)) {
+        return {
+            valid: false,
+            error: 'invalid_email',
+            message: 'כתובת האימייל אינה תקינה'
+        };
+    }
+
+    // בדיקת תקינות טלפון
+    if (!isValidPhone(tempRegistrationData.school_phone)) {
+        return {
+            valid: false,
+            error: 'invalid_phone',
+            message: 'מספר הטלפון אינו תקין (נדרש פורמט ישראלי)'
+        };
+    }
+
+    // בדיקת חוזק סיסמה
+    if (!isPasswordStrong(tempRegistrationData.admin_password)) {
+        return {
+            valid: false,
+            error: 'weak_password',
+            message: 'הסיסמה חייבת להכיל לפחות 8 תווים, ספרה אחת ואות אחת'
+        };
+    }
+
+    // בדיקת אורך שם משתמש
+    if (tempRegistrationData.admin_username.length < 3) {
+        return {
+            valid: false,
+            error: 'short_username',
+            message: 'שם המשתמש חייב להכיל לפחות 3 תווים'
+        };
+    }
+
+    // בדיקת תווים מיוחדים בשם משתמש
+    if (!/^[a-zA-Z0-9_]+$/.test(tempRegistrationData.admin_username)) {
+        return {
+            valid: false,
+            error: 'invalid_username',
+            message: 'שם המשתמש יכול להכיל רק אותיות אנגליות, ספרות וקו תחתון'
+        };
+    }
+
+    console.log('✅ כל הנתונים הזמניים תקינים');
+    return {
+        valid: true,
+        message: 'כל הנתונים תקינים'
+    };
+}
 
 // ==================== TAB SWITCHING ====================
 /**
@@ -46,18 +175,37 @@ function switchTab(tabName) {
 
     currentTab = tabName;
 
+    // אם עוברים לטאב הרשמה, מנקים את הנתונים הזמניים
+    if (tabName === 'register') {
+        clearTempData();
+    }
+
     // ניקוי הודעות (פרט להודעת ההדגמה)
-    if (document.getElementById('message-area').innerHTML.includes('דף ההתחברות לצורכי ההדגמה')) {
-        // שמור את הודעת ההדגמה
+    if (document.getElementById('message-area').innerHTML.includes('מחובר למערכת Python')) {
         return;
     } else {
         clearMessages();
     }
 }
 
+/**
+ * ניקוי המשתנה הזמני
+ */
+function clearTempData() {
+    tempRegistrationData = {
+        school_name: '',
+        school_email: '',
+        school_phone: '',
+        school_address: '',
+        admin_username: '',
+        admin_password: ''
+    };
+    console.log('🗑️ נתונים זמניים נוקו');
+}
+
 // ==================== LOGIN HANDLING ====================
 /**
- * טיפול בהתחברות - ללא אימות אמיתי
+ * טיפול בהתחברות - שליחה לשרת Python
  * @param {Event} event - אירוע שליחת הטופס
  */
 async function handleLogin(event) {
@@ -75,27 +223,56 @@ async function handleLogin(event) {
         return;
     }
 
-    console.log('🔐 מתחבר (הדגמה):', username);
-
+    console.log('🔐 מתחבר למערכת Python:', username);
     showSpinner('login');
 
-    // הדמיית אימות (תמיד מצליח)
-    setTimeout(() => {
-        showMessage('✅ התחברות בוצעה בהצלחה! מעביר לדף הבית...', 'success');
+    try {
+        // שליחת בקשה לשרת Python
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
 
-        // העברה לדף הבית אחרי שנייה וחצי
-        setTimeout(() => {
-            goHome();
-        }, 1500);
+        const result = await response.json();
 
-        hideSpinner('login');
-        isSubmitting = false;
-    }, 1000);
+        if (result.success) {
+            showMessage(result.message, 'success');
+            console.log('✅ התחברות מוצלחת:', result.school_info);
+
+            // שמירת פרטי המשתמש בזיכרון הדפדפן (לא localStorage!)
+            window.currentUser = {
+                username: username,
+                schoolInfo: result.school_info
+            };
+
+            // העברה לדף הבית אחרי שנייה וחצי
+            setTimeout(() => {
+                goHome();
+            }, 1500);
+        } else {
+            // הצגת הודעת שגיאה מהשרת
+            showMessage(result.message, 'error');
+            console.log('❌ שגיאת התחברות:', result.error_type);
+        }
+
+    } catch (error) {
+        console.error('❌ שגיאת רשת:', error);
+        showMessage('שגיאה בחיבור לשרת. נסה שוב.', 'error');
+    }
+
+    hideSpinner('login');
+    isSubmitting = false;
 }
 
 // ==================== REGISTRATION HANDLING ====================
 /**
- * טיפול בהרשמה - ללא אימות אמיתי
+ * טיפול בהרשמה - בדיקת נתונים ושליחה לשרת Python
  * @param {Event} event - אירוע שליחת הטופס
  */
 async function handleRegister(event) {
@@ -104,54 +281,62 @@ async function handleRegister(event) {
     if (isSubmitting) return;
     isSubmitting = true;
 
-    // איסוף נתונים
-    const formData = {
-        school_name: document.getElementById('school-name').value.trim(),
-        school_email: document.getElementById('school-email').value.trim(),
-        school_phone: document.getElementById('school-phone').value.trim(),
-        school_address: document.getElementById('school-address').value.trim(),
-        admin_username: document.getElementById('admin-username').value.trim(),
-        admin_password: document.getElementById('admin-password').value
-    };
+    console.log('🏫 מתחיל תהליך הרשמה...');
 
-    // בדיקות תקינות
-    if (!formData.school_name || !formData.school_email || !formData.school_phone ||
-        !formData.admin_username || !formData.admin_password) {
-        showMessage('נא למלא את כל השדות הנדרשים (*)', 'error');
+    // עדכון סופי של כל הנתונים הזמניים
+    ['school-name', 'school-email', 'school-phone', 'school-address', 'admin-username', 'admin-password'].forEach(id => {
+        updateTempData(id);
+    });
+
+    // בדיקת תקינות הנתונים הזמניים
+    const validation = validateTempData();
+    if (!validation.valid) {
+        showMessage(validation.message, 'error');
         isSubmitting = false;
         return;
     }
 
-    // בדיקת תקינות אימייל
-    if (!isValidEmail(formData.school_email)) {
-        showMessage('כתובת אימייל לא תקינה', 'error');
-        isSubmitting = false;
-        return;
-    }
-
-    // בדיקת חוזק סיסמה
-    if (!isPasswordStrong(formData.admin_password)) {
-        showMessage('הסיסמה חייבת להכיל לפחות 8 תווים, ספרה אחת ואות אחת', 'error');
-        isSubmitting = false;
-        return;
-    }
-
-    console.log('🏫 יוצר בית ספר חדש (הדגמה):', formData.school_name);
-
+    console.log('✅ כל הנתונים תקינים, שולח לשרת Python...');
     showSpinner('register');
 
-    // הדמיית יצירת בית ספר (תמיד מצליח)
-    setTimeout(() => {
-        showMessage('🎉 בית הספר נוצר בהצלחה! מעביר לדף הבית...', 'success');
+    try {
+        // שליחת בקשה לשרת Python
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(tempRegistrationData)
+        });
 
-        // העברה לדף הבית אחרי שנייה וחצי
-        setTimeout(() => {
-            goHome();
-        }, 2000);
+        const result = await response.json();
 
-        hideSpinner('register');
-        isSubmitting = false;
-    }, 1500);
+        if (result.success) {
+            showMessage(result.message, 'success');
+            console.log('✅ הרשמה מוצלחת:', result.school_info);
+
+            // ניקוי הטופס והנתונים הזמניים
+            document.getElementById('register-form').reset();
+            clearTempData();
+            updatePreview();
+
+            // העברה לדף הבית אחרי שתי שניות
+            setTimeout(() => {
+                goHome();
+            }, 2000);
+        } else {
+            // הצגת הודעת שגיאה מהשרת
+            showMessage(result.message, 'error');
+            console.log('❌ שגיאת הרשמה:', result.error_type);
+        }
+
+    } catch (error) {
+        console.error('❌ שגיאת רשת:', error);
+        showMessage('שגיאה בחיבור לשרת. נסה שוב.', 'error');
+    }
+
+    hideSpinner('register');
+    isSubmitting = false;
 }
 
 // ==================== PREVIEW FUNCTIONS ====================
@@ -159,21 +344,17 @@ async function handleRegister(event) {
  * עדכון תצוגה מקדימה של בית הספר
  */
 function updatePreview() {
-    const name = document.getElementById('school-name').value.trim();
-    const email = document.getElementById('school-email').value.trim();
-    const phone = document.getElementById('school-phone').value.trim();
-    const address = document.getElementById('school-address').value.trim();
-    const admin = document.getElementById('admin-username').value.trim();
-
     const preview = document.getElementById('school-preview');
 
-    if (name || email || phone || admin) {
+    if (tempRegistrationData.school_name || tempRegistrationData.school_email ||
+        tempRegistrationData.school_phone || tempRegistrationData.admin_username) {
+
         preview.style.display = 'block';
-        document.getElementById('preview-name').textContent = name || '-';
-        document.getElementById('preview-email').textContent = email || '-';
-        document.getElementById('preview-phone').textContent = phone || '-';
-        document.getElementById('preview-address').textContent = address || '-';
-        document.getElementById('preview-admin').textContent = admin || '-';
+        document.getElementById('preview-name').textContent = tempRegistrationData.school_name || '-';
+        document.getElementById('preview-email').textContent = tempRegistrationData.school_email || '-';
+        document.getElementById('preview-phone').textContent = tempRegistrationData.school_phone || '-';
+        document.getElementById('preview-address').textContent = tempRegistrationData.school_address || '-';
+        document.getElementById('preview-admin').textContent = tempRegistrationData.admin_username || '-';
     } else {
         preview.style.display = 'none';
     }
@@ -184,7 +365,7 @@ function updatePreview() {
  * בדיקת דרישות סיסמה ועדכון ויזואלי
  */
 function checkPasswordRequirements() {
-    const password = document.getElementById('admin-password').value;
+    const password = tempRegistrationData.admin_password;
 
     const lengthReq = document.getElementById('length-req');
     const numberReq = document.getElementById('number-req');
@@ -248,6 +429,23 @@ function checkPasswordRequirements() {
 function isValidEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
+}
+
+/**
+ * בדיקת תקינות מספר טלפון ישראלי
+ * @param {string} phone - מספר הטלפון
+ * @returns {boolean} האם הטלפון תקין
+ */
+function isValidPhone(phone) {
+    // פורמטים מקובלים: 03-1234567, 054-1234567, +972-3-1234567
+    const patterns = [
+        /^0[2-9]-?\d{7}$/,           // 03-1234567 או 031234567
+        /^05[0-9]-?\d{7}$/,         // 054-1234567 או 0541234567
+        /^\+972-?[2-9]-?\d{7}$/,    // +972-3-1234567
+        /^[2-9]\d{6,7}$/            // 1234567 או 12345678
+    ];
+
+    return patterns.some(pattern => pattern.test(phone.replace(/\s/g, '')));
 }
 
 /**
@@ -316,26 +514,33 @@ function goHome(event) {
  */
 function showHelp() {
     const helpMessage = `
-🎯 הדגמת מערכת AttendMe
-
-זהו דף התחברות לצורכי הדגמה בלבד:
+🎯 מערכת AttendMe - ניהול בתי ספר
 
 ✅ התחברות:
-• הזן כל שם משתמש וסיסמה
-• הלחיצה על "כניסה למערכת" תחזיר אותך לדף הבית
+• הזן שם משתמש וסיסמה של מנהל בית ספר רשום
+• המערכת תבדוק אם המשתמש קיים ואם הסיסמה נכונה
 
 ✅ הרשמה:
 • מלא את כל השדות הנדרשים (*)
-• הלחיצה על "צור בית ספר חדש" תחזיר אותך לדף הבית
+• שם המשתמש חייב להיות ייחודי (לא קיים במערכת)
+• האימייל חייב להיות ייחודי ותקין
 • דרישות הסיסמה: 8 תווים + ספרה + אות
 
-📝 הערה:
-זהו דף הדגמה - אין אימות אמיתי ולא נשמרים נתונים.
+🔧 תכונות מתקדמות:
+• בדיקת תקינות בזמן אמת
+• תצוגה מקדימה של פרטי בית הספר
+• הודעות שגיאה מפורטות
+• חיבור למסד נתונים Python
+
+📞 תמיכה:
+אם נתקלת בבעיות, פנה למנהל המערכת.
     `;
 
     alert(helpMessage);
 }
 
 // ==================== DEBUG INFO ====================
-console.log('📄 login.js נטען בהצלחה');
-console.log('🎯 מוכן לטיפול בהתחברות והרשמה (הדגמה)');
+console.log('📄 login.js (מעודכן) נטען בהצלחה');
+console.log('🔗 מחובר למערכת Python School.py');
+console.log('💾 משתמש במשתנה זמני לבדיקת נתונים');
+console.log('🎯 מוכן לטיפול בהתחברות והרשמה אמיתית');

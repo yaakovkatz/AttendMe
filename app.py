@@ -4,13 +4,14 @@
 =================================================================
 מבנה הקובץ מחולק לפי נושאים:
 1. Imports והגדרות
-הגדרות ופונקציות עזר .2
+2. הגדרות ופונקציות עזר
 3. Routes עיקריים (עמוד בית)
-4. API - ניהול אנשים
-5. API - ניהול תמונות זמניות
-6. API - ניהול תמונות מטרה
-7. API - פונקציות מתקדמות
-8. הפעלת השרת
+4. School Authentication Routes (הוסף!)
+5. API - ניהול אנשים
+6. API - ניהול תמונות זמניות
+7. API - ניהול תמונות מטרה
+8. API - פונקציות מתקדמות
+9. הפעלת השרת
 =================================================================
 """
 
@@ -22,7 +23,12 @@ from Data_Manage import (add_new_person, remove_person, get_all_people, get_pers
                          update_person, toggle_presence, add_new_target, remove_target,
                          get_all_targets, clear_all_targets)
 from Attend_Manage import (extract_all_faces_from_targets, check_attendance_for_all_people)
+
+# ייבוא מערכת School (הוסף!)
+from School import login_user, register_school, add_demo_data, print_all_schools
+
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import os
 import time
 import logging
@@ -51,6 +57,9 @@ app = Flask(__name__,
             template_folder='web_templates',
             static_folder='web_static')
 
+# הוסף CORS (הוסף!)
+CORS(app)
+
 logging.basicConfig(level=logging.INFO)
 app.logger.setLevel(logging.INFO)
 
@@ -75,6 +84,192 @@ def login_page():
 def login_page_html():
     """דף התחברות עם סיומת .html"""
     return render_template('login.html')
+
+# ===============================================================================
+#                         SCHOOL AUTHENTICATION ROUTES (הוסф!)
+# ===============================================================================
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    """
+    API להתחברות משתמש - מערכת בתי ספר
+    """
+    try:
+        # קבלת נתונים מה-JavaScript
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'לא התקבלו נתונים',
+                'error_type': 'no_data'
+            }), 400
+
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+
+        # בדיקת נתונים בסיסית
+        if not username or not password:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש וסיסמה נדרשים',
+                'error_type': 'missing_credentials'
+            }), 400
+
+        print(f"🔐 API: ניסיון התחברות - {username}")
+
+        # קריאה לפונקציה מ-School.py
+        result = login_user(username, password)
+
+        # החזרת התוצאה ל-JavaScript
+        if result['success']:
+            print(f"✅ API: התחברות מוצלחת - {username}")
+            return jsonify(result), 200
+        else:
+            print(f"❌ API: התחברות נכשלה - {username} ({result['error_type']})")
+            return jsonify(result), 401
+
+    except Exception as e:
+        print(f"❌ API: שגיאה בהתחברות - {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}',
+            'error_type': 'server_error'
+        }), 500
+
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    """
+    API להרשמת בית ספר חדש
+    """
+    try:
+        # קבלת נתונים מה-JavaScript
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'לא התקבלו נתונים',
+                'error_type': 'no_data'
+            }), 400
+
+        print(f"🏫 API: ניסיון הרשמה - {data.get('school_name', 'לא צוין')}")
+
+        # קריאה לפונקציה מ-School.py
+        result = register_school(data)
+
+        # החזרת התוצאה ל-JavaScript
+        if result['success']:
+            print(f"✅ API: הרשמה מוצלחת - {data.get('school_name')}")
+            return jsonify(result), 201
+        else:
+            print(f"❌ API: הרשמה נכשלה - {data.get('school_name')} ({result['error_type']})")
+            return jsonify(result), 400
+
+    except Exception as e:
+        print(f"❌ API: שגיאה בהרשמה - {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}',
+            'error_type': 'server_error'
+        }), 500
+
+@app.route('/api/schools', methods=['GET'])
+def api_get_schools():
+    """
+    API לקבלת רשימת כל בתי הספר (לבדיקה)
+    """
+    try:
+        from School import get_all_schools, get_schools_count
+
+        schools = get_all_schools()
+        schools_list = []
+
+        for school in schools:
+            schools_list.append({
+                'school_name': school.school_name,
+                'school_email': school.school_email,
+                'school_phone': school.school_phone,
+                'admin_username': school.admin_username,
+                'created_at': school.created_at
+            })
+
+        return jsonify({
+            'success': True,
+            'count': get_schools_count(),
+            'schools': schools_list
+        }), 200
+
+    except Exception as e:
+        print(f"❌ API: שגיאה בקבלת בתי ספר - {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}',
+            'error_type': 'server_error'
+        }), 500
+
+@app.route('/api/schools/<username>', methods=['GET'])
+def api_get_school_by_username(username):
+    """
+    API לקבלת פרטי בית ספר לפי שם משתמש
+    """
+    try:
+        from School import find_school_by_username
+
+        school = find_school_by_username(username)
+
+        if school:
+            return jsonify({
+                'success': True,
+                'school_info': school.get_school_info()
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': f'לא נמצא בית ספר עם שם המשתמש: {username}',
+                'error_type': 'school_not_found'
+            }), 404
+
+    except Exception as e:
+        print(f"❌ API: שגיאה בחיפוש בית ספר - {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}',
+            'error_type': 'server_error'
+        }), 500
+
+@app.route('/api/test', methods=['GET'])
+def api_test():
+    """
+    API לבדיקת תקינות השרת
+    """
+    return jsonify({
+        'success': True,
+        'message': 'השרת פועל תקין! 🚀',
+        'timestamp': __import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }), 200
+
+@app.route('/api/debug/schools', methods=['GET'])
+def api_debug_schools():
+    """
+    API לדיבוג - הדפסת כל בתי הספר לקונסול
+    """
+    try:
+        print("\n" + "="*60)
+        print("🔧 API DEBUG: הדפסת כל בתי הספר")
+        print_all_schools()
+        print("="*60 + "\n")
+
+        return jsonify({
+            'success': True,
+            'message': 'רשימת בתי הספר הודפסה לקונסול'
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'שגיאה: {str(e)}'
+        }), 500
 
 # ===============================================================================
 #                               API - ניהול אנשים (CRUD)
@@ -451,6 +646,43 @@ def export_attendance():
     # TODO: מלא את הפונקציה
     pass
 
+# ===============================================================================
+#                                ERROR HANDLERS (הוסף!)
+# ===============================================================================
+
+@app.errorhandler(404)
+def not_found(error):
+    """
+    טיפול בשגיאת 404
+    """
+    return jsonify({
+        'success': False,
+        'message': 'הדף המבוקש לא נמצא',
+        'error_type': 'not_found'
+    }), 404
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    """
+    טיפול בשגיאת 405
+    """
+    return jsonify({
+        'success': False,
+        'message': 'שיטת HTTP לא מורשית',
+        'error_type': 'method_not_allowed'
+    }), 405
+
+@app.errorhandler(500)
+def internal_error(error):
+    """
+    טיפול בשגיאת 500
+    """
+    return jsonify({
+        'success': False,
+        'message': 'שגיאת שרת פנימית',
+        'error_type': 'internal_server_error'
+    }), 500
+
 
 # ===============================================================================
 #                                   הפעלת השרת
@@ -465,6 +697,17 @@ if __name__ == '__main__':
         - Host: 0.0.0.0 (מאפשר גישה מכל IP)
         - Debug: False (לייצור)
     """
+
+    # אתחול מערכת בתי הספר (הוסף!)
+    print("🏫 מאתחל מערכת בתי ספר...")
+    try:
+        add_demo_data()
+        from School import get_schools_count
+        print(f"✅ מערכת בתי ספר מוכנה עם {get_schools_count()} בתי ספר לדוגמה")
+    except Exception as e:
+        print(f"⚠️  שגיאה באתחול מערכת בתי ספר: {e}")
+        print("📝 ודא שקובץ School.py קיים באותה תיקייה")
+
     # קבלת פורט מ-Render או ברירת מחדל
     port = int(os.environ.get("PORT", 5000))
 
@@ -472,6 +715,15 @@ if __name__ == '__main__':
     print(f"🚀 Starting Flask server on port {port}")
     print(f"🌐 Host: 0.0.0.0")
     print(f"🔧 Debug mode: False")
+
+    # הודעה על APIs חדשים (הוסף!)
+    print("\n🎯 מערכת בתי ספר זמינה:")
+    print("• POST /api/login - התחברות")
+    print("• POST /api/register - הרשמה")
+    print("• GET  /api/schools - רשימת בתי ספר")
+    print("• GET  /api/test - בדיקת תקינות")
+    print("📝 משתמש לבדיקה: admin / admin123")
+    print("="*60)
 
     # הפעלת השרת
     app.run(
@@ -501,10 +753,10 @@ if __name__ == '__main__':
    - מחיקה מ-Cloudinary
    - ניהול תמונות זמניות
 
-✅ פונקציות מתקדמות:
-   - זיהוי פנים (אם רלוונטי)
-   - ייצוא נתונים
-   - גיבויים
+✅ מערכת בתי ספר (הוסף!):
+   - ייבוא מ-School.py
+   - התחברות והרשמה
+   - APIs מושלמים
 
 💡 טיפים למימוש:
    - התחל עם הפונקציות הפשוטות (load_data, save_data)
