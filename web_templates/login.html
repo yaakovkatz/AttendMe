@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendMe - כניסה למערכת</title>
+    <link rel="stylesheet" href="/web_static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* סטיילים ייחודיים לדף הכניסה */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            margin: 20px;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .login-header .logo-icon {
+            font-size: 2.5rem;
+        }
+
+        .login-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .login-tabs {
+            display: flex;
+            background: #f8f9fa;
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .login-tab.active {
+            background: white;
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .login-content {
+            padding: 30px;
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-footer a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-right: 4px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-right: 4px solid #c3e6cb;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 10px auto;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .school-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-right: 4px solid #3498db;
+        }
+
+        .school-preview h4 {
+            margin: 0 0 10px 0;
+            color: #3498db;
+        }
+
+        .school-preview p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .password-requirements {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .requirement {
+            display: block;
+            margin: 2px 0;
+        }
+
+        .requirement.met {
+            color: #27ae60;
+        }
+
+        .requirement.not-met {
+            color: #e74c3c;
+        }
+
+        /* רספונסיבי */
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .login-header {
+                padding: 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .login-content {
+                padding: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- כותרת -->
+        <div class="login-header">
+            <h1>
+                <span class="logo-icon">👁️</span>
+                AttendMe
+            </h1>
+            <p>מערכת חכמה לניהול נוכחות</p>
+        </div>
+
+        <!-- טאבים -->
+        <div class="login-tabs">
+            <button class="login-tab active" onclick="switchTab('login')">
+                <i class="fas fa-sign-in-alt"></i> התחברות
+            </button>
+            <button class="login-tab" onclick="switchTab('register')">
+                <i class="fas fa-user-plus"></i> הרשמה
+            </button>
+        </div>
+
+        <div class="login-content">
+            <!-- אזור הודעות -->
+            <div id="message-area"></div>
+
+            <!-- טופס התחברות -->
+            <form id="login-form" class="login-form active">
+                <div class="form-group">
+                    <label for="login-username">
+                        <i class="fas fa-user"></i> שם משתמש:
+                    </label>
+                    <input type="text" id="login-username" name="username" required
+                           autocomplete="username" placeholder="הזן שם משתמש">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">
+                        <i class="fas fa-lock"></i> סיסמה:
+                    </label>
+                    <input type="password" id="login-password" name="password" required
+                           autocomplete="current-password" placeholder="הזן סיסמה">
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-sign-in-alt"></i> כניסה למערכת
+                </button>
+
+                <div class="loading-spinner" id="login-spinner"></div>
+            </form>
+
+            <!-- טופס הרשמה -->
+            <form id="register-form" class="login-form">
+                <h4 style="text-align: center; color: #3498db; margin-bottom: 20px;">
+                    🏫 יצירת בית ספר חדש
+                </h4>
+
+                <div class="form-group">
+                    <label for="school-name">
+                        <i class="fas fa-school"></i> שם בית הספר: *
+                    </label>
+                    <input type="text" id="school-name" name="school_name" required
+                           placeholder="לדוגמה: בית ספר יסודי הרצל">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="school-email">
+                            <i class="fas fa-envelope"></i> אימייל: *
+                        </label>
+                        <input type="email" id="school-email" name="school_email" required
+                               placeholder="school@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="school-phone">
+                            <i class="fas fa-phone"></i> טלפון: *
+                        </label>
+                        <input type="tel" id="school-phone" name="school_phone" required
+                               placeholder="03-1234567">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="school-address">
+                        <i class="fas fa-map-marker-alt"></i> כתובת בית הספר:
+                    </label>
+                    <textarea id="school-address" name="school_address"
+                              placeholder="רחוב הרצל 123, תל אביב"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="admin-username">
+                            <i class="fas fa-user-shield"></i> שם משתמש מנהל: *
+                        </label>
+                        <input type="text" id="admin-username" name="admin_username" required
+                               placeholder="admin" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">
+                            <i class="fas fa-key"></i> סיסמת מנהל: *
+                        </label>
+                        <input type="password" id="admin-password" name="admin_password" required
+                               autocomplete="new-password" placeholder="סיסמה חזקה">
+                        <div class="password-requirements">
+                            <span class="requirement" id="length-req">❌ לפחות 8 תווים</span>
+                            <span class="requirement" id="number-req">❌ לפחות ספרה אחת</span>
+                            <span class="requirement" id="letter-req">❌ לפחות אות אחת</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="register-submit">
+                    <i class="fas fa-school"></i> צור בית ספר חדש
+                </button>
+
+                <div class="loading-spinner" id="register-spinner"></div>
+
+                <!-- תצוגה מקדימה של בית הספר -->
+                <div id="school-preview" class="school-preview" style="display: none;">
+                    <h4>🏫 תצוגה מקדימה</h4>
+                    <p><strong>שם:</strong> <span id="preview-name">-</span></p>
+                    <p><strong>אימייל:</strong> <span id="preview-email">-</span></p>
+                    <p><strong>טלפון:</strong> <span id="preview-phone">-</span></p>
+                    <p><strong>כתובת:</strong> <span id="preview-address">-</span></p>
+                    <p><strong>מנהל:</strong> <span id="preview-admin">-</span></p>
+                </div>
+            </form>
+
+            <!-- כותרת תחתונה -->
+            <div class="form-footer">
+                <p>© 2025 AttendMe - כל הזכויות שמורות</p>
+                <a href="#" onclick="showHelp()">
+                    <i class="fas fa-question-circle"></i> זקוק לעזרה?
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // משתנים גלובליים
+        let currentTab = 'login';
+
+        // אתחול הדף
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 דף כניסה נטען בהצלחה');
+
+            // מאזיני אירועים לטפסים
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('register-form').addEventListener('submit', handleRegister);
+
+            // מעקב שינויים בטופס הרשמה לתצוגה מקדימה
+            ['school-name', 'school-email', 'school-phone', 'school-address', 'admin-username'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updatePreview);
+            });
+
+            // מעקב דרישות סיסמה
+            document.getElementById('admin-password').addEventListener('input', checkPasswordRequirements);
+
+            // בדיקת חיבור לשרת
+            checkServerConnection();
+        });
+
+        /**
+         * בדיקת חיבור לשרת
+         */
+        async function checkServerConnection() {
+            try {
+                const response = await fetch('/api/health', {
+                    method: 'GET',
+                    timeout: 5000
+                });
+
+                if (response.ok) {
+                    console.log('✅ חיבור לשרת תקין');
+                } else {
+                    console.warn('⚠️ שרת מגיב אבל יש בעיה');
+                }
+            } catch (error) {
+                console.error('❌ שגיאה בחיבור לשרת:', error);
+                showMessage('⚠️ בעיית חיבור לשרת - יכולות להיות בעיות בהתחברות', 'error');
+            }
+        }
+
+        /**
+         * החלפת טאבים בין התחברות והרשמה
+         */
+        function switchTab(tabName) {
+            console.log(`🔄 מחליף לטאב: ${tabName}`);
+
+            // עדכון טאבים
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.login-tab').classList.add('active');
+
+            // עדכון תוכן
+            document.querySelectorAll('.login-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-form`).classList.add('active');
+
+            currentTab = tabName;
+
+            // ניקוי הודעות
+            clearMessages();
+        }
+
+        /**
+         * טיפול בהתחברות
+         */
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!username || !password) {
+                showMessage('נא למלא את כל השדות', 'error');
+                return;
+            }
+
+            console.log('🔐 מנסה להתחבר:', username);
+
+            showSpinner('login');
+            clearMessages();
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                console.log('📨 תגובת התחברות:', data);
+
+                if (data.success) {
+                    showMessage('✅ התחברות בוצעה בהצלחה! מעביר למערכת...', 'success');
+
+                    // העברה למערכת אחרי שנייה
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1500);
+                } else {
+                    showMessage(data.error || 'שגיאה בהתחברות - בדוק שם משתמש וסיסמה', 'error');
+                }
+
+            } catch (error) {
+                console.error('❌ שגיאת רשת:', error);
+                showMessage('שגיאה בחיבור לשרת - בדוק חיבור אינטרנט', 'error');
+            } finally {
+                hideSpinner('login');
+            }
+        }
+
+        /**
+         * טיפול בהרשמה
+         */
+        async function handleRegister(event) {
+            event.preventDefault();
+
+            // איסוף נתונים
+            const formData = {
+                school_name: document.getElementById('school-name').value.trim(),
+                school_email: document.getElementById('school-email').value.trim(),
+                school_phone: document.getElementById('school-phone').value.trim(),
+                school_address: document.getElementById('school-address').value.trim(),
+                admin_username: document.getElementById('admin-username').value.trim(),
+                admin_password: document.getElementById('admin-password').value
+            };
+
+            // בדיקות תקינות
+            if (!formData.school_name || !formData.school_email || !formData.school_phone ||
+                !formData.admin_username || !formData.admin_password) {
+                showMessage('נא למלא את כל השדות הנדרשים (*)', 'error');
+                return;
+            }
+
+            // בדיקת תקינות אימייל
+            if (!isValidEmail(formData.school_email)) {
+                showMessage('כתובת אימייל לא תקינה', 'error');
+                return;
+            }
+
+            // בדיקת חוזק סיסמה
+            if (!isPasswordStrong(formData.admin_password)) {
+                showMessage('הסיסמה חייבת להכיל לפחות 8 תווים, ספרה אחת ואות אחת', 'error');
+                return;
+            }
+
+            console.log('🏫 יוצר בית ספר חדש:', formData.school_name);
+
+            showSpinner('register');
+            clearMessages();
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                console.log('📨 תגובת הרשמה:', data);
+
+                if (data.success) {
+                    showMessage('🎉 בית הספר נוצר בהצלחה! מתחבר למערכת...', 'success');
+
+                    // התחברות אוטומטית אחרי יצירת בית ספר
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 2000);
+                } else {
+                    showMessage(data.error || 'שגיאה ביצירת בית הספר', 'error');
+                }
+
+            } catch (error) {
+                console.error('❌ שגיאת רשת:', error);
+                showMessage('שגיאה בחיבור לשרת', 'error');
+            } finally {
+                hideSpinner('register');
+            }
+        }
+
+        /**
+         * עדכון תצוגה מקדימה
+         */
+        function updatePreview() {
+            const name = document.getElementById('school-name').value.trim();
+            const email = document.getElementById('school-email').value.trim();
+            const phone = document.getElementById('school-phone').value.trim();
+            const address = document.getElementById('school-address').value.trim();
+            const admin = document.getElementById('admin-username').value.trim();
+
+            const preview = document.getElementById('school-preview');
+
+            if (name || email || phone || admin) {
+                preview.style.display = 'block';
+                document.getElementById('preview-name').textContent = name || '-';
+                document.getElementById('preview-email').textContent = email || '-';
+                document.getElementById('preview-phone').textContent = phone || '-';
+                document.getElementById('preview-address').textContent = address || '-';
+                document.getElementById('preview-admin').textContent = admin || '-';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        /**
+         * בדיקת דרישות סיסמה
+         */
+        function checkPasswordRequirements() {
+            const password = document.getElementById('admin-password').value;
+
+            const lengthReq = document.getElementById('length-req');
+            const numberReq = document.getElementById('number-req');
+            const letterReq = document.getElementById('letter-req');
+            const submitBtn = document.getElementById('register-submit');
+
+            let allMet = true;
+
+            // בדיקת אורך
+            if (password.length >= 8) {
+                lengthReq.classList.remove('not-met');
+                lengthReq.classList.add('met');
+                lengthReq.innerHTML = '✅ לפחות 8 תווים';
+            } else {
+                lengthReq.classList.remove('met');
+                lengthReq.classList.add('not-met');
+                lengthReq.innerHTML = '❌ לפחות 8 תווים';
+                allMet = false;
+            }
+
+            // בדיקת ספרה
+            if (/\d/.test(password)) {
+                numberReq.classList.remove('not-met');
+                numberReq.classList.add('met');
+                numberReq.innerHTML = '✅ לפחות ספרה אחת';
+            } else {
+                numberReq.classList.remove('met');
+                numberReq.classList.add('not-met');
+                numberReq.innerHTML = '❌ לפחות ספרה אחת';
+                allMet = false;
+            }
+
+            // בדיקת אות
+            if (/[a-zA-Zא-ת]/.test(password)) {
+                letterReq.classList.remove('not-met');
+                letterReq.classList.add('met');
+                letterReq.innerHTML = '✅ לפחות אות אחת';
+            } else {
+                letterReq.classList.remove('met');
+                letterReq.classList.add('not-met');
+                letterReq.innerHTML = '❌ לפחות אות אחת';
+                allMet = false;
+            }
+
+            // עדכון כפתור
+            if (allMet && password.length > 0) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.7';
+            }
+        }
+
+        /**
+         * פונקציות עזר
+         */
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function isPasswordStrong(password) {
+            return password.length >= 8 && /\d/.test(password) && /[a-zA-Zא-ת]/.test(password);
+        }
+
+        function showMessage(message, type) {
+            const messageArea = document.getElementById('message-area');
+            const className = type === 'error' ? 'error-message' : 'success-message';
+            messageArea.innerHTML = `<div class="${className}"><i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${message}</div>`;
+
+            // גלילה למעלה להצגת ההודעה
+            messageArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function clearMessages() {
+            document.getElementById('message-area').innerHTML = '';
+        }
+
+        function showSpinner(formType) {
+            document.getElementById(`${formType}-spinner`).style.display = 'block';
+            document.querySelector(`#${formType}-form .submit-btn`).disabled = true;
+        }
+
+        function hideSpinner(formType) {
+            document.getElementById(`${formType}-spinner`).style.display = 'none';
+            document.querySelector(`#${formType}-form .submit-btn`).disabled = false;
+        }
+
+        function showHelp() {
+            const helpMessage = `
+            📞 עזרה והדרכה:
+
+            התחברות:
+            • וודא שהקלדת שם משתמש וסיסמה נכונים
+            • אם שכחת סיסמה, פנה למנהל המערכת
+
+            הרשמה:
+            • מלא את כל השדות הנדרשים (*)
+            • השתמש בסיסמה חזקה (8 תווים + ספרה + אות)
+            • וודא שכתובת האימייל תקינה
+
+            בעיות טכניות:
+            • רענן את הדף ונסה שוב
+            • בדוק חיבור אינטרנט
+            • נקה cache של הדפדפן
+
+            לתמיכה נוספת פנה למפתח המערכת
+            `;
+
+            alert(helpMessage);
+        }
+
+        // מניעת שליחה כפולה
+        let isSubmitting = false;
+
+        function preventDoubleSubmit(formId) {
+            if (isSubmitting) return false;
+            isSubmitting = true;
+
+            setTimeout(() => {
+                isSubmitting = false;
+            }, 3000);
+
+            return true;
+        }
+
+        // עדכון מאזיני הטפסים למניעת שליחה כפולה
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            if (!preventDoubleSubmit('login')) {
+                event.preventDefault();
+                return;
+            }
+            handleLogin(event);
+        });
+
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            if (!preventDoubleSubmit('register')) {
+                event.preventDefault();
+                return;
+            }
+            handleRegister(event);
+        });
+    </script>
+
+</body>
+</html>
