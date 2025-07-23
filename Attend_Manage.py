@@ -1,12 +1,6 @@
-"""
-=================================================================
-                    Attend_Manage.py - ניהול נוכחות מתקדם
-=================================================================
-גרסה 2.0 - מעודכן לעבודה עם מערכת בתי ספר מרובים
-=================================================================
-"""
+from Data_Manage import people_vector
+from Data_Manage import targets_vector
 
-from School_Manager import school_manager
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -18,12 +12,11 @@ import glob
 import shutil
 from tabulate import tabulate
 import logging
-from datetime import datetime
 
 # הגדרת logger
 logger = logging.getLogger(__name__)
 
-# הגדרות סף - מעודכנות
+# הגדרות סף
 FIRST_THRESHOLD = 0.72
 SECOND_THRESHOLD = 0.6
 GRAY_ZONE_LOWER_THRESHOLD = 0.7
@@ -34,6 +27,7 @@ def print_status(message, emoji="ℹ️", level=0):
     indent = "  " * level
     log_message = f"{indent}{emoji} {message}"
     print(log_message)
+    # הסרנו את השורה logger.info(log_message) כדי למנוע כפילות
 
 
 def normalize_similarity_score(value):
@@ -107,7 +101,7 @@ def verify_face_secondary(img1_path, img2_path):
             enforce_detection=False,
             detector_backend='opencv',
             model_name='Facenet',
-            distance_metric='cosine',
+            distance_metric='cosine',  # שינוי ל-cosine במקום euclidean
             align=True
         )
         return 1 - result['distance']
@@ -116,32 +110,18 @@ def verify_face_secondary(img1_path, img2_path):
         return 0
 
 
-def extract_all_faces_from_targets(school_id=None):
+def extract_all_faces_from_targets():
     """
-    מחלצת פנים מכל תמונות המטרה של בית ספר ספציפי ושומרת אותן בתיקייה EnviroFaces
-
-    Args:
-        school_id (str): מזהה בית הספר
+    מחלצת פנים מכל תמונות המטרה ושומרת אותן בתיקייה EnviroFaces
 
     Returns:
         dict: {'success': bool, 'faces_extracted': int, 'message': str}
     """
     try:
-        print_status("מאתחל מערכת חילוץ פנים מתקדמת...", emoji="🚀")
+        print_status("מאתחל מערכת חילוץ פנים...", emoji="🚀")
 
-        # בדיקה שבית הספר קיים
-        school = school_manager.get_school(school_id)
-        if not school:
-            return {
-                'success': False,
-                'faces_extracted': 0,
-                'message': f'בית ספר לא נמצא: {school_id}'
-            }
-
-        print_status(f"עובד עבור בית הספר: {school.name} (ID: {school_id})", emoji="🏫")
-
-        # יצירת תיקיית EnviroFaces ספציפית לבית הספר
-        enviro_faces_dir = f"EnviroFaces_{school_id}"
+        # יצירת תיקיית EnviroFaces אם לא קיימת
+        enviro_faces_dir = "EnviroFaces"
         if not os.path.exists(enviro_faces_dir):
             os.makedirs(enviro_faces_dir)
             print_status(f"נוצרה תיקיית מאגר פנים חדשה: {enviro_faces_dir}", emoji="📁", level=1)
@@ -166,31 +146,13 @@ def extract_all_faces_from_targets(school_id=None):
                 'message': f"שגיאה בטעינת מודל YOLO: {str(e)}"
             }
 
-        # קבלת המטרות של בית הספר הספציפי
-        targets_vector = school.get_all_targets()
-
-        if not targets_vector:
-            return {
-                'success': False,
-                'faces_extracted': 0,
-                'message': f'לא נמצאו מטרות בבית הספר {school.name}'
-            }
-
-        print_status(f"נמצאו {len(targets_vector)} מטרות בבית הספר {school.name}", emoji="📊", level=1)
-
         # מונה פנים גלובלי
         face_counter = 1
         total_faces_extracted = 0
 
-        # מעבר על כל המטרות של בית הספר הזה
+        # מעבר על כל targets
         for target_index, target in enumerate(targets_vector):
-            print_status(f"מעבד מטרה {target_index + 1}: מצלמה {target.camera_number} בבית הספר {school.name}",
-                         emoji="🔍")
-
-            # בדיקה שהמטרה פעילה
-            if not target.is_active:
-                print_status(f"מצלמה {target.camera_number} לא פעילה, מדלג", emoji="⚠️", level=1)
-                continue
+            print_status(f"מעבד תמונת מטרה {target_index + 1}: מצלמה {target.camera_number}", emoji="🔍")
 
             # קבלת URL התמונה
             image_url = target.image_url
@@ -251,8 +213,8 @@ def extract_all_faces_from_targets(school_id=None):
                             print_status(f"פנים ריקות עבור פנים {box_index + 1}", emoji="⚠️", level=2)
                             continue
 
-                        # שמירת הפנים עם שם ייחודי לבית הספר
-                        face_filename = f"school_{school_id}_camera_{target.camera_number}_face_{face_counter}.jpg"
+                        # שמירת הפנים
+                        face_filename = f"f{face_counter}.jpg"
                         face_path = os.path.join(enviro_faces_dir, face_filename)
 
                         success = cv2.imwrite(face_path, face)
@@ -269,25 +231,18 @@ def extract_all_faces_from_targets(school_id=None):
                                      level=2)
                         continue
 
-                # עדכון סטטיסטיקות המטרה
-                target.last_detection_time = datetime.now()
-
             except Exception as target_error:
                 print_status(f"שגיאה בעיבוד target {target_index + 1}: {str(target_error)}", emoji="❌")
                 continue
 
-        # שמירת נתוני בית הספר
-        school_manager.save_school_data(school_id)
-
         # סיכום
-        message = f"הושלם חילוץ פנים לבית הספר {school.name}: {total_faces_extracted} פנים נשמרו בתיקייה {enviro_faces_dir}"
+        message = f"הושלם חילוץ פנים: {total_faces_extracted} פנים נשמרו בתיקייה {enviro_faces_dir}"
         print_status(message, emoji="🎉")
 
         return {
             'success': True,
             'faces_extracted': total_faces_extracted,
-            'message': message,
-            'school_name': school.name
+            'message': message
         }
 
     except Exception as e:
@@ -300,25 +255,21 @@ def extract_all_faces_from_targets(school_id=None):
         }
 
 
-def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_name, last_name, school_id=None):
+def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_name, last_name):
     """
-    גרסה מתקדמת של בדיקת תמונה בודדת עם ניתוח מפורט וטבלאות - מעודכן לבית ספר
+    גרסה מתקדמת של בדיקת תמונה בודדת עם ניתוח מפורט וטבלאות
 
     Args:
         image_path (str): נתיב לתמונה לבדיקה
         faces_in_db (list): רשימת נתיבי תמונות פנים במאגר
         first_name (str): שם פרטי (לצורך לוג)
         last_name (str): שם משפחה (לצורך לוג)
-        school_id (str): מזהה בית הספר
 
     Returns:
         bool: True אם נמצאה התאמה, False אחרת
     """
     try:
-        school = school_manager.get_school(school_id) if school_id else None
-        school_name = school.name if school else "לא ידוע"
-
-        print_status(f"מתחיל בדיקה מפורטת עבור {first_name} {last_name} בבית הספר {school_name}", emoji="🔍", level=3)
+        print_status(f"מתחיל בדיקה מפורטת עבור {first_name} {last_name}", emoji="🔍", level=3)
 
         # בדיקת קיום התמונה
         if not os.path.exists(image_path):
@@ -330,8 +281,8 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
         definite_matches = []  # התאמות ודאיות (מעל הסף)
         gray_zone_matches = []  # התאמות באזור האפור
 
-        # יצירת תיקיית Identified_Images ספציפית לבית ספר
-        identified_dir = f"./Identified_Images_{school_id}" if school_id else "./Identified_Images"
+        # יצירת תיקיית Identified_Images אם לא קיימת
+        identified_dir = "./Identified_Images"
         if not os.path.exists(identified_dir):
             os.makedirs(identified_dir)
 
@@ -395,7 +346,7 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
 
         # הדפסת טבלת תוצאות
         if results:
-            print_status(f"תוצאות בדיקה עבור {first_name} {last_name} בבית הספר {school_name}:", emoji="📊", level=3)
+            print_status(f"תוצאות בדיקה עבור {first_name} {last_name}:", emoji="📊", level=3)
             headers = ["סטטוס", "ציון סופי", "ציון שני", "ציון ראשון", "תמונה במאגר", "תמונה נבדקת"]
             print("\n" + tabulate(results, headers=headers, tablefmt="grid", stralign="center"))
 
@@ -408,7 +359,7 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
             for face_path, similarity in gray_zone_matches:
                 print_status(f"באזור אפור: {os.path.basename(face_path)} - {similarity:.3f}", level=4, emoji="🔍")
 
-        # שמירת פנים מזוהות עם שם בית הספר
+        # שמירת פנים מזוהות
         if found_match and definite_matches:
             try:
                 print_status(f"שומר {len(definite_matches)} פנים מזוהות...", emoji="💾", level=3)
@@ -416,8 +367,7 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
                 for face_in_db in definite_matches:
                     # יצירת שם קובץ חדש עבור הפנים המזוהות
                     original_number = os.path.basename(face_in_db).split('.')[0]
-                    school_suffix = f"_{school_id}" if school_id else ""
-                    new_filename = f"{first_name}_{last_name}_{original_number}{school_suffix}.jpg"
+                    new_filename = f"{first_name}_{last_name}_{original_number}.jpg"
                     new_path = os.path.join(identified_dir, new_filename)
 
                     # העתקת הקובץ (לא מחיקה מהמאגר המקורי)
@@ -429,9 +379,8 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
 
         # סיכום
         if found_match:
-            print_status(
-                f"סיכום: נמצאו {len(definite_matches)} התאמות ודאיות עבור {first_name} {last_name} בבית הספר {school_name}",
-                emoji="✅", level=3)
+            print_status(f"סיכום: נמצאו {len(definite_matches)} התאמות ודאיות עבור {first_name} {last_name}", emoji="✅",
+                         level=3)
         else:
             best_score = max([float(r[2]) for r in results]) if results else 0
             print_status(f"סיכום: לא נמצאה התאמה עבור {first_name} {last_name} (ציון הטוב ביותר: {best_score:.3f})",
@@ -444,53 +393,36 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
         return False
 
 
-def check_attendance_for_all_people(school_id=None):
+def check_attendance_for_all_people():
     """
-    בודקת נוכחות עבור כל האנשים במערכת - מעודכן לבית ספר ספציפי
+    בודקת נוכחות עבור כל האנשים במערכת
     משווה את התמונה הראשית של כל אדם מול פנים ב-EnviroFaces
-
-    Args:
-        school_id (str): מזהה בית הספר
 
     Returns:
         dict: {'success': bool, 'checked_people': int, 'present_people': int, 'absent_people': int, 'message': str}
     """
     try:
-        print_status("מתחיל בדיקת נוכחות כללית מתקדמת", emoji="🚀")
-
-        # בדיקה שבית הספר קיים
-        school = school_manager.get_school(school_id)
-        if not school:
-            return {
-                'success': False,
-                'checked_people': 0,
-                'present_people': 0,
-                'absent_people': 0,
-                'message': f'בית ספר לא נמצא: {school_id}'
-            }
-
-        print_status(f"עובד עבור בית הספר: {school.name} (ID: {school_id})", emoji="🏫")
+        print_status("מתחיל בדיקת נוכחות כללית", emoji="🚀")
 
         # בדיקה שיש אנשים במערכת
-        people_vector = school.get_all_people()
         if not people_vector:
             return {
                 'success': False,
                 'checked_people': 0,
                 'present_people': 0,
                 'absent_people': 0,
-                'message': f'אין אנשים רשומים בבית הספר {school.name}'
+                'message': 'אין אנשים רשומים במערכת'
             }
 
         # בדיקה שתיקיית EnviroFaces קיימת ויש בה תמונות
-        enviro_faces_dir = f"EnviroFaces_{school_id}"
+        enviro_faces_dir = "EnviroFaces"
         if not os.path.exists(enviro_faces_dir):
             return {
                 'success': False,
                 'checked_people': 0,
                 'present_people': 0,
                 'absent_people': 0,
-                'message': f'תיקיית EnviroFaces לא קיימת עבור בית הספר {school.name}. נא להפעיל חילוץ פנים תחילה'
+                'message': 'תיקיית EnviroFaces לא קיימת. נא להפעיל חילוץ פנים תחילה'
             }
 
         faces_in_db = glob.glob(f"{enviro_faces_dir}/*.jpg")
@@ -500,7 +432,7 @@ def check_attendance_for_all_people(school_id=None):
                 'checked_people': 0,
                 'present_people': 0,
                 'absent_people': 0,
-                'message': f'לא נמצאו פנים בתיקיית EnviroFaces עבור בית הספר {school.name}. נא להפעיל חילוץ פנים תחילה'
+                'message': 'לא נמצאו פנים בתיקיית EnviroFaces. נא להפעיל חילוץ פנים תחילה'
             }
 
         print_status(f"נמצאו {len(faces_in_db)} פנים במאגר", emoji="📊", level=1)
@@ -510,7 +442,7 @@ def check_attendance_for_all_people(school_id=None):
         checked_people = 0
         present_people = 0
 
-        # מעבר על כל האנשים של בית הספר
+        # מעבר על כל האנשים
         for person_index, person in enumerate(people_vector):
             try:
                 print_status(
@@ -542,7 +474,7 @@ def check_attendance_for_all_people(school_id=None):
                         continue
 
                     # שמירת התמונה זמנית עם בדיקת תקינות
-                    temp_image_path = f"temp_{school_id}_{person.id_number}.jpg"
+                    temp_image_path = f"temp_{person.id_number}.jpg"
 
                     # שמירה וודא שהתמונה תקינה
                     with open(temp_image_path, 'wb') as f:
@@ -560,13 +492,8 @@ def check_attendance_for_all_people(school_id=None):
                     print_status(f"תמונה זמנית נשמרה בהצלחה: {temp_image_path}", emoji="💾", level=3)
 
                     # בדיקת נוכחות באמצעות הפונקציה המתקדמת החדשה
-                    is_present = check_single_image_with_detailed_analysis(
-                        temp_image_path,
-                        faces_in_db,
-                        person.first_name,
-                        person.last_name,
-                        school_id
-                    )
+                    is_present = check_single_image_with_detailed_analysis(temp_image_path, faces_in_db,
+                                                                           person.first_name, person.last_name)
 
                     # עדכון סטטוס נוכחות
                     person.set_presence(is_present)
@@ -598,33 +525,23 @@ def check_attendance_for_all_people(school_id=None):
                 print_status(f"שגיאה בעיבוד אדם {person_index + 1}: {str(person_loop_error)}", emoji="❌", level=1)
                 continue
 
-        # עדכון סטטיסטיקות בית הספר
-        school.update_statistics()
-
-        # שמירת נתונים
-        school_manager.save_school_data(school_id)
-
         # סיכום כולל
         absent_people = checked_people - present_people
-        success_message = (f"בדיקת נוכחות הושלמה לבית הספר {school.name}: "
-                           f"{present_people} נוכחים, {absent_people} נעדרים מתוך {checked_people} אנשים")
+        success_message = f"בדיקת נוכחות הושלמה: {present_people} נוכחים, {absent_people} נעדרים מתוך {checked_people} אנשים"
 
-        print_status("=" * 80, level=0)
-        print_status(f"סיכום בדיקת נוכחות - בית הספר {school.name}:", emoji="📋", level=0)
+        print_status("=" * 50, level=0)
+        print_status("סיכום בדיקת נוכחות:", emoji="📋", level=0)
         print_status(f"סה\"כ אנשים נבדקו: {checked_people}", emoji="👥", level=1)
         print_status(f"נוכחים: {present_people}", emoji="✅", level=1)
         print_status(f"נעדרים: {absent_people}", emoji="❌", level=1)
-        print_status(f"אחוז נוכחות: {(present_people / max(1, checked_people) * 100):.1f}%", emoji="📊", level=1)
-        print_status("=" * 80, level=0)
+        print_status("=" * 50, level=0)
 
         return {
             'success': True,
             'checked_people': checked_people,
             'present_people': present_people,
             'absent_people': absent_people,
-            'message': success_message,
-            'school_name': school.name,
-            'attendance_percentage': round((present_people / max(1, checked_people) * 100), 2)
+            'message': success_message
         }
 
     except Exception as e:
@@ -637,187 +554,3 @@ def check_attendance_for_all_people(school_id=None):
             'absent_people': 0,
             'message': error_message
         }
-
-
-def check_attendance_for_specific_person(person_id, school_id=None):
-    """
-    בדיקת נוכחות לאדם ספציפי בבית ספר
-
-    Args:
-        person_id (str): מספר תעודת זהות
-        school_id (str): מזהה בית הספר
-
-    Returns:
-        dict: תוצאת הבדיקה
-    """
-    try:
-        school = school_manager.get_school(school_id)
-        if not school:
-            return {
-                'success': False,
-                'message': f'בית ספר לא נמצא: {school_id}'
-            }
-
-        # חיפוש האדם בבית הספר
-        person = None
-        for p in school.people_vector:
-            if p.id_number == person_id:
-                person = p
-                break
-
-        if not person:
-            return {
-                'success': False,
-                'message': f'לא נמצא אדם עם ת.ז. {person_id} בבית הספר {school.name}'
-            }
-
-        print_status(f"מתחיל בדיקת נוכחות לאדם ספציפי: {person.get_full_name()}", emoji="🎯")
-
-        # בדיקה שתיקיית פנים קיימת
-        enviro_faces_dir = f"EnviroFaces_{school_id}"
-        if not os.path.exists(enviro_faces_dir):
-            return {
-                'success': False,
-                'message': f'תיקיית EnviroFaces לא קיימת עבור בית הספר {school.name}'
-            }
-
-        faces_in_db = glob.glob(f"{enviro_faces_dir}/*.jpg")
-        if not faces_in_db:
-            return {
-                'success': False,
-                'message': f'לא נמצאו פנים במאגר עבור בית הספר {school.name}'
-            }
-
-        # בדיקה שיש תמונות לאדם
-        if not person.image_urls or len(person.image_urls) == 0:
-            return {
-                'success': False,
-                'message': f'אין תמונות עבור {person.get_full_name()}'
-            }
-
-        # הורדת התמונה הראשית וביצוע בדיקה
-        primary_image_url = person.image_urls[0]
-        temp_image_path = f"temp_specific_{school_id}_{person.id_number}.jpg"
-
-        try:
-            response = requests.get(primary_image_url, timeout=10)
-            if response.status_code != 200:
-                return {
-                    'success': False,
-                    'message': f'לא ניתן להוריד תמונה עבור {person.get_full_name()}'
-                }
-
-            with open(temp_image_path, 'wb') as f:
-                f.write(response.content)
-
-            # בדיקת נוכחות
-            is_present = check_single_image_with_detailed_analysis(
-                temp_image_path,
-                faces_in_db,
-                person.first_name,
-                person.last_name,
-                school_id
-            )
-
-            # עדכון נוכחות
-            person.set_presence(is_present)
-            school.update_statistics()
-            school_manager.save_school_data(school_id)
-
-            status_text = "נוכח" if is_present else "נעדר"
-            return {
-                'success': True,
-                'person_name': person.get_full_name(),
-                'is_present': is_present,
-                'message': f'{person.get_full_name()} - {status_text}'
-            }
-
-        finally:
-            # ניקוי קובץ זמני
-            if os.path.exists(temp_image_path):
-                try:
-                    os.remove(temp_image_path)
-                except:
-                    pass
-
-    except Exception as e:
-        return {
-            'success': False,
-            'message': f'שגיאה בבדיקת נוכחות: {str(e)}'
-        }
-
-
-def get_attendance_report(school_id=None):
-    """
-    יצירת דוח נוכחות מפורט לבית ספר
-
-    Args:
-        school_id (str): מזהה בית הספר
-
-    Returns:
-        dict: דוח נוכחות מפורט
-    """
-    try:
-        school = school_manager.get_school(school_id)
-        if not school:
-            return {
-                'success': False,
-                'error': 'בית ספר לא נמצא'
-            }
-
-        people = school.get_all_people()
-        attendance_data = []
-
-        for person in people:
-            attendance_data.append({
-                'name': person.get_full_name(),
-                'id_number': person.id_number,
-                'person_type': person.person_type,
-                'class_name': person.class_name,
-                'is_present': person.is_present,
-                'last_check': person.last_attendance_check.strftime(
-                    "%d/%m/%Y %H:%M") if person.last_attendance_check else "לא נבדק",
-                'total_days': person.total_attendance_days
-            })
-
-        summary = school.get_attendance_summary()
-
-        return {
-            'success': True,
-            'school_name': school.name,
-            'report_date': datetime.now().strftime("%d/%m/%Y %H:%M"),
-            'summary': summary,
-            'attendance_data': attendance_data
-        }
-
-    except Exception as e:
-        return {
-            'success': False,
-            'error': f'שגיאה ביצירת דוח: {str(e)}'
-        }
-
-
-# פונקציות עזר נוספות לתאימות לאחור
-def extract_all_faces_from_targets_legacy():
-    """פונקציה ישנה - השתמש בגרסה החדשה עם school_id"""
-    print("⚠️ אזהרה: השתמש ב-extract_all_faces_from_targets עם פרמטר school_id")
-    return {
-        'success': False,
-        'faces_extracted': 0,
-        'message': 'נדרש לעדכן לשימוש עם school_id'
-    }
-
-
-def check_attendance_for_all_people_legacy():
-    """פונקציה ישנה - השתמש בגרסה החדשה עם school_id"""
-    print("⚠️ אזהרה: השתמש ב-check_attendance_for_all_people עם פרמטר school_id")
-    return {
-        'success': False,
-        'checked_people': 0,
-        'present_people': 0,
-        'absent_people': 0,
-        'message': 'נדרש לעדכן לשימוש עם school_id'
-    }
-
-
-print("🎯 Attend_Manage v2.0 - מערכת נוכחות לבתי ספר מרובים נטענה בהצלחה")

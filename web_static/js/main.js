@@ -1,388 +1,142 @@
 /**
- * ==================== ATTENDANCE MANAGEMENT SYSTEM V2.0 ====================
- * מערכת ניהול נוכחות באמצעות זיהוי פנים - עם תמיכה במערכת בתי ספר
+ * ==================== ATTENDANCE MANAGEMENT SYSTEM ====================
+ * מערכת ניהול נוכחות באמצעות זיהוי פנים
  *
  * תיאור: מערכת מקיפה לניהול אנשים ובדיקת נוכחות באמצעות זיהוי פנים
- * חדש: אותנטיקציה, בתי ספר מרובים, הרשאות משתמשים
- *
  * מאפיינים עיקריים:
- * - מערכת כניסה והרשמה
- * - ניהול בתי ספר מרובים
- * - הוספת ועריכת אנשים במערכת (לפי בית ספר)
+ * - הוספת ועריכת אנשים במערכת
  * - העלאת תמונות לכל אדם (3-5 תמונות)
  * - בדיקת נוכחות באמצעות תמונות מטרה
- * - ניהול תמונות מטרה (לפי בית ספר)
+ * - ניהול תמונות מטרה
  * - ממשק משתמש ידידותי ורספונסיבי
- * - הרשאות משתמשים מתקדמות
  */
 
 document.addEventListener('DOMContentLoaded', function() {
     // ==================== GLOBAL VARIABLES ====================
 
     /**
-     * מערך גלובלי המכיל את כל נתוני האנשים של בית הספר הנוכחי
+     * עדכון כפתור העלאה בהתאם למספר קבצים
+     */
+    function updateUploadButton(fileCount) {
+        const uploadBtn = document.querySelector('.target-btn-upload');
+        if (uploadBtn) {
+            if (fileCount > 0) {
+                uploadBtn.textContent = `📤 העלה ${fileCount} קבצים`;
+                uploadBtn.disabled = false;
+                uploadBtn.style.backgroundColor = '#28a745';
+            } else {
+                uploadBtn.textContent = '📤 בחר קבצים תחילה';
+                uploadBtn.disabled = true;
+                uploadBtn.style.backgroundColor = '#ccc';
+            }
+        }
+    }
+
+    /**
+     * מערך גלובלי המכיל את כל נתוני האנשים במערכת
+     * כל אובייקט אדם מכיל: id_number, first_name, last_name, is_present, image_urls, וכו'
+     * @type {Array<Object>}
      */
     let peopleData = [];
 
     /**
-     * אובייקט לאחסון נתוני המשתמש הנוכחי
-     */
-    let currentUser = null;
-
-    /**
-     * אובייקט לאחסון נתוני בית הספר הנוכחי
-     */
-    let currentSchool = null;
-
-    /**
      * אובייקט לאחסון נתונים זמניים של אדם חדש בתהליך יצירה
+     * משמש לשמירת מידע עד להשלמת תהליך ההוספה
+     * @type {Object}
      */
     let tempPersonData = {
-        isActive: false,
-        personDetails: null,
-        uploadedImages: [],
-        imageUrls: []
+        isActive: false,           // האם יש תהליך יצירה פעיל
+        personDetails: null,       // פרטי האדם (שם, ת.ז.)
+        uploadedImages: [],        // מערך של public_id של תמונות שהועלו
+        imageUrls: []             // מערך של URL-ים לתצוגה
     };
 
-    // ==================== AUTHENTICATION & INITIALIZATION ====================
+    // ==================== INITIALIZATION ====================
 
     /**
-     * פונקציית אתחול ראשית - מעודכנת לאותנטיקציה
+     * פונקציית אתחול ראשית
+     * מופעלת כאשר הדף נטען ומגדירה את כל הפונקציות הבסיסיות
      */
     async function initialize() {
-        console.log('🚀 AttendMe v2.0 - מאתחל מערכת...');
+        initializeEventListeners(); // הגדרת מאזיני אירועים
 
-        // בדיקת אותנטיקציה
-        const authResult = await checkAuthentication();
-
-        if (!authResult.authenticated) {
-            // אם לא מאומת, הפנייה לדף כניסה
-            console.log('❌ לא מאומת, מפנה לדף כניסה...');
-            window.location.href = '/login';
-            return;
-        }
-
-        // אם מאומת, טעינת נתוני המערכת
-        currentUser = authResult.user;
-        currentSchool = authResult.school;
-
-        console.log('✅ משתמש מאומת:', currentUser);
-        console.log('🏫 בית ספר נוכחי:', currentSchool);
-
-        // עדכון ממשק המשתמש
-        updateUserInterface();
-
-        // הגדרת מאזיני אירועים
-        initializeEventListeners();
-
-        // טעינת נתונים
+        // בדיקת חיבור לשרת
         const serverOk = await checkServerConnection();
         if (serverOk) {
-            await loadPeopleData();
-            await loadTargetImages();
-            updateDashboardStats();
+            await loadPeopleData();           // טעינת נתוני אנשים מהשרת
+            await loadTargetImages();         // טעינת תמונות מטרה מהשרת
+            updateDashboardStats();     // עדכון סטטיסטיקות לוח הבקרה
         }
 
-        setCurrentDate();
-    }
+        setCurrentDate();           // הגדרת תאריך נוכחי
 
-    /**
-     * בדיקת אותנטיקציה
-     */
-    async function checkAuthentication() {
-        try {
-            const sessionToken = localStorage.getItem('session_token');
-            const userData = localStorage.getItem('user_data');
-
-            if (!sessionToken || !userData) {
-                return { authenticated: false };
-            }
-
-            // אימות הטוקן עם השרת
-            const response = await fetch('/api/auth/verify-session', {
-                headers: {
-                    'Authorization': `Bearer ${sessionToken}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const user = JSON.parse(userData);
-
-                return {
-                    authenticated: true,
-                    user: user,
-                    school: {
-                        id: user.school_id,
-                        name: user.school_name,
-                        type: user.school_type
-                    }
-                };
-            } else {
-                // טוקן לא תקף
-                localStorage.removeItem('session_token');
-                localStorage.removeItem('user_data');
-                return { authenticated: false };
-            }
-
-        } catch (error) {
-            console.error('שגיאה בבדיקת אותנטיקציה:', error);
-            return { authenticated: false };
+        // בדיקת endpoints בסביבת פיתוח
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            await checkAvailableEndpoints();
         }
-    }
-
-    /**
-     * עדכון ממשק המשתמש לפי המשתמש המחובר
-     */
-    function updateUserInterface() {
-        // עדכון כותרת הדף
-        const title = document.title;
-        if (currentSchool) {
-            document.title = `${title} - ${currentSchool.name}`;
-        }
-
-        // הוספת מידע בית ספר לממשק (אם יש אלמנט מתאים)
-        const schoolInfo = document.querySelector('.school-info');
-        if (schoolInfo && currentSchool) {
-            schoolInfo.innerHTML = `
-                <div class="school-header">
-                    <h3>${currentSchool.name}</h3>
-                    <span class="school-type">${currentSchool.type}</span>
-                </div>
-            `;
-        }
-
-        // הוספת פרטי משתמש לממשק (אם יש אלמנט מתאים)
-        const userInfo = document.querySelector('.user-info');
-        if (userInfo && currentUser) {
-            userInfo.innerHTML = `
-                <div class="user-header">
-                    <span class="user-name">שלום, ${currentUser.username}</span>
-                    <span class="user-role">${getRoleDisplayName(currentUser.role)}</span>
-                </div>
-            `;
-        }
-
-        // הסתרת/הצגת אלמנטים לפי הרשאות
-        updateUIBasedOnPermissions();
-
-        // הוספת כפתור יציאה
-        addLogoutButton();
-    }
-
-    /**
-     * עדכון ממשק לפי הרשאות משתמש
-     */
-    function updateUIBasedOnPermissions() {
-        if (!currentUser) return;
-
-        const role = currentUser.role;
-
-        // הסתרת כפתורים לפי הרשאות
-        const managementButtons = document.querySelectorAll('[data-permission]');
-        managementButtons.forEach(button => {
-            const requiredPermission = button.getAttribute('data-permission');
-            if (!hasPermission(requiredPermission)) {
-                button.style.display = 'none';
-            }
-        });
-
-        // הסתרת חלקים שלמים אם אין הרשאה
-        if (role === 'user' || role === 'staff') {
-            const peopleManagement = document.getElementById('people-management');
-            if (peopleManagement) {
-                const addPersonBtn = peopleManagement.querySelector('#add-person-btn');
-                if (addPersonBtn) addPersonBtn.style.display = 'none';
-            }
-        }
-
-        if (role !== 'admin') {
-            const settingsSection = document.getElementById('settings');
-            if (settingsSection) {
-                settingsSection.style.display = 'none';
-            }
-        }
-    }
-
-    /**
-     * בדיקת הרשאות משתמש
-     */
-    function hasPermission(permission) {
-        if (!currentUser) return false;
-
-        const rolePermissions = {
-            'admin': {
-                'manage_people': true,
-                'manage_targets': true,
-                'attendance_check': true,
-                'system_settings': true,
-                'manage_users': true
-            },
-            'teacher': {
-                'manage_people': true,
-                'manage_targets': false,
-                'attendance_check': true,
-                'system_settings': false,
-                'manage_users': false
-            },
-            'staff': {
-                'manage_people': false,
-                'manage_targets': false,
-                'attendance_check': true,
-                'system_settings': false,
-                'manage_users': false
-            },
-            'user': {
-                'manage_people': false,
-                'manage_targets': false,
-                'attendance_check': false,
-                'system_settings': false,
-                'manage_users': false
-            }
-        };
-
-        const userPermissions = rolePermissions[currentUser.role] || rolePermissions['user'];
-        return userPermissions[permission] || false;
-    }
-
-    /**
-     * קבלת שם תפקיד להצגה
-     */
-    function getRoleDisplayName(role) {
-        const roleNames = {
-            'admin': 'מנהל',
-            'teacher': 'מורה',
-            'staff': 'צוות',
-            'user': 'משתמש'
-        };
-        return roleNames[role] || 'משתמש';
-    }
-
-    /**
-     * הוספת כפתור יציאה
-     */
-    function addLogoutButton() {
-        const navLinks = document.querySelector('.nav-links');
-        if (navLinks && !document.getElementById('logout-btn')) {
-            const logoutLi = document.createElement('li');
-            logoutLi.innerHTML = `
-                <a href="#" id="logout-btn" class="logout-link">
-                    <i class="fas fa-sign-out-alt"></i> יציאה
-                </a>
-            `;
-            navLinks.appendChild(logoutLi);
-
-            // הוספת מאזין לכפתור יציאה
-            document.getElementById('logout-btn').addEventListener('click', handleLogout);
-        }
-    }
-
-    /**
-     * טיפול ביציאה מהמערכת
-     */
-    function handleLogout(e) {
-        e.preventDefault();
-
-        if (confirm('האם אתה בטוח שברצונך לצאת מהמערכת?')) {
-            // ניקוי נתוני סשן
-            localStorage.removeItem('session_token');
-            localStorage.removeItem('user_data');
-
-            // הפנייה לדף כניסה
-            window.location.href = '/login';
-        }
-    }
-
-    // ==================== API HELPERS ====================
-
-    /**
-     * שליחת בקשת API עם אותנטיקציה
-     */
-    async function authenticatedFetch(url, options = {}) {
-        const sessionToken = localStorage.getItem('session_token');
-
-        const defaultHeaders = {
-            'Content-Type': 'application/json',
-        };
-
-        if (sessionToken) {
-            defaultHeaders['Authorization'] = `Bearer ${sessionToken}`;
-        }
-
-        const mergedOptions = {
-            ...options,
-            headers: {
-                ...defaultHeaders,
-                ...(options.headers || {})
-            }
-        };
-
-        const response = await fetch(url, mergedOptions);
-
-        // אם קיבלנו 401, זה אומר שהטוקן פג תוקף
-        if (response.status === 401) {
-            console.log('🔑 טוקן פג תוקף, מפנה לכניסה...');
-            localStorage.removeItem('session_token');
-            localStorage.removeItem('user_data');
-            window.location.href = '/login';
-            return null;
-        }
-
-        return response;
     }
 
     // ==================== EVENT LISTENERS SETUP ====================
 
     /**
-     * הגדרת כל מאזיני האירועים של האפליקציה - מעודכן
+     * הגדרת כל מאזיני האירועים של האפליקציה
+     * מרכז את כל האירועים במקום אחד לניהול נוח
      */
     function initializeEventListeners() {
         // ==================== PEOPLE MANAGEMENT BUTTONS ====================
 
-        // כפתור הוספת אדם חדש - רק אם יש הרשאה
-        if (hasPermission('manage_people')) {
-            document.getElementById('add-person-btn')?.addEventListener('click', () =>
-                showModal(document.getElementById('add-person-modal'))
-            );
-        }
+        // כפתור הוספת אדם חדש - פותח מודל הוספה
+        document.getElementById('add-person-btn')?.addEventListener('click', () =>
+            showModal(document.getElementById('add-person-modal'))
+        );
 
-        // טופס הוספת אדם
+        // טופס הוספת אדם - מטפל בשליחת הנתונים
         document.getElementById('add-person-form')?.addEventListener('submit', handleAddPerson);
 
-        // טופס העלאת תמונה
+        // טופס העלאת תמונה - מטפל בהעלאת תמונות
         document.getElementById('upload-image-form')?.addEventListener('submit', handleUploadImage);
 
-        // שדה חיפוש אנשים
+        // שדה חיפוש אנשים - מסנן את הטבלה בזמן אמת
         document.getElementById('search-people')?.addEventListener('input', filterPeopleTable);
 
-        // כפתור בדיקת נוכחות כללית - רק אם יש הרשאה
-        if (hasPermission('attendance_check')) {
-            document.getElementById('check-all-people')?.addEventListener('click', handleCheckAllPeople);
-        }
+        // כפתור בדיקת נוכחות כללית
+        document.getElementById('check-all-people')?.addEventListener('click', handleCheckAllPeople);
 
         // ==================== MODAL CLOSE HANDLERS ====================
 
+        /**
+         * טיפול בסגירת מודלים - עדכון מיוחד לחלון העלאת תמונות
+         * בודק אם זה אדם חדש שעדיין לא הושלם ומציג אזהרה
+         */
         document.querySelectorAll('.close-modal').forEach(button => {
             button.addEventListener('click', (e) => {
                 const modal = e.target.closest('.modal');
+
+                // טיפול מיוחד לחלון העלאת תמונות
                 if (modal && modal.id === 'upload-image-modal') {
+                    // אם זה אדם חדש ועדיין לא הועלו מספיק תמונות
                     if (tempPersonData.isActive && tempPersonData.uploadedImages.length < 3) {
                         const confirmed = confirm('האם אתה בטוח שברצונך לבטל? התמונות שהועלו יימחקו.');
                         if (confirmed) {
-                            cancelNewPersonCreation();
+                            cancelNewPersonCreation(); // ביטול יצירת האדם
                         }
                         return;
                     }
-                    closeUploadModal();
+                    closeUploadModal(); // סגירה רגילה
                 } else if (modal) {
-                    modal.classList.remove('active');
+                    modal.classList.remove('active'); // סגירה רגילה לשאר המודלים
                 }
             });
         });
 
+        /**
+         * כפתורי סגירה במודלים
+         * טיפול דומה לכפתור X אבל עם class שונה
+         */
         document.querySelectorAll('.close-modal-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const modal = e.target.closest('.modal');
+
                 if (modal && modal.id === 'upload-image-modal') {
                     if (tempPersonData.isActive && tempPersonData.uploadedImages.length < 3) {
                         const confirmed = confirm('האם אתה בטוח שברצונך לבטל? התמונות שהועלו יימחקו.');
@@ -398,17 +152,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
+        /**
+         * כפתור "צור" בחלון העלאת תמונות
+         * מסיים את תהליך יצירת אדם חדש או סוגר חלון לאדם קיים
+         */
         document.getElementById('finish-upload-button')?.addEventListener('click', function() {
             if (tempPersonData.isActive) {
+                // זה אדם חדש - יוצר אותו בשרת
                 finishNewPersonCreation();
             } else {
+                // זה אדם קיים - סגירה רגילה
                 closeUploadModal();
-                loadPeopleData();
+                loadPeopleData(); // רענון הרשימה
             }
         });
 
         // ==================== IMAGE PREVIEW ====================
 
+        /**
+         * תצוגה מקדימה של תמונה שנבחרה להעלאה
+         * מציג את התמונה לפני ההעלאה בפועל
+         */
         document.getElementById('person-image')?.addEventListener('change', function() {
             if (this.files && this.files[0]) {
                 const reader = new FileReader();
@@ -424,12 +188,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // ==================== TARGET UPLOAD EVENTS ====================
 
+        // קובץ תמונות מטרה - העלאה
         document.getElementById('target-file-input')?.addEventListener('change', handleTargetFileSelection);
 
         // ==================== MODAL BACKGROUND CLICK ====================
 
+        /**
+         * סגירת מודל בלחיצה על הרקע (מחוץ לתוכן)
+         * טיפול מיוחד לחלון העלאת תמונות
+         */
         document.getElementById('upload-image-modal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
+            if (e.target === this) { // לחיצה על הרקע ולא על התוכן
                 if (tempPersonData.isActive && tempPersonData.uploadedImages.length < 3) {
                     const confirmed = confirm('האם אתה בטוח שברצונך לבטל? התמונות שהועלו יימחקו.');
                     if (confirmed) {
@@ -441,13 +210,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Navigation events
         setupNavigation();
     }
 
     // ==================== NAVIGATION SETUP ====================
 
+    /**
+     * הגדרת ניווט בין הסקשנים
+     */
     function setupNavigation() {
-        document.querySelectorAll('.nav-links a:not(.logout-link), .cta-button').forEach(link => {
+        // מאזינים לקישורי ניווט
+        document.querySelectorAll('.nav-links a, .cta-button').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
@@ -455,10 +229,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (targetId && targetId.startsWith('#')) {
                     const targetSection = document.querySelector(targetId);
                     if (targetSection) {
+                        // הסרת active מכל הקישורים
                         document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+                        // הוספת active לקישור הנוכחי
                         if (this.classList.contains('nav-links')) {
                             this.classList.add('active');
                         }
+                        // גלילה לסקשן
                         targetSection.scrollIntoView({ behavior: 'smooth' });
                     }
                 }
@@ -468,9 +245,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ==================== TEMPORARY PERSON DATA MANAGEMENT ====================
 
+    /**
+     * התחלת תהליך יצירת אדם חדש
+     * שומר את פרטי האדם באופן זמני עד השלמת ההעלאות
+     * @param {Object} personDetails - פרטי האדם (שם פרטי, משפחה, ת.ז.)
+     */
     function startNewPersonCreation(personDetails) {
         console.log('🚀 מתחיל יצירת אדם חדש:', personDetails);
 
+        // איפוס ואתחול הנתונים הזמניים
         tempPersonData = {
             isActive: true,
             personDetails: personDetails,
@@ -481,14 +264,21 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('💾 נתונים זמניים הוגדרו:', tempPersonData);
     }
 
+    /**
+     * השלמת תהליך יצירת אדם חדש
+     * שולח בקשה לשרת ליצירת האדם עם כל התמונות שהועלו
+     * @returns {Promise<void>}
+     */
     async function finishNewPersonCreation() {
         console.log('מסיים יצירת אדם חדש');
 
+        // בדיקות תקינות
         if (!tempPersonData.isActive || !tempPersonData.personDetails) {
             showNotification('שגיאה: נתונים זמניים לא תקינים', 'error');
             return;
         }
 
+        // בדיקה שיש מספיק תמונות
         if (tempPersonData.imageUrls.length < 3) {
             showNotification('נדרשות לפחות 3 תמונות ליצירת אדם', 'error');
             console.log('❌ לא מספיק תמונות:', tempPersonData.imageUrls.length);
@@ -502,52 +292,97 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         try {
-            const response = await authenticatedFetch('/api/people/create_person', {
-                method: 'POST',
-                body: JSON.stringify({
-                    person_details: tempPersonData.personDetails,
-                    image_urls: tempPersonData.imageUrls
-                })
-            });
+            // ננסה קודם endpoint חלופי אם הראשי לא עובד
+            let response, data;
 
-            if (!response) return; // טוקן פג תוקף - authenticatedFetch כבר טיפל בזה
+            try {
+                // נסיון ראשון - endpoint הרגיל
+                response = await fetch('/api/people/create_person', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        person_details: tempPersonData.personDetails,
+                        image_urls: tempPersonData.imageUrls
+                    })
+                });
 
-            const data = await response.json();
+                data = await response.json();
+            } catch (firstError) {
+                console.log('⚠️ Endpoint הראשי לא עובד, מנסה חלופי...');
+
+                // נסיון שני - endpoint ישן (אם קיים)
+                response = await fetch('/api/add_person', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        first_name: tempPersonData.personDetails.first_name,
+                        last_name: tempPersonData.personDetails.last_name,
+                        id_number: tempPersonData.personDetails.id_number,
+                        image_urls: tempPersonData.imageUrls
+                    })
+                });
+
+                data = await response.json();
+            }
             console.log('📨 תגובה מהשרת:', data);
+            console.log('📨 status:', response.status);
 
             if (response.status === 200 || response.status === 201) {
+                // הצלחה - בדוק אם יש שדה success
                 if (data.success !== false) {
                     showNotification('האדם נוצר בהצלחה!', 'success');
+                    // ניקוי והשלמה
                     clearTempPersonData();
                     closeUploadModal();
-                    await loadPeopleData();
-                    updateDashboardStats();
+                    await loadPeopleData(); // רענון הרשימה
+                    updateDashboardStats(); // עדכון סטטיסטיקות
                 } else {
                     showNotification(data.error || 'שגיאה ביצירת האדם', 'error');
                 }
             } else if (response.status === 409) {
+                // אדם כבר קיים
                 showNotification('אדם עם מספר זהות זה כבר קיים במערכת', 'error');
-            } else if (response.status === 403) {
-                showNotification('אין לך הרשאה ליצור אדם חדש', 'error');
+            } else if (response.status === 500) {
+                // שגיאת שרת פנימית
+                showNotification('שגיאה פנימית בשרת - נא לנסות שוב', 'error');
+                console.error('❌ שגיאת שרת 500 - צריך לתקן את הקובץ Python');
             } else {
                 console.error('❌ שגיאה מהשרת:', data);
                 showNotification(data.error || `שגיאה ${response.status}: ${response.statusText}`, 'error');
             }
         } catch (error) {
             console.error('❌ שגיאה ביצירת אדם:', error);
-            showNotification('שגיאה ביצירת האדם', 'error');
+            console.error('❌ סוג השגיאה:', error.constructor.name);
+            console.error('❌ הודעת השגיאה:', error.message);
+
+            // בדיקה אם זה שגיאת 404
+            if (error.message.includes('Unexpected token')) {
+                showNotification('שגיאה: ה-API לא נמצא או לא מוגדר נכון', 'error');
+            } else {
+                showNotification('שגיאה ביצירת האדם', 'error');
+            }
         }
     }
 
+    /**
+     * ביטול תהליך יצירת אדם חדש
+     * מוחק את התמונות הזמניות ומנקה את הנתונים
+     * @returns {Promise<void>}
+     */
     async function cancelNewPersonCreation() {
         console.log('❌ מבטל יצירת אדם חדש');
 
+        // מחיקת תמונות זמניות מהענן
         if (tempPersonData.uploadedImages.length > 0) {
             try {
+                // מחיקת כל תמונה בנפרד
                 for (const public_id of tempPersonData.uploadedImages) {
-                    await authenticatedFetch('/api/delete_temp_image', {
+                    await fetch('/api/delete_temp_image', {
                         method: 'DELETE',
-                        body: JSON.stringify({ public_id: public_id })
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            public_id: public_id
+                        })
                     });
                 }
                 console.log('🗑️ נמחקו תמונות זמניות:', tempPersonData.uploadedImages);
@@ -560,6 +395,10 @@ document.addEventListener('DOMContentLoaded', function() {
         closeUploadModal();
     }
 
+    /**
+     * ניקוי הנתונים הזמניים
+     * מאפס את כל המשתנים לערכי ברירת מחדל
+     */
     function clearTempPersonData() {
         console.log('🧹 מנקה נתונים זמניים');
         tempPersonData = {
@@ -570,128 +409,15 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // ==================== EVENT HANDLERS ====================
-
-    async function handleAddPerson(event) {
-        event.preventDefault();
-
-        const form = event.target;
-
-        const personData = {
-            first_name: form.querySelector('#first-name').value.trim(),
-            last_name: form.querySelector('#last-name').value.trim(),
-            id_number: form.querySelector('#id-number').value.trim()
-        };
-
-        if (!personData.first_name || !personData.last_name || !personData.id_number) {
-            showNotification('נא למלא את כל השדות', 'error');
-            return;
-        }
-
-        if (!/^\d+$/.test(personData.id_number)) {
-            showNotification('מספר ת.ז. חייב להכיל ספרות בלבד', 'error');
-            return;
-        }
-
-        if (peopleData.find(p => p.id_number === personData.id_number)) {
-            showNotification('אדם עם מספר זהות זה כבר קיים במערכת', 'error');
-            return;
-        }
-
-        form.closest('.modal').classList.remove('active');
-        form.reset();
-
-        startNewPersonCreation(personData);
-        openUploadModalForNewPerson(personData);
-    }
-
-    function handleUploadClick(event) {
-        const personId = event.currentTarget.getAttribute('data-id');
-        const person = peopleData.find(p => p.id_number === personId);
-
-        if (!person) return;
-
-        openUploadModal(personId, `${person.first_name} ${person.last_name}`);
-    }
-
-    async function handleDeleteClick(event) {
-        const personId = event.currentTarget.getAttribute('data-id');
-        const person = peopleData.find(p => p.id_number === personId);
-
-        if (!person) return;
-
-        if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
-            try {
-                const response = await authenticatedFetch(`/api/people/${personId}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response) return;
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showNotification('האדם נמחק בהצלחה', 'success');
-                    await loadPeopleData();
-                    updateDashboardStats();
-                } else {
-                    showNotification(data.error || 'שגיאה במחיקת אדם', 'error');
-                }
-            } catch (error) {
-                showNotification('שגיאה במחיקת אדם', 'error');
-            }
-        }
-    }
-
-    function handleViewImagesClick(event) {
-        const personId = event.currentTarget.getAttribute('data-id');
-        const person = peopleData.find(p => p.id_number === personId);
-
-        if (!person) return;
-
-        const modal = document.getElementById('person-images-modal');
-        const galleryContainer = document.getElementById('person-images-gallery');
-        const personNameElem = document.getElementById('person-images-name');
-
-        if (!modal || !galleryContainer || !personNameElem) return;
-
-        galleryContainer.innerHTML = '';
-        personNameElem.textContent = `${person.first_name} ${person.last_name}`;
-
-        if (!person.image_urls || person.image_urls.length === 0) {
-            galleryContainer.innerHTML = '<p class="no-images">אין תמונות זמינות</p>';
-        } else {
-            person.image_urls.forEach((url, index) => {
-                const imageContainer = document.createElement('div');
-                imageContainer.className = 'person-image-item';
-                imageContainer.innerHTML = `
-                    <img src="${url}" alt="תמונה ${index + 1}" loading="lazy">
-                    <div class="person-image-counter">${index + 1}</div>
-                `;
-                galleryContainer.appendChild(imageContainer);
-            });
-        }
-
-        showModal(modal);
-    }
-
     /**
-     * טיפול בלחיצה על כפתור בדיקת נוכחות כללית - מעודכן
+     * טיפול בלחיצה על כפתור בדיקת נוכחות כללית
      */
     async function handleCheckAllPeople() {
         console.log('🚀 מתחיל בדיקת נוכחות כללית');
 
-        // בדיקת הרשאות
-        if (!hasPermission('attendance_check')) {
-            showNotification('אין לך הרשאה לבצע בדיקת נוכחות', 'error');
-            return;
-        }
-
         // בדיקה שיש תמונות מטרה
         try {
-            const targetsResponse = await authenticatedFetch('/api/get_target_images');
-            if (!targetsResponse) return;
-
+            const targetsResponse = await fetch('/api/get_target_images');
             const targetsData = await targetsResponse.json();
 
             if (!targetsData.success || !targetsData.targets || targetsData.targets.length === 0) {
@@ -713,18 +439,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // הצגת הודעת התחלה
         showNotification('מתחיל בדיקת נוכחות כללית...', 'info');
 
         try {
-            // שלב 1: חילוץ פנים
+            // שלב 1: חילוץ פנים (אם עדיין לא בוצע)
             console.log('🔄 מבצע חילוץ פנים מתמונות מטרה...');
             showNotification('שלב 1: מחלץ פנים מתמונות מטרה...', 'info');
 
-            const extractResponse = await authenticatedFetch('/api/face-recognition/extract-faces', {
-                method: 'POST'
+            const extractResponse = await fetch('/api/face-recognition/extract-faces', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
             });
-
-            if (!extractResponse) return;
 
             const extractData = await extractResponse.json();
 
@@ -739,15 +465,15 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('🔄 מבצע בדיקת נוכחות...');
             showNotification('שלב 2: בודק נוכחות עבור כל האנשים...', 'info');
 
-            const attendanceResponse = await authenticatedFetch('/api/attendance/check-all', {
-                method: 'POST'
+            const attendanceResponse = await fetch('/api/attendance/check-all', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
             });
-
-            if (!attendanceResponse) return;
 
             const attendanceData = await attendanceResponse.json();
 
             if (attendanceData.success) {
+                // הצגת תוצאות
                 const message = `🎉 בדיקת נוכחות הושלמה!\n` +
                                `✅ נוכחים: ${attendanceData.present_people}\n` +
                                `❌ נעדרים: ${attendanceData.absent_people}\n` +
@@ -756,20 +482,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification(message, 'success');
                 console.log(`✅ בדיקת נוכחות הצליחה:`, attendanceData);
 
-                // רענון רשימת האנשים
+                // רענון רשימת האנשים לעדכון סטטוס נוכחות
                 console.log('🔄 מרענן נתוני אנשים...');
                 showNotification('מעדכן רשימת אנשים...', 'info');
 
+                // השהיה קצרה לוודא שהשרת עדכן את הנתונים
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 await loadPeopleData();
                 updateDashboardStats();
 
+                // בדיקה שהנתונים התעדכנו
+                console.log('📊 נתוני אנשים אחרי רענון:', peopleData);
+
+                // הצגת סטטיסטיקות מעודכנות
                 const currentPresentCount = peopleData.filter(p => p.is_present).length;
                 const currentAbsentCount = peopleData.length - currentPresentCount;
 
                 console.log(`📈 סטטיסטיקות מעודכנות: ${currentPresentCount} נוכחים, ${currentAbsentCount} נעדרים`);
 
+                // הודעה מעודכנת עם הנתונים החדשים
                 const finalMessage = `🎉 בדיקת נוכחות הושלמה ונתונים עודכנו!\n` +
                                    `✅ נוכחים: ${currentPresentCount}\n` +
                                    `❌ נעדרים: ${currentAbsentCount}\n` +
@@ -788,32 +520,173 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ==================== EVENT HANDLERS ====================
+
+    /**
+     * טיפול בהוספת אדם חדש
+     * מעבד את הנתונים מהטופס ומתחיל תהליך יצירה
+     * @param {Event} event - אירוע שליחת הטופס
+     */
+    async function handleAddPerson(event) {
+        event.preventDefault(); // מניעת שליחה רגילה של הטופס
+
+        const form = event.target;
+
+        // איסוף נתונים מהטופס
+        const personData = {
+            first_name: form.querySelector('#first-name').value.trim(),
+            last_name: form.querySelector('#last-name').value.trim(),
+            id_number: form.querySelector('#id-number').value.trim()
+        };
+
+        // בדיקות תקינות בסיסיות
+        if (!personData.first_name || !personData.last_name || !personData.id_number) {
+            showNotification('נא למלא את כל השדות', 'error');
+            return;
+        }
+
+        // בדיקת פורמט ת.ז.
+        if (!/^\d+$/.test(personData.id_number)) {
+            showNotification('מספר ת.ז. חייב להכיל ספרות בלבד', 'error');
+            return;
+        }
+
+        // בדיקה שהאדם לא קיים כבר
+        if (peopleData.find(p => p.id_number === personData.id_number)) {
+            showNotification('אדם עם מספר זהות זה כבר קיים במערכת', 'error');
+            return;
+        }
+
+        // סגירת מודל הוספת אדם
+        form.closest('.modal').classList.remove('active');
+        form.reset();
+
+        // התחלת תהליך יצירת אדם חדש (שמירה זמנית)
+        startNewPersonCreation(personData);
+
+        // פתיחת חלון העלאת תמונות
+        openUploadModalForNewPerson(personData);
+    }
+
+    /**
+     * טיפול בלחיצה על כפתור העלאת תמונה (לאדם קיים)
+     * @param {Event} event - אירוע הלחיצה
+     */
+    function handleUploadClick(event) {
+        const personId = event.currentTarget.getAttribute('data-id');
+        const person = peopleData.find(p => p.id_number === personId);
+
+        if (!person) return;
+
+        openUploadModal(personId, `${person.first_name} ${person.last_name}`);
+    }
+
+    /**
+     * טיפול בלחיצה על כפתור מחיקת אדם
+     * מציג אישור ושולח בקשת מחיקה לשרת
+     * @param {Event} event - אירוע הלחיצה
+     */
+    async function handleDeleteClick(event) {
+        const personId = event.currentTarget.getAttribute('data-id');
+        const person = peopleData.find(p => p.id_number === personId);
+
+        if (!person) return;
+
+        // בקשת אישור מהמשתמש
+        if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
+            try {
+                const response = await fetch(`/api/people/${personId}`, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('האדם נמחק בהצלחה', 'success');
+                    await loadPeopleData(); // רענון הרשימה
+                    updateDashboardStats(); // עדכון סטטיסטיקות
+                } else {
+                    showNotification(data.error || 'שגיאה במחיקת אדם', 'error');
+                }
+            } catch (error) {
+                showNotification('שגיאה במחיקת אדם', 'error');
+            }
+        }
+    }
+
+    /**
+     * טיפול בלחיצה על כפתור צפייה בתמונות
+     * פותח מודל עם כל התמונות של האדם
+     * @param {Event} event - אירוע הלחיצה
+     */
+    function handleViewImagesClick(event) {
+        const personId = event.currentTarget.getAttribute('data-id');
+        const person = peopleData.find(p => p.id_number === personId);
+
+        if (!person) return;
+
+        // מציאת אלמנטי המודל
+        const modal = document.getElementById('person-images-modal');
+        const galleryContainer = document.getElementById('person-images-gallery');
+        const personNameElem = document.getElementById('person-images-name');
+
+        if (!modal || !galleryContainer || !personNameElem) return;
+
+        // איפוס ומילוי תוכן
+        galleryContainer.innerHTML = '';
+        personNameElem.textContent = `${person.first_name} ${person.last_name}`;
+
+        // בדיקה אם יש תמונות
+        if (!person.image_urls || person.image_urls.length === 0) {
+            galleryContainer.innerHTML = '<p class="no-images">אין תמונות זמינות</p>';
+        } else {
+            // יצירת גלריית תמונות
+            person.image_urls.forEach((url, index) => {
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'person-image-item';
+                imageContainer.innerHTML = `
+                    <img src="${url}" alt="תמונה ${index + 1}" loading="lazy">
+                    <div class="person-image-counter">${index + 1}</div>
+                `;
+                galleryContainer.appendChild(imageContainer);
+            });
+        }
+
+        showModal(modal);
+    }
+
     // ==================== UPLOAD MODAL FUNCTIONS ====================
 
+    /**
+     * איפוס מלא של חלון העלאת תמונות
+     * מנקה את כל השדות והתצוגות המקדימות
+     */
     function resetUploadModal() {
         console.log('🧹 מאפס את חלון העלאה');
 
+        // איפוס הטופס
         const form = document.getElementById('upload-image-form');
         if (form) {
             form.reset();
         }
 
+        // איפוס תצוגה מקדימה (אם קיימת)
         const imagePreview = document.getElementById('image-preview');
         if (imagePreview) {
             imagePreview.src = '/web_static/img/person-placeholder.jpg';
         }
 
+        // איפוס שדה הקובץ
         const fileInput = document.getElementById('person-image');
         if (fileInput) {
             fileInput.value = '';
         }
 
+        // הסרת הודעות progress קודמות
         const existingProgress = document.querySelector('.upload-progress-container');
         if (existingProgress) {
             existingProgress.remove();
             console.log('🗑️ הוסר progress container קודם');
         }
 
+        // עדכון מד ההתקדמות בהתאם למצב
         if (tempPersonData.isActive) {
             updateUploadProgress(tempPersonData.uploadedImages.length);
         } else {
@@ -823,13 +696,21 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ חלון העלאה אופס במלואו');
     }
 
+    /**
+     * פתיחת חלון העלאה עבור אדם חדש
+     * מגדיר את החלון במצב מיוחד לאדם חדש
+     * @param {Object} personData - פרטי האדם החדש
+     */
     function openUploadModalForNewPerson(personData) {
         console.log(`📂 פותח חלון העלאה עבור אדם חדש: ${personData.first_name} ${personData.last_name}`);
 
+        // איפוס מלא קודם
         resetUploadModal();
 
+        // מילוי פרטי האדם
         document.getElementById('upload-person-id').value = personData.id_number;
 
+        // עדכון כותרת עם אינדיקטור "אדם חדש"
         const titleElement = document.querySelector('#upload-image-modal h3');
         if (titleElement) {
             titleElement.innerHTML = `
@@ -838,72 +719,99 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
 
+        // הסתרת כפתור הסגירה (X) - אדם חדש חייב להשלים
         const closeButtons = document.querySelectorAll('#upload-image-modal .close-modal');
         closeButtons.forEach(btn => {
             btn.style.visibility = 'hidden';
         });
 
+        // הצגת הודעה מיוחדת לאדם חדש (אם קיימת)
         const newPersonNotice = document.getElementById('new-person-notice');
         if (newPersonNotice) {
             newPersonNotice.style.display = 'block';
         }
 
+        // עדכון מד ההתקדמות (0 תמונות)
         updateUploadProgress(0);
 
+        // פתיחת החלון
         showModal(document.getElementById('upload-image-modal'));
 
         console.log('🎉 חלון העלאה לאדם חדש נפתח בהצלחה');
     }
 
+    /**
+     * פתיחת חלון העלאה עבור אדם קיים
+     * מגדיר את החלון במצב רגיל
+     * @param {string} personId - מזהה האדם
+     * @param {string} personName - שם האדם לתצוגה
+     */
     function openUploadModal(personId, personName) {
         console.log(`📂 פותח חלון העלאה עבור ${personName} (ID: ${personId})`);
 
+        // איפוס מלא קודם
         resetUploadModal();
 
+        // מילוי פרטי האדם
         document.getElementById('upload-person-id').value = personId;
 
+        // עדכון כותרת רגילה
         const titleElement = document.querySelector('#upload-image-modal h3');
         if (titleElement) {
             titleElement.textContent = `העלאת תמונות עבור ${personName}`;
         }
 
+        // הצגת כפתור הסגירה (X) - אדם קיים
         const closeButtons = document.querySelectorAll('#upload-image-modal .close-modal');
         closeButtons.forEach(btn => {
             btn.style.visibility = 'visible';
         });
 
+        // הסתרת הודעה מיוחדת לאדם חדש (אם קיימת)
         const newPersonNotice = document.getElementById('new-person-notice');
         if (newPersonNotice) {
             newPersonNotice.style.display = 'none';
         }
 
+        // קבלת מספר התמונות הנוכחי ועדכון המד
         const currentImageCount = getPersonImageCount(personId);
         console.log(`📊 מספר תמונות נוכחי: ${currentImageCount}`);
 
+        // עדכון מד ההתקדמות
         updateUploadProgress(currentImageCount);
 
+        // פתיחת החלון
         showModal(document.getElementById('upload-image-modal'));
 
         console.log('🎉 חלון העלאה נפתח בהצלחה');
     }
 
+    /**
+     * סגירת חלון העלאת תמונות
+     * מנקה ומאפס את החלון לקראת השימוש הבא
+     */
     function closeUploadModal() {
         console.log('❌ סוגר חלון העלאה');
 
+        // סגירת החלון
         document.getElementById('upload-image-modal').classList.remove('active');
 
+        // החזרת כפתור הסגירה (X) לתצוגה
         const closeButtons = document.querySelectorAll('#upload-image-modal .close-modal');
         closeButtons.forEach(btn => {
             btn.style.visibility = 'visible';
         });
 
+        // הסתרת הודעה מיוחדת לאדם חדש (אם קיימת)
         const newPersonNotice = document.getElementById('new-person-notice');
         if (newPersonNotice) {
             newPersonNotice.style.display = 'none';
         }
 
+        // איפוס החלון לקראת הפעם הבאה
         resetUploadModal();
 
+        // איפוס נתונים זמניים אם זה אדם חדש שהושלם
         if (tempPersonData.isActive) {
             clearTempPersonData();
         }
@@ -913,12 +821,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ==================== UPLOAD IMAGE HANDLER ====================
 
+    /**
+     * טיפול בהעלאת תמונות
+     * מעלה תמונות לשרת עם מעקב התקדמות מפורט
+     * @param {Event} event - אירוע שליחת הטופס
+     */
     async function handleUploadImage(event) {
         event.preventDefault();
 
         const personId = document.getElementById('upload-person-id').value;
         const fileInput = document.getElementById('person-image');
 
+        // בדיקות בסיסיות
         if (!fileInput.files.length) {
             showNotification('נא לבחור קבצים', 'error');
             return;
@@ -926,6 +840,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const files = Array.from(fileInput.files);
 
+        // הגבלת מספר קבצים
         if (files.length > 5) {
             showNotification('ניתן להעלות עד 5 תמונות בלבד', 'error');
             return;
@@ -933,12 +848,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log(`מתחיל להעלות ${files.length} תמונות...`);
 
+        // משתני מעקב
         let successCount = 0;
         let errorCount = 0;
         let totalImages = 0;
 
         const form = event.target;
 
+        // יצירת/חיפוש אלמנט progress
         let progressContainer = form.querySelector('.upload-progress-container');
 
         if (!progressContainer) {
@@ -959,14 +876,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const progressBar = progressContainer.querySelector('#upload-progress-bar');
         const progressText = progressContainer.querySelector('#upload-progress-text');
 
+        // גלילה לאזור ההתקדמות
         progressContainer.scrollIntoView({
             behavior: 'smooth',
             block: 'center'
         });
 
+        // איפוס מד ההתקדמות
         progressBar.style.width = '0%';
         progressText.textContent = 'מתחיל העלאה...';
 
+        // העלאת קבצים בלולאה
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 
@@ -976,7 +896,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const formData = new FormData();
                 formData.append('image', file);
 
+                // הוספת פרטי אדם לבקשה אם זה אדם חדש
                 if (tempPersonData.isActive) {
+                    // שימוש במספר ת.ז. בלבד לשם פשטות
                     formData.append('first_name', tempPersonData.personDetails.id_number);
                     formData.append('last_name', 'person');
                     formData.append('id_number', tempPersonData.personDetails.id_number);
@@ -984,40 +906,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 console.log(`מעלה קובץ: ${file.name}`);
 
-                let response;
+                // בחירת endpoint בהתאם לסוג האדם (חדש/קיים)
+                let response, data;
 
                 if (tempPersonData.isActive) {
                     // אדם חדש - העלאה לתיקייה זמנית
-                    response = await authenticatedFetch('/api/upload_temp_image', {
+                    response = await fetch('/api/upload_temp_image', {
                         method: 'POST',
-                        body: formData,
-                        headers: {} // ביטול Content-Type כי FormData יגדיר אותו אוטומטית
+                        body: formData
                     });
                 } else {
-                    // אדם קיים - העלאה רגילה
-                    response = await authenticatedFetch('/api/upload_temp_image', {
+                    // אדם קיים - העלאה רגילה (API לא קיים עדיין, נשתמש בזמני)
+                    response = await fetch('/api/upload_temp_image', {
                         method: 'POST',
-                        body: formData,
-                        headers: {}
+                        body: formData
                     });
                 }
 
-                if (!response) return;
-
-                const data = await response.json();
+                data = await response.json();
                 console.log(`תגובה עבור ${file.name}:`, data);
 
                 if (data.success) {
                     successCount++;
 
+                    // עדכון נתונים בהתאם לסוג האדם
                     if (tempPersonData.isActive) {
+                        // אדם חדש - הוספה לנתונים הזמניים
                         tempPersonData.uploadedImages.push(data.public_id);
                         tempPersonData.imageUrls.push(data.image_url);
-                        totalImages = tempPersonData.imageUrls.length;
+                        totalImages = tempPersonData.imageUrls.length; // ✅ תיקון: משתמש ב-imageUrls
                     } else {
-                        totalImages = successCount;
+                        // אדם קיים - עדכון מהשרת
+                        totalImages = successCount; // זמני עד שנוסיף API נכון
                     }
 
+                    // עדכון מד ההתקדמות הכללי
                     const progress = ((i + 1) / files.length) * 100;
                     progressBar.style.width = `${progress}%`;
 
@@ -1025,6 +948,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     updateUploadProgress(totalImages);
 
+                    // בדיקת מגבלת תמונות
                     if (totalImages >= 5) {
                         progressText.textContent = `הגעת למקסימום תמונות (5). הועלו ${successCount} תמונות.`;
                         showNotification('הגעת למקסימום תמונות (5)', 'warning');
@@ -1037,6 +961,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const progress = ((i + 1) / files.length) * 100;
                     progressBar.style.width = `${progress}%`;
 
+                    // טיפול בשגיאת מקסימום תמונות
                     if (data.error && data.error.includes('מקסימום')) {
                         progressText.textContent = `הגעת למקסימום תמונות. הועלו ${successCount} תמונות.`;
                         break;
@@ -1050,13 +975,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBar.style.width = `${progress}%`;
             }
 
+            // השהיה קצרה בין קבצים
             if (i < files.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, 300));
             }
         }
 
+        // סיום העלאה - עדכון מד התקדמות ל-100%
         progressBar.style.width = '100%';
 
+        // הכנת הודעת סיכום
         let summaryMessage = '';
         let notificationType = 'success';
 
@@ -1080,13 +1008,16 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('סיכום העלאה:', summaryMessage);
         showNotification(summaryMessage, notificationType);
 
+        // רענון נתונים רק אם זה לא אדם חדש (זמני)
         if (!tempPersonData.isActive) {
             await loadPeopleData();
         }
 
+        // ניקוי וסגירה אוטומטית לאחר 3 שניות
         setTimeout(() => {
             document.getElementById('upload-image-form').reset();
 
+            // איפוס תצוגה מקדימה
             const imagePreview = document.getElementById('image-preview');
             if (imagePreview) {
                 imagePreview.src = '/web_static/img/person-placeholder.jpg';
@@ -1095,18 +1026,28 @@ document.addEventListener('DOMContentLoaded', function() {
             if (progressContainer && progressContainer.parentNode) {
                 progressContainer.remove();
             }
+
+            // הערה: החלון לא נסגר אוטומטית - המשתמש צריך לבחור "צור"
         }, 3000);
     }
 
     // ==================== HELPER FUNCTIONS ====================
 
+    /**
+     * קבלת מספר התמונות של אדם ספציפי
+     * בודק באחסון מקומי ובנתונים הגלובליים
+     * @param {string} personId - מזהה האדם
+     * @returns {number} מספר התמונות
+     */
     function getPersonImageCount(personId) {
         try {
+            // אם זה אדם חדש (זמני), נחזיר את מספר התמונות הזמניות
             if (tempPersonData.isActive && tempPersonData.personDetails &&
                 tempPersonData.personDetails.id_number === personId) {
                 return tempPersonData.uploadedImages.length;
             }
 
+            // חיפוש בנתונים הגלובליים
             const globalPerson = peopleData.find(p => p.id_number === personId);
             if (globalPerson && globalPerson.image_urls) {
                 console.log(`נמצא ב-peopleData: ${globalPerson.image_urls.length} תמונות`);
@@ -1121,18 +1062,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * עדכון מד התקדמות העלאת תמונות
+     * מעדכן את הפסים הגרפיים והטקסט המתאים
+     * @param {number} imageCount - מספר התמונות הנוכחי
+     */
     function updateUploadProgress(imageCount) {
         console.log(`🎯 מעדכן מד התקדמות ל: ${imageCount} תמונות`);
 
+        // עדכון הפסים הגרפיים (1-5)
         for (let i = 1; i <= 5; i++) {
             const step = document.getElementById(`progress-step-${i}`);
             if (step) {
                 if (i <= imageCount) {
+                    // פס מושלם - צבע ירוק
                     step.classList.add('completed');
                     step.style.backgroundColor = '#4caf50';
                     step.style.borderColor = '#4caf50';
                     console.log(`✅ פס ${i} מושלם`);
                 } else {
+                    // פס לא מושלם - צבע אפור
                     step.classList.remove('completed');
                     step.style.backgroundColor = '#ddd';
                     step.style.borderColor = '#ddd';
@@ -1143,6 +1092,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // עדכון הטקסט המתאר
         const statusEl = document.getElementById('upload-status');
         if (statusEl) {
             const remaining = Math.max(0, 3 - imageCount);
@@ -1168,13 +1118,16 @@ document.addEventListener('DOMContentLoaded', function() {
             console.warn('❌ לא נמצא אלמנט upload-status');
         }
 
+        // עדכון כפתור צור
         const finishBtn = document.getElementById('finish-upload-button');
         if (finishBtn) {
             if (imageCount >= 3) {
+                // מספיק תמונות - הפעלת הכפתור
                 finishBtn.style.display = 'inline-block';
                 finishBtn.disabled = false;
                 finishBtn.textContent = 'צור';
             } else {
+                // לא מספיק תמונות
                 if (tempPersonData.isActive) {
                     finishBtn.style.display = 'inline-block';
                     finishBtn.disabled = true;
@@ -1186,11 +1139,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * בדיקת חיבור לשרת
+     */
     async function checkServerConnection() {
         try {
-            const response = await authenticatedFetch('/api/get_loaded_people');
-            if (!response) return false;
-
+            const response = await fetch('/api/get_loaded_people');
             const data = await response.json();
             console.log('✅ שרת מחובר:', data);
             return true;
@@ -1201,13 +1155,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * בדיקת endpoints זמינים
+     */
+    async function checkAvailableEndpoints() {
+        const endpoints = [
+            '/api/get_loaded_people',
+            '/api/people/create_person',
+            '/api/add_person',
+            '/api/upload_temp_image'
+        ];
+
+        console.log('🔍 בודק endpoints זמינים:');
+
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(endpoint, { method: 'OPTIONS' });
+                console.log(`✅ ${endpoint}: ${response.status}`);
+            } catch (error) {
+                console.log(`❌ ${endpoint}: לא זמין`);
+            }
+        }
+    }
+
+    /**
+     * טעינת נתוני אנשים מהשרת
+     * מבצע בקשה ל-API ומעדכן את המערך הגלובלי
+     * @returns {Promise<void>}
+     */
     async function loadPeopleData() {
         console.log('🔄 מתחיל לטעון נתוני אנשים...');
 
         try {
-            const response = await authenticatedFetch('/api/get_loaded_people');
-            if (!response) return;
-
+            const response = await fetch('/api/get_loaded_people');
             console.log('📡 תגובת שרת:', response.status);
 
             if (!response.ok) {
@@ -1222,7 +1202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     id_number: person.id_number,
                     first_name: person.first_name,
                     last_name: person.last_name,
-                    is_present: person.is_present || false,
+                    is_present: person.is_present || false, // ברירת מחדל אם לא קיים
                     image_urls: person.image_urls || [],
                     image_count: person.image_urls ? person.image_urls.length : 0
                 }));
@@ -1248,6 +1228,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * רינדור טבלת האנשים ב-DOM
+     * יוצר את השורות בטבלה על בסיס הנתונים הגלובליים
+     */
     function renderPeopleTable() {
         console.log('🎨 מתחיל לרנדר טבלת אנשים...');
 
@@ -1258,8 +1242,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         console.log('📋 מספר אנשים לרינדור:', peopleData.length);
-        tableBody.innerHTML = '';
+        tableBody.innerHTML = ''; // ניקוי תוכן קיים
 
+        // בדיקה אם יש אנשים
         if (peopleData.length === 0) {
             const emptyRow = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: #666;">אין אנשים במערכת</td></tr>`;
             tableBody.innerHTML = emptyRow;
@@ -1267,44 +1252,27 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // יצירת שורה לכל אדם
         peopleData.forEach((person, index) => {
             console.log(`🔄 מעבד אדם ${index + 1}:`, person);
 
             const row = document.createElement('tr');
 
+            // קביעת תמונה - ברירת מחדל או התמונה הראשונה
             let imageUrl = '/web_static/img/person-placeholder.jpg';
             if (person.image_urls && person.image_urls.length > 0) {
                 imageUrl = person.image_urls[0];
             }
 
+            // מונה תמונות
             const imageCounter = person.image_count > 0 ?
                 `<span class="image-count">${person.image_count}</span>` : '';
 
+            // סטטוס נוכחות
             const statusClass = person.is_present ? 'status-present' : 'status-absent';
             const statusText = person.is_present ? 'נוכח' : 'נעדר';
 
-            // כפתורי פעולה לפי הרשאות
-            let actionButtons = '';
-
-            if (hasPermission('manage_people')) {
-                actionButtons += `
-                    <button class="upload" data-id="${person.id_number}" title="העלאת תמונה">
-                        <i class="fas fa-upload"></i>
-                    </button>
-                    <button class="delete" data-id="${person.id_number}" title="מחיקה">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                `;
-            }
-
-            if (person.image_count > 0) {
-                actionButtons += `
-                    <button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות">
-                        <i class="fas fa-images"></i>
-                    </button>
-                `;
-            }
-
+            // בניית תוכן השורה
             row.innerHTML = `
                 <td>
                     <div style="position: relative; display: inline-block;">
@@ -1317,7 +1285,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td><span class="person-status ${statusClass}">${statusText}</span></td>
                 <td>
                     <div class="person-actions">
-                        ${actionButtons}
+                        <button class="upload" data-id="${person.id_number}" title="העלאת תמונה">
+                            <i class="fas fa-upload"></i>
+                        </button>
+                        ${person.image_count > 0 ?
+                            `<button class="view-images" data-id="${person.id_number}" title="צפייה בכל התמונות">
+                                <i class="fas fa-images"></i>
+                            </button>` : ''
+                        }
+                        <button class="delete" data-id="${person.id_number}" title="מחיקה">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 </td>
             `;
@@ -1328,15 +1306,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`✅ הושלם רינדור ${peopleData.length} אנשים`);
 
         // הוספת מאזיני אירועים לכפתורים החדשים
-        if (hasPermission('manage_people')) {
-            tableBody.querySelectorAll('.upload').forEach(b =>
-                b.addEventListener('click', handleUploadClick)
-            );
-            tableBody.querySelectorAll('.delete').forEach(b =>
-                b.addEventListener('click', handleDeleteClick)
-            );
-        }
-
+        tableBody.querySelectorAll('.upload').forEach(b =>
+            b.addEventListener('click', handleUploadClick)
+        );
+        tableBody.querySelectorAll('.delete').forEach(b =>
+            b.addEventListener('click', handleDeleteClick)
+        );
         tableBody.querySelectorAll('.view-images').forEach(b =>
             b.addEventListener('click', handleViewImagesClick)
         );
@@ -1344,6 +1319,10 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🎯 הוספו מאזיני אירועים לכפתורים');
     }
 
+    /**
+     * סינון טבלת האנשים על פי טקסט החיפוש
+     * מסתיר/מציג שורות בהתאם למחרוזת החיפוש
+     */
     function filterPeopleTable() {
         const searchValue = document.getElementById('search-people').value.toLowerCase();
         const tableBody = document.getElementById('people-table-body');
@@ -1353,22 +1332,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = tableBody.querySelectorAll('tr');
 
         rows.forEach(row => {
+            // חיפוש בשם מלא ובת.ז.
             const fullName = row.children[1]?.textContent.toLowerCase() || '';
             const id = row.children[2]?.textContent.toLowerCase() || '';
 
             if (fullName.includes(searchValue) || id.includes(searchValue)) {
-                row.style.display = '';
+                row.style.display = ''; // הצגה
             } else {
-                row.style.display = 'none';
+                row.style.display = 'none'; // הסתרה
             }
         });
     }
 
+    /**
+     * עדכון סטטיסטיקות לוח הבקרה
+     */
     function updateDashboardStats() {
         const totalPeople = peopleData.length;
         const presentPeople = peopleData.filter(p => p.is_present).length;
         const absentPeople = totalPeople - presentPeople;
 
+        // עדכון אלמנטים ב-DOM
         const totalEl = document.getElementById('total-people');
         const presentEl = document.getElementById('present-people');
         const absentEl = document.getElementById('absent-people');
@@ -1377,6 +1361,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (presentEl) presentEl.textContent = presentPeople;
         if (absentEl) absentEl.textContent = absentPeople;
 
+        // עדכון סטטיסטיקות נוכחות
         const attendancePresentEl = document.getElementById('attendance-present');
         const attendanceAbsentEl = document.getElementById('attendance-absent');
         const attendancePercentageEl = document.getElementById('attendance-percentage');
@@ -1389,6 +1374,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * הגדרת תאריך נוכחי
+     */
     function setCurrentDate() {
         const dateInput = document.getElementById('attendance-date');
         if (dateInput) {
@@ -1399,13 +1387,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ==================== TARGET IMAGE FUNCTIONS ====================
 
+    /**
+     * טעינת תמונות מטרה מהשרת
+     * מציג את התמונות בגלריה עם סטטיסטיקות
+     */
     async function loadTargetImages() {
         console.log('🔄 טוען תמונות מטרה...');
 
         try {
-            const response = await authenticatedFetch('/api/get_target_images');
-            if (!response) return;
-
+            const response = await fetch('/api/get_target_images');
             const data = await response.json();
 
             console.log('📡 תגובת שרת לתמונות מטרה:', data);
@@ -1418,11 +1408,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            galleryGrid.innerHTML = '';
+            galleryGrid.innerHTML = ''; // ניקוי תוכן קיים
 
             if (data.success && data.targets && data.targets.length > 0) {
                 console.log(`📊 נמצאו ${data.targets.length} targets`);
 
+                // עדכון סטטיסטיקות
                 let totalImages = 0;
                 data.targets.forEach(target => {
                     if (target.images_url && Array.isArray(target.images_url)) {
@@ -1434,6 +1425,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     galleryStats.textContent = `${totalImages} תמונות מטרה`;
                 }
 
+                // יצירת הגלריה
                 data.targets.forEach((target, targetIndex) => {
                     console.log(`🎯 מעבד target ${targetIndex}:`, target);
 
@@ -1454,6 +1446,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
 
+                // הוספת מאזין לצ'קבוקסים
                 document.querySelectorAll('.target-checkbox').forEach(checkbox => {
                     checkbox.addEventListener('change', updateDeleteButton);
                 });
@@ -1461,6 +1454,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(`✅ הוצגו ${totalImages} תמונות מטרה`);
 
             } else {
+                // מצב ריק - אין תמונות
                 console.log('📭 אין תמונות מטרה');
 
                 if (galleryStats) {
@@ -1498,6 +1492,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * טיפול בבחירת קבצים לתמונות מטרה
+     */
     function handleTargetFileSelection() {
         const fileInput = document.getElementById('target-file-input');
         const uploadArea = document.querySelector('.upload-area');
@@ -1505,15 +1502,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (files.length > 0) {
             console.log(`נבחרו ${files.length} קבצים לתמונות מטרה`);
+
+            // עדכון אזור ההעלאה להראות את הקבצים שנבחרו
             updateUploadAreaWithPreview(files, uploadArea);
         } else {
+            // איפוס לתצוגה רגילה
             resetUploadArea(uploadArea);
         }
     }
 
+    /**
+     * עדכון אזור ההעלאה עם תצוגה מקדימה
+     */
     function updateUploadAreaWithPreview(files, uploadArea) {
         const filesArray = Array.from(files);
 
+        // יצירת תוכן חדש עם תצוגה מקדימה
         let previewHTML = `
             <div class="upload-preview">
                 <div class="upload-icon">📁</div>
@@ -1522,8 +1526,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="selected-files">
         `;
 
+        // הוספת תצוגה מקדימה לכל קובץ
         filesArray.forEach((file, index) => {
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
             const isImage = file.type.startsWith('image/');
             const isVideo = file.type.startsWith('video/');
 
@@ -1552,9 +1557,13 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadArea.style.borderColor = '#007bff';
         uploadArea.style.backgroundColor = '#f8f9fa';
 
+        // עדכון כפתור העלאה
         updateUploadButton(files.length);
     }
 
+    /**
+     * איפוס אזור ההעלאה לתצוגה רגילה
+     */
     function resetUploadArea(uploadArea) {
         uploadArea.innerHTML = `
             <div class="upload-icon">📁</div>
@@ -1564,31 +1573,44 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadArea.style.borderColor = '#ccc';
         uploadArea.style.backgroundColor = '';
 
+        // איפוס כפתור העלאה
         updateUploadButton(0);
     }
 
-    function updateUploadButton(fileCount) {
-        const uploadBtn = document.querySelector('.target-btn-upload');
-        if (uploadBtn) {
-            if (fileCount > 0) {
-                uploadBtn.textContent = `📤 העלה ${fileCount} קבצים`;
-                uploadBtn.disabled = false;
-                uploadBtn.style.backgroundColor = '#28a745';
-            } else {
-                uploadBtn.textContent = '📤 בחר קבצים תחילה';
-                uploadBtn.disabled = true;
-                uploadBtn.style.backgroundColor = '#ccc';
+    /**
+     * הסרת קובץ ספציפי מהבחירה
+     */
+    function removeFileFromSelection(indexToRemove) {
+        const fileInput = document.getElementById('target-file-input');
+        const uploadArea = document.querySelector('.upload-area');
+
+        // יצירת רשימה חדשה של קבצים בלי הקובץ שנבחר להסרה
+        const dt = new DataTransfer();
+        const files = Array.from(fileInput.files);
+
+        files.forEach((file, index) => {
+            if (index !== indexToRemove) {
+                dt.items.add(file);
             }
+        });
+
+        // עדכון ה-input עם הרשימה החדשה
+        fileInput.files = dt.files;
+
+        // עדכון התצוגה
+        if (dt.files.length > 0) {
+            updateUploadAreaWithPreview(dt.files, uploadArea);
+        } else {
+            resetUploadArea(uploadArea);
         }
+
+        console.log(`הוסר קובץ. נותרו ${dt.files.length} קבצים`);
     }
 
+    /**
+     * העלאת תמונות מטרה
+     */
     async function uploadTargetFiles() {
-        // בדיקת הרשאות
-        if (!hasPermission('manage_targets')) {
-            showNotification('אין לך הרשאה להעלות תמונות מטרה', 'error');
-            return;
-        }
-
         const fileInput = document.getElementById('target-file-input');
         const loading = document.getElementById('target-loading');
 
@@ -1599,33 +1621,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log(`📤 מעלה ${fileInput.files.length} תמונות מטרה...`);
 
+        // הצגת loading
         if (loading) loading.style.display = 'flex';
 
         try {
             let successCount = 0;
             let errorCount = 0;
 
+            // העלאת כל קובץ בנפרד
             for (let i = 0; i < fileInput.files.length; i++) {
                 const file = fileInput.files[i];
                 console.log(`📷 מעלה קובץ ${i + 1}/${fileInput.files.length}: ${file.name}`);
 
                 try {
+                    // יצירת FormData לקובץ בודד
                     const formData = new FormData();
                     formData.append('image', file);
 
-                    const tempResponse = await authenticatedFetch('/api/upload_temp_image', {
+                    // העלאה זמנית לקבלת URL
+                    const tempResponse = await fetch('/api/upload_temp_image', {
                         method: 'POST',
-                        body: formData,
-                        headers: {}
+                        body: formData
                     });
-
-                    if (!tempResponse) return;
 
                     const tempData = await tempResponse.json();
 
                     if (tempData.success) {
                         console.log(`✅ העלאה זמנית הצליחה עבור ${file.name}:`, tempData);
 
+                        // עכשיו יצירת target עם ה-URL
                         const targetPayload = {
                             camera_number: Date.now() + i,
                             image_url: tempData.image_url
@@ -1633,15 +1657,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         console.log(`📤 שולח target payload:`, targetPayload);
 
-                        const targetResponse = await authenticatedFetch('/api/target-images', {
+                        const targetResponse = await fetch('/api/target-images', {
                             method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify(targetPayload)
                         });
 
-                        if (!targetResponse) return;
-
                         console.log(`📨 תגובת target server: status ${targetResponse.status}`);
+                        console.log(`📨 response headers:`, [...targetResponse.headers.entries()]);
 
+                        // קרא את התגובה כטקסט קודם
                         const responseText = await targetResponse.text();
                         console.log(`📋 raw response text:`, responseText);
 
@@ -1673,11 +1698,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error(`❌ שגיאה בעיבוד ${file.name}:`, fileError);
                 }
 
+                // השהיה קצרה בין קבצים
                 if (i < fileInput.files.length - 1) {
                     await new Promise(resolve => setTimeout(resolve, 200));
                 }
             }
 
+            // הודעת סיכום
             if (successCount > 0 && errorCount === 0) {
                 showNotification(`🎉 הועלו ${successCount} תמונות מטרה בהצלחה!`, 'success');
             } else if (successCount > 0 && errorCount > 0) {
@@ -1686,21 +1713,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification(`❌ כל ההעלאות נכשלו`, 'error');
             }
 
+            // איפוס הקלט והתצוגה
             fileInput.value = '';
             const uploadArea = document.querySelector('.upload-area');
             uploadArea.querySelector('.upload-text').textContent = 'לחץ כאן או גרור קבצים להעלאה';
             uploadArea.style.borderColor = '#ccc';
 
-            await loadTargetImages();
+            await loadTargetImages(); // רענון הגלריה
 
         } catch (error) {
             console.error('שגיאה כללית בהעלאת תמונות מטרה:', error);
             showNotification('שגיאה בהעלאת תמונות מטרה', 'error');
         } finally {
+            // הסתרת loading
             if (loading) loading.style.display = 'none';
         }
     }
 
+    /**
+     * עדכון מצב כפתור מחיקה של תמונות מטרה
+     */
     function updateDeleteButton() {
         const deleteBtn = document.getElementById('target-delete-btn');
         const checkedBoxes = document.querySelectorAll('.target-checkbox:checked');
@@ -1710,13 +1742,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * מחיקת תמונות מטרה נבחרות
+     */
     async function deleteSelectedTargets() {
-        // בדיקת הרשאות
-        if (!hasPermission('manage_targets')) {
-            showNotification('אין לך הרשאה למחוק תמונות מטרה', 'error');
-            return;
-        }
-
         const checkedBoxes = document.querySelectorAll('.target-checkbox:checked');
 
         if (checkedBoxes.length === 0) {
@@ -1728,23 +1757,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!confirmed) return;
 
         try {
+            // איסוף מזהי התמונות למחיקה
             const cameraNumbers = Array.from(checkedBoxes).map(cb =>
                 parseInt(cb.getAttribute('data-camera'))
             );
 
+            // מחיקה של כל מצלמה
             for (const cameraNumber of new Set(cameraNumbers)) {
-                const response = await authenticatedFetch(`/api/targets/${cameraNumber}`, {
+                const response = await fetch(`/api/targets/${cameraNumber}`, {
                     method: 'DELETE'
                 });
 
-                if (!response || !response.ok) {
+                if (!response.ok) {
                     throw new Error(`Failed to delete camera ${cameraNumber}`);
                 }
             }
 
             showNotification(`נמחקו תמונות בהצלחה`, 'success');
-            await loadTargetImages();
-            updateDeleteButton();
+            await loadTargetImages(); // רענון הגלריה
+            updateDeleteButton(); // עדכון כפתור מחיקה
 
         } catch (error) {
             console.error('שגיאה במחיקת תמונות:', error);
@@ -1754,10 +1785,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ==================== UTILITY FUNCTIONS ====================
 
+    /**
+     * תעתיק מעברית לאנגלית לשמות קבצים
+     * @param {string} text - טקסט בעברית
+     * @returns {string} טקסט באנגלית
+     */
+    function transliterateHebrew(text) {
+        const hebrewToEnglish = {
+            'א': 'a', 'ב': 'b', 'ג': 'g', 'ד': 'd', 'ה': 'h', 'ו': 'v', 'ז': 'z',
+            'ח': 'ch', 'ט': 't', 'י': 'y', 'כ': 'k', 'ך': 'k', 'ל': 'l', 'מ': 'm',
+            'ם': 'm', 'ן': 'n', 'נ': 'n', 'ס': 's', 'ע': 'a', 'פ': 'p', 'ף': 'f',
+            'צ': 'tz', 'ץ': 'tz', 'ק': 'k', 'ר': 'r', 'ש': 'sh', 'ת': 't',
+            ' ': '_', '-': '_', '.': '_'
+        };
+
+        return text
+            .toLowerCase()
+            .split('')
+            .map(char => hebrewToEnglish[char] || char)
+            .join('')
+            .replace(/[^a-z0-9_]/g, '') // הסרת תווים לא חוקיים
+            .replace(/_+/g, '_') // החלפת מספר קווים תחתונים באחד
+            .replace(/^_|_$/g, ''); // הסרת קווים תחתונים מתחילת וסוף
+    }
+
+    /**
+     * הצגת חלון מודל
+     * מוסיף את הקלאס 'active' לחלון כדי להציגו
+     * @param {HTMLElement} modal - אלמנט המודל להצגה
+     */
     function showModal(modal) {
         if(modal) modal.classList.add('active');
     }
 
+    /**
+     * סגירת חלון מודל לפי מזהה
+     * @param {string} modalId - מזהה המודל לסגירה
+     */
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -1765,7 +1829,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    /**
+     * הצגת הודעת התראה למשתמש
+     * יוצר הודעה צפה עם כפתור סגירה וסגירה אוטומטית
+     * @param {string} message - תוכן ההודעה
+     * @param {string} type - סוג ההודעה (info/success/warning/error)
+     */
     function showNotification(message, type = 'info') {
+        // יצירה/חיפוש מיכל הודעות
         let container = document.querySelector('.notification-container');
         if (!container) {
             container = document.createElement('div');
@@ -1773,15 +1844,22 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.appendChild(container);
         }
 
+        // יצירת הודעה חדשה
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.innerHTML = `<span class="notification-message">${message}</span><button class="notification-close">&times;</button>`;
 
         container.appendChild(notification);
 
+        // מאזין לכפתור סגירה
         const closeBtn = notification.querySelector('.notification-close');
+
+        // טיימר לסגירה אוטומטית
         const autoClose = setTimeout(() => closeNotification(notification), 5000);
 
+        /**
+         * פונקציית סגירת הודעה
+         */
         function closeNotification() {
             notification.classList.add('closing');
             setTimeout(() => {
@@ -1790,40 +1868,670 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
 
+        // הוספת מאזין לכפתור סגירה
         closeBtn.addEventListener('click', closeNotification);
     }
 
     // ==================== GLOBAL FUNCTIONS FOR HTML ====================
 
+    /**
+     * פונקציות גלובליות שהHTML יכול לקרוא להן
+     */
     window.uploadTargetFiles = uploadTargetFiles;
     window.deleteSelectedTargets = deleteSelectedTargets;
     window.loadTargetImages = loadTargetImages;
 
-    // ==================== MAIN INITIALIZATION ====================
+    // ==================== ERROR HANDLING ====================
 
-    initialize();
+    /**
+     * טיפול גלובלי בשגיאות JavaScript
+     * לוכד שגיאות שלא נתפסו ומציג הודעה למשתמש
+     */
+    window.addEventListener('error', function(event) {
+        console.error('JavaScript Error:', event.error);
 
-    // ==================== CONSOLE MESSAGE ====================
-
-    console.log('✅ AttendMe v2.0 - מערכת ניהול נוכחות עם בתי ספר מרובים אותחלה בהצלחה');
-    console.log('📊 סטטיסטיקות אתחול:', {
-        'משתמש מחובר': currentUser ? currentUser.username : 'לא מחובר',
-        'בית ספר נוכחי': currentSchool ? currentSchool.name : 'לא ידוע',
-        'תמיכה באותנטיקציה': '✅',
-        'בתי ספר מרובים': '✅'
+        // הצגת הודעה ידידותית למשתמש (רק בסביבת פיתוח)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            showNotification('אירעה שגיאה בסיסית באפליקציה. בדוק את הקונסול לפרטים.', 'error');
+        }
     });
 
-});
+    /**
+     * טיפול בשגיאות Promise שלא נתפסו
+     */
+    window.addEventListener('unhandledrejection', function(event) {
+        console.error('Unhandled Promise Rejection:', event.reason);
+
+        // הצגת הודעה ידידותית למשתמש (רק בסביבת פיתוח)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            showNotification('אירעה שגיאה בתקשורת עם השרת', 'error');
+        }
+    });
+
+    // ==================== MAIN INITIALIZATION ====================
+
+    /**
+     * הפעלת האתחול הראשי
+     * זה הקוד הראשון שרץ כשהדף נטען
+     */
+    initialize();
+
+    // ==================== CSS STYLES INJECTION ====================
+
+    /**
+     * הוספת סטיילים דינמיים להודעות התראה
+     * מוסיף CSS לעיצוב ההודעות אם הוא לא קיים
+     */
+    (function injectNotificationStyles() {
+        // בדיקה אם הסטיילים כבר קיימים
+        if (document.getElementById('notification-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            /* סטיילים להודעות התראה */
+            .notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                max-width: 400px;
+            }
+
+            .notification {
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                margin-bottom: 10px;
+                padding: 15px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                animation: slideIn 0.3s ease-out;
+                border-right: 4px solid #3498db;
+            }
+
+            .notification.success {
+                border-right-color: #27ae60;
+                background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            }
+
+            .notification.error {
+                border-right-color: #e74c3c;
+                background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            }
+
+            .notification.warning {
+                border-right-color: #f39c12;
+                background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            }
+
+            .notification.info {
+                border-right-color: #3498db;
+                background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            }
+
+            .notification-message {
+                flex: 1;
+                margin-right: 10px;
+                font-weight: 500;
+            }
+
+            .notification-close {
+                background: none;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                color: #666;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: background-color 0.2s;
+            }
+
+            .notification-close:hover {
+                background-color: rgba(0,0,0,0.1);
+            }
+
+            .notification.closing {
+                animation: slideOut 0.3s ease-in forwards;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+
+            /* עיצוב רספונסיבי להודעות */
+            @media (max-width: 768px) {
+                .notification-container {
+                    right: 10px;
+                    left: 10px;
+                    max-width: none;
+                }
+
+                .notification {
+                    padding: 12px;
+                }
+
+                .notification-message {
+                    font-size: 14px;
+                }
+            }
+
+            /* סטיילים נוספים לאלמנטים שלא קיימים ב-CSS */
+            .upload-progress {
+                display: flex;
+                gap: 10px;
+                margin: 15px 0;
+                justify-content: center;
+            }
+
+            .progress-step {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                border: 3px solid #ddd;
+                background: #ddd;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: white;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .progress-step.completed {
+                background: #4caf50 !important;
+                border-color: #4caf50 !important;
+            }
+
+            .progress-step.optional {
+                opacity: 0.6;
+            }
+
+            .progress-step::after {
+                content: attr(data-step);
+            }
+
+            .upload-status {
+                text-align: center;
+                padding: 10px;
+                margin: 10px 0;
+                font-weight: bold;
+                border-radius: 5px;
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+            }
+
+            .target-image-card {
+                position: relative;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: transform 0.3s ease;
+            }
+
+            .target-image-card:hover {
+                transform: scale(1.05);
+            }
+
+            .target-image-card img {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+            }
+
+            .target-checkbox {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                z-index: 10;
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+            }
+
+            .target-image-info {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0,0,0,0.7);
+                color: white;
+                padding: 5px;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            .target-gallery-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+                margin-top: 15px;
+            }
+
+            .upload-area {
+                border: 2px dashed #ccc;
+                border-radius: 8px;
+                padding: 40px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-bottom: 20px;
+            }
+
+            .upload-area:hover {
+                border-color: #007bff;
+                background-color: #f8f9fa;
+            }
+
+            .upload-icon {
+                font-size: 48px;
+                margin-bottom: 10px;
+            }
+
+            .upload-text {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .upload-hint {
+                color: #666;
+                font-size: 14px;
+            }
+
+            .target-buttons-row {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .target-btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background-color 0.3s ease;
+            }
+
+            .target-btn-upload {
+                background: #28a745;
+                color: white;
+            }
+
+            .target-btn-upload:hover {
+                background: #218838;
+            }
+
+            .target-btn-delete {
+                background: #dc3545;
+                color: white;
+            }
+
+            .target-btn-delete:hover:not(:disabled) {
+                background: #c82333;
+            }
+
+            .target-btn-delete:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+
+            .target-loading {
+                display: none;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                padding: 20px;
+                font-weight: bold;
+            }
+
+            .target-spinner {
+                width: 20px;
+                height: 20px;
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid #3498db;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            .target-gallery-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+
+            .target-gallery-title {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .target-gallery-stats {
+                color: #666;
+                font-weight: bold;
+            }
+
+            /* תצוגה מקדימה של קבצים נבחרים */
+            .upload-preview {
+                text-align: center;
+            }
+
+            .selected-files {
+                margin-top: 15px;
+                max-height: 200px;
+                overflow-y: auto;
+                text-align: left;
+            }
+
+            .file-preview-item {
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                margin: 5px 0;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                transition: background-color 0.2s;
+            }
+
+            .file-preview-item:hover {
+                background-color: #f8f9fa;
+            }
+
+            .file-icon {
+                font-size: 20px;
+                margin-left: 10px;
+                min-width: 30px;
+            }
+
+            .file-info {
+                flex: 1;
+                margin: 0 10px;
+            }
+
+            .file-name {
+                font-weight: bold;
+                margin-bottom: 2px;
+                word-break: break-word;
+            }
+
+            .file-details {
+                font-size: 12px;
+                color: #666;
+            }
+
+            .remove-file-btn {
+                background: #dc3545;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                cursor: pointer;
+                font-size: 16px;
+                line-height: 1;
+                transition: background-color 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .remove-file-btn:hover {
+                background: #c82333;
+            }
+
+            /* שיפור עיצוב אזור העלאה כשיש קבצים */
+            .upload-area.has-files {
+                border-color: #007bff;
+                background-color: #f8f9fa;
+            }
+
+            /* עיצוב לאלמנטים שחסרים */
+            .person-image {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-left: 10px;
+            }
+
+            .image-count {
+                background: #007bff;
+                color: white;
+                border-radius: 50%;
+                padding: 2px 6px;
+                font-size: 11px;
+                position: absolute;
+                top: -5px;
+                right: -5px;
+            }
+
+            .person-actions {
+                display: flex;
+                gap: 5px;
+            }
+
+            .person-actions button {
+                padding: 5px 8px;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+
+            .person-actions .upload {
+                background: #28a745;
+                color: white;
+            }
+
+            .person-actions .view-images {
+                background: #17a2b8;
+                color: white;
+            }
+
+            .person-actions .delete {
+                background: #dc3545;
+                color: white;
+            }
+
+            .person-status {
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            .status-present {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .status-absent {
+                background: #f8d7da;
+                color: #721c24;
+            }
+        `;
+
+        document.head.appendChild(style);
+    })();
+
+    // ==================== DEBUG UTILITIES ====================
+
+    /**
+     * כלי עזר לדיבוג (רק בסביבת פיתוח)
+     * מוסיף פונקציות עזר לקונסול
+     */
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // הוספת פונקציות דיבוג לאובייקט הגלובלי
+        window.debugAttendance = {
+            // הצגת נתוני אנשים נוכחיים
+            showPeopleData: () => {
+                console.table(peopleData);
+                return peopleData;
+            },
+
+            // הצגת נתונים זמניים
+            showTempData: () => {
+                console.log('Temp Person Data:', tempPersonData);
+                return tempPersonData;
+            },
+
+            // טעינה ידנית של נתונים
+            refresh: async () => {
+                console.log('🔄 מתחיל רענון ידני...');
+                await loadPeopleData();
+                await loadTargetImages();
+                updateDashboardStats();
+                console.log('✅ רענון הושלם');
+            },
+
+            // בדיקת DOM
+            checkDOM: () => {
+                const elements = {
+                    'people-table-body': document.getElementById('people-table-body'),
+                    'people-table': document.getElementById('people-table'),
+                    'people-management': document.getElementById('people-management')
+                };
+
+                console.log('🔍 בדיקת אלמנטי DOM:');
+                for (const [name, element] of Object.entries(elements)) {
+                    console.log(`${element ? '✅' : '❌'} ${name}:`, element);
+                }
+
+                return elements;
+            },
+
+            // אילוץ רינדור
+            forceRender: () => {
+                console.log('🎨 אילוץ רינדור טבלה...');
+                renderPeopleTable();
+            },
+
+            // בדיקת שרת
+            checkServer: checkServerConnection,
+
+            // בדיקת endpoints
+            checkEndpoints: checkAvailableEndpoints,
+
+            // ניסיון יצירת אדם ידני
+            testCreatePerson: async () => {
+                try {
+                    const testData = {
+                        person_details: {
+                            first_name: 'טסט',
+                            last_name: 'דיבוג',
+                            id_number: '999999999'
+                        },
+                        image_urls: ['https://via.placeholder.com/150']
+                    };
+
+                    const response = await fetch('/api/people/create_person', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(testData)
+                    });
+
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    return data;
+                } catch (error) {
+                    console.error('Test failed:', error);
+                    return error;
+                }
+            },
+
+            // סימולציה של הוספת אדם לדיבוג
+            simulatePersonCreation: () => {
+                startNewPersonCreation({
+                    first_name: 'בדיקה',
+                    last_name: 'דיבוג',
+                    id_number: '123456789'
+                });
+                console.log('🧪 נוצר אדם זמני לדיבוג');
+            }
+        };
+
+        console.log('🔧 כלי דיבוג זמינים: window.debugAttendance');
+    }
+
+    // ==================== FINAL CONSOLE MESSAGE ====================
+
+    /**
+     * הודעת סיום טעינה
+     */
+    console.log('✅ מערכת ניהול נוכחות אותחלה בהצלחה');
+    console.log('📊 נתונים זמינים:', {
+        'כמות אנשים': peopleData.length,
+        'מצב נתונים זמניים': tempPersonData.isActive ? 'פעיל' : 'לא פעיל'
+    });
+
+}); // סוף DOMContentLoaded
 
 /**
  * ==================== END OF FILE ====================
  *
- * גרסה 2.0 - שינויים עיקריים:
- * - אותנטיקציה מלאה עם JWT
- * - תמיכה בבתי ספר מרובים
- * - הרשאות משתמשים מתקדמות
- * - API מעודכן עם בדיקות אבטחה
- * - ממשק משתמש מותאם לכל בית ספר
- * - ניהול סשנים מתקדם
- * - תמיכה בתפקידים שונים (מנהל, מורה, צוות, משתמש)
+ * קובץ זה מכיל את כל הפונקציונליות של מערכת ניהול הנוכחות:
+ *
+ * 🏗️ מבנה הקוד:
+ * - משתנים גלובליים ואתחול
+ * - מאזיני אירועים
+ * - ניהול נתונים זמניים
+ * - טיפול בטפסים ומודלים
+ * - העלאת וניהול תמונות
+ * - פונקציות עזר ויוטיליטיס
+ * - שיפורי נגישות וביצועים
+ *
+ * 🎯 מאפיינים עיקריים:
+ * - ניהול מלא של מחזור חיי יצירת אדם
+ * - העלאת תמונות עם מעקב התקדמות
+ * - ניהול תמונות מטרה לבדיקת נוכחות
+ * - ממשק משתמש רספונסיבי ונגיש
+ * - טיפול מקיף בשגיאות
+ * - כלי דיבוג לסביבת פיתוח
+ *
+ * 💡 הערות למפתח:
+ * - הקוד כתוב בצורה מודולרית וניתן להרחבה
+ * - כל פונקציה מתועדת עם JSDoc
+ * - יש תמיכה מלאה בשגיאות ובדיבוג
+ * - הקוד מותאם לעברית וממשק RTL
+ * - מותאם למבנה ה-API ב-Python backend
+ * - תומך בכל האלמנטים שמופיעים ב-HTML
  */
