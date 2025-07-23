@@ -62,7 +62,7 @@ app.logger.setLevel(logging.INFO)
 @app.route('/')
 def index():
     """עמוד הבית - מציג את הממשק הראשי של המערכת"""
-    return render_template('index.html')
+    return render_template('home.html')
 
 
 # ===============================================================================
