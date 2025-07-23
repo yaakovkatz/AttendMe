@@ -253,7 +253,7 @@
                         <tr>
                             <th>תמונה</th>
                             <th>שם מלא</th>
-                            <th>ת.ز.</th>
+                            <th>ת.ז.</th>
                             <th>סטטוס</th>
                             <th>זמן בדיקה</th>
                         </tr>
@@ -403,98 +403,6 @@
 
     <!-- Script imports -->
     <script src="/web_static/js/home.js"></script>
-
-    <script>
-        // פונקציה למעבר לדף התחברות
-        function goToLogin(event) {
-            event.preventDefault();
-
-            console.log('🔄 מנסה לעבור לדף התחברות...');
-            console.log('📍 נתיב נוכחי:', window.location.href);
-
-            // נתיבים אפשריים לשרת
-            const possiblePaths = [
-                '/login.html',          // נתיב מהשורש
-                './login.html',         // נתיב יחסי
-                'login.html',           // ישירות
-                '/web_static/login.html', // תיקיית static
-                '/templates/login.html',  // תיקיית templates
-                '/static/login.html'    // תיקיית static אחרת
-            ];
-
-            // בחר את הנתיב המתאים לפי המבנה שלך
-            let targetPath = possiblePaths[0]; // נתיב מהשורש
-
-            console.log('🎯 מנסה נתיב:', targetPath);
-
-            // נסה לעבור לדף
-            window.location.href = targetPath;
-        }
-
-        // בדיקה מהירה לקיום הקובץ
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏠 דף בית נטען');
-            console.log('🌐 URL מלא:', window.location.href);
-            console.log('📂 Host:', window.location.host);
-            console.log('📁 Path:', window.location.pathname);
-        });
-    </script>
-
-    <style>
-        /* סטיילים לכפתור ההתחברות */
-        .auth-section {
-            margin-left: 20px;
-        }
-
-        .login-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #3498db, #2ecc71);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3);
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
-            background: linear-gradient(135deg, #2980b9, #27ae60);
-        }
-
-        .login-btn i {
-            font-size: 1rem;
-        }
-
-        /* התאמה לניווט */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* רספונסיבי */
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .auth-section {
-                margin-left: 0;
-            }
-
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-    </style>
 
 </body>
 </html>

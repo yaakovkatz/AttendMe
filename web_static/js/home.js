@@ -11,7 +11,50 @@
  * - ממשק משתמש ידידותי ורספונסיבי
  */
 
+// ==================== LOGIN FUNCTIONALITY ====================
+
+/**
+ * פונקציה למעבר לדף התחברות
+ * מטפלת בניווט לדף התחברות עם נתיבים חלופיים
+ * @param {Event} event - אירוע הלחיצה על כפתור ההתחברות
+ */
+function goToLogin(event) {
+    event.preventDefault();
+
+    console.log('🔄 מנסה לעבור לדף התחברות...');
+    console.log('📍 נתיב נוכחי:', window.location.href);
+
+    // נתיבים אפשריים לשרת
+    const possiblePaths = [
+        '/login.html',          // נתיב מהשורש
+        './login.html',         // נתיב יחסי
+        'login.html',           // ישירות
+        '/web_static/login.html', // תיקיית static
+        '/templates/login.html',  // תיקיית templates
+        '/static/login.html'    // תיקיית static אחרת
+    ];
+
+    // בחר את הנתיב המתאים לפי המבנה שלך
+    let targetPath = possiblePaths[0]; // נתיב מהשורש
+
+    console.log('🎯 מנסה נתיב:', targetPath);
+
+    // נסה לעבור לדף
+    window.location.href = targetPath;
+}
+
+// הוספת הפונקציה לחלון הגלובלי כדי שהHTML יוכל לקרוא לה
+window.goToLogin = goToLogin;
+
+// ==================== MAIN INITIALIZATION ====================
+
 document.addEventListener('DOMContentLoaded', function() {
+    // הוספת לוגים נוספים לדף הבית
+    console.log('🏠 דף בית נטען');
+    console.log('🌐 URL מלא:', window.location.href);
+    console.log('📂 Host:', window.location.host);
+    console.log('📁 Path:', window.location.pathname);
+
     // ==================== GLOBAL VARIABLES ====================
 
     /**
@@ -1880,6 +1923,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.uploadTargetFiles = uploadTargetFiles;
     window.deleteSelectedTargets = deleteSelectedTargets;
     window.loadTargetImages = loadTargetImages;
+    window.removeFileFromSelection = removeFileFromSelection;
 
     // ==================== ERROR HANDLING ====================
 
@@ -1915,480 +1959,6 @@ document.addEventListener('DOMContentLoaded', function() {
      * זה הקוד הראשון שרץ כשהדף נטען
      */
     initialize();
-
-    // ==================== CSS STYLES INJECTION ====================
-
-    /**
-     * הוספת סטיילים דינמיים להודעות התראה
-     * מוסיף CSS לעיצוב ההודעות אם הוא לא קיים
-     */
-    (function injectNotificationStyles() {
-        // בדיקה אם הסטיילים כבר קיימים
-        if (document.getElementById('notification-styles')) return;
-
-        const style = document.createElement('style');
-        style.id = 'notification-styles';
-        style.textContent = `
-            /* סטיילים להודעות התראה */
-            .notification-container {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 10000;
-                max-width: 400px;
-            }
-
-            .notification {
-                background: #fff;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                margin-bottom: 10px;
-                padding: 15px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                animation: slideIn 0.3s ease-out;
-                border-right: 4px solid #3498db;
-            }
-
-            .notification.success {
-                border-right-color: #27ae60;
-                background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            }
-
-            .notification.error {
-                border-right-color: #e74c3c;
-                background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            }
-
-            .notification.warning {
-                border-right-color: #f39c12;
-                background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            }
-
-            .notification.info {
-                border-right-color: #3498db;
-                background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-            }
-
-            .notification-message {
-                flex: 1;
-                margin-right: 10px;
-                font-weight: 500;
-            }
-
-            .notification-close {
-                background: none;
-                border: none;
-                font-size: 18px;
-                cursor: pointer;
-                color: #666;
-                padding: 0;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                transition: background-color 0.2s;
-            }
-
-            .notification-close:hover {
-                background-color: rgba(0,0,0,0.1);
-            }
-
-            .notification.closing {
-                animation: slideOut 0.3s ease-in forwards;
-            }
-
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-
-            /* עיצוב רספונסיבי להודעות */
-            @media (max-width: 768px) {
-                .notification-container {
-                    right: 10px;
-                    left: 10px;
-                    max-width: none;
-                }
-
-                .notification {
-                    padding: 12px;
-                }
-
-                .notification-message {
-                    font-size: 14px;
-                }
-            }
-
-            /* סטיילים נוספים לאלמנטים שלא קיימים ב-CSS */
-            .upload-progress {
-                display: flex;
-                gap: 10px;
-                margin: 15px 0;
-                justify-content: center;
-            }
-
-            .progress-step {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                border: 3px solid #ddd;
-                background: #ddd;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                color: white;
-                transition: all 0.3s ease;
-                position: relative;
-            }
-
-            .progress-step.completed {
-                background: #4caf50 !important;
-                border-color: #4caf50 !important;
-            }
-
-            .progress-step.optional {
-                opacity: 0.6;
-            }
-
-            .progress-step::after {
-                content: attr(data-step);
-            }
-
-            .upload-status {
-                text-align: center;
-                padding: 10px;
-                margin: 10px 0;
-                font-weight: bold;
-                border-radius: 5px;
-                background: #f8f9fa;
-                border: 1px solid #dee2e6;
-            }
-
-            .target-image-card {
-                position: relative;
-                border-radius: 8px;
-                overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                transition: transform 0.3s ease;
-            }
-
-            .target-image-card:hover {
-                transform: scale(1.05);
-            }
-
-            .target-image-card img {
-                width: 100%;
-                height: 150px;
-                object-fit: cover;
-            }
-
-            .target-checkbox {
-                position: absolute;
-                top: 8px;
-                right: 8px;
-                z-index: 10;
-                width: 18px;
-                height: 18px;
-                cursor: pointer;
-            }
-
-            .target-image-info {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: rgba(0,0,0,0.7);
-                color: white;
-                padding: 5px;
-                font-size: 12px;
-                text-align: center;
-            }
-
-            .target-gallery-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 15px;
-                margin-top: 15px;
-            }
-
-            .upload-area {
-                border: 2px dashed #ccc;
-                border-radius: 8px;
-                padding: 40px;
-                text-align: center;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                margin-bottom: 20px;
-            }
-
-            .upload-area:hover {
-                border-color: #007bff;
-                background-color: #f8f9fa;
-            }
-
-            .upload-icon {
-                font-size: 48px;
-                margin-bottom: 10px;
-            }
-
-            .upload-text {
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 5px;
-            }
-
-            .upload-hint {
-                color: #666;
-                font-size: 14px;
-            }
-
-            .target-buttons-row {
-                display: flex;
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-
-            .target-btn {
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-weight: bold;
-                transition: background-color 0.3s ease;
-            }
-
-            .target-btn-upload {
-                background: #28a745;
-                color: white;
-            }
-
-            .target-btn-upload:hover {
-                background: #218838;
-            }
-
-            .target-btn-delete {
-                background: #dc3545;
-                color: white;
-            }
-
-            .target-btn-delete:hover:not(:disabled) {
-                background: #c82333;
-            }
-
-            .target-btn-delete:disabled {
-                background: #ccc;
-                cursor: not-allowed;
-            }
-
-            .target-loading {
-                display: none;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-                padding: 20px;
-                font-weight: bold;
-            }
-
-            .target-spinner {
-                width: 20px;
-                height: 20px;
-                border: 3px solid #f3f3f3;
-                border-top: 3px solid #3498db;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            }
-
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-
-            .target-gallery-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-                padding: 15px;
-                background: #f8f9fa;
-                border-radius: 8px;
-            }
-
-            .target-gallery-title {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-            }
-
-            .target-gallery-stats {
-                color: #666;
-                font-weight: bold;
-            }
-
-            /* תצוגה מקדימה של קבצים נבחרים */
-            .upload-preview {
-                text-align: center;
-            }
-
-            .selected-files {
-                margin-top: 15px;
-                max-height: 200px;
-                overflow-y: auto;
-                text-align: left;
-            }
-
-            .file-preview-item {
-                display: flex;
-                align-items: center;
-                padding: 8px 12px;
-                margin: 5px 0;
-                background: white;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                transition: background-color 0.2s;
-            }
-
-            .file-preview-item:hover {
-                background-color: #f8f9fa;
-            }
-
-            .file-icon {
-                font-size: 20px;
-                margin-left: 10px;
-                min-width: 30px;
-            }
-
-            .file-info {
-                flex: 1;
-                margin: 0 10px;
-            }
-
-            .file-name {
-                font-weight: bold;
-                margin-bottom: 2px;
-                word-break: break-word;
-            }
-
-            .file-details {
-                font-size: 12px;
-                color: #666;
-            }
-
-            .remove-file-btn {
-                background: #dc3545;
-                color: white;
-                border: none;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                cursor: pointer;
-                font-size: 16px;
-                line-height: 1;
-                transition: background-color 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .remove-file-btn:hover {
-                background: #c82333;
-            }
-
-            /* שיפור עיצוב אזור העלאה כשיש קבצים */
-            .upload-area.has-files {
-                border-color: #007bff;
-                background-color: #f8f9fa;
-            }
-
-            /* עיצוב לאלמנטים שחסרים */
-            .person-image {
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                object-fit: cover;
-                margin-left: 10px;
-            }
-
-            .image-count {
-                background: #007bff;
-                color: white;
-                border-radius: 50%;
-                padding: 2px 6px;
-                font-size: 11px;
-                position: absolute;
-                top: -5px;
-                right: -5px;
-            }
-
-            .person-actions {
-                display: flex;
-                gap: 5px;
-            }
-
-            .person-actions button {
-                padding: 5px 8px;
-                border: none;
-                border-radius: 3px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-
-            .person-actions .upload {
-                background: #28a745;
-                color: white;
-            }
-
-            .person-actions .view-images {
-                background: #17a2b8;
-                color: white;
-            }
-
-            .person-actions .delete {
-                background: #dc3545;
-                color: white;
-            }
-
-            .person-status {
-                padding: 3px 8px;
-                border-radius: 12px;
-                font-size: 12px;
-                font-weight: bold;
-            }
-
-            .status-present {
-                background: #d4edda;
-                color: #155724;
-            }
-
-            .status-absent {
-                background: #f8d7da;
-                color: #721c24;
-            }
-        `;
-
-        document.head.appendChild(style);
-    })();
 
     // ==================== DEBUG UTILITIES ====================
 

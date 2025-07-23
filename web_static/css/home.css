@@ -119,6 +119,40 @@ header {
     background-color: var(--primary-color); /* רקע כחול */
 }
 
+/* ==================== AUTH SECTION ==================== */
+/* אזור התחברות */
+.auth-section {
+    margin-left: 20px;
+}
+
+/* כפתור התחברות */
+.login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3);
+}
+
+/* אפקט hover לכפתור התחברות */
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, #2980b9, #27ae60);
+}
+
+/* אייקון בכפתור התחברות */
+.login-btn i {
+    font-size: 1rem;
+}
+
 /* ==================== BUTTONS ==================== */
 /* כפתור קריאה לפעולה (CTA) */
 .cta-button {
@@ -438,6 +472,122 @@ tr:hover {
     background-color: #f1f1f1;     /* רקע אפור בהיר יותר */
 }
 
+/* ==================== UPLOAD PROGRESS COMPONENTS ==================== */
+/* מד התקדמות העלאת תמונות */
+.upload-progress {
+    display: flex;                 /* פריסה גמישה */
+    gap: 10px;                     /* מרווח בין הפסים */
+    margin: 15px 0;                /* מרווח עליון ותחתון */
+    justify-content: center;       /* יישור למרכז */
+    align-items: center;           /* יישור אנכי במרכז */
+}
+
+/* פס התקדמות בודד */
+.progress-step {
+    width: 40px;                   /* רוחב קבוע */
+    height: 40px;                  /* גובה קבוע */
+    border-radius: 50%;            /* עיגול מלא */
+    border: 3px solid #ddd;        /* גבול אפור */
+    background: #f5f5f5;           /* רקע אפור בהיר */
+    display: flex;                 /* פריסה גמישה */
+    align-items: center;           /* יישור אנכי במרכז */
+    justify-content: center;       /* יישור אופקי במרכז */
+    font-weight: bold;             /* טקסט בולט */
+    color: #999;                   /* צבע אפור */
+    transition: all 0.3s ease;     /* מעבר חלק */
+    position: relative;            /* מיקום יחסי */
+    font-size: 12px;               /* גודל טקסט */
+}
+
+/* פס התקדמות מושלם */
+.progress-step.completed {
+    background: #4caf50 !important; /* רקע ירוק */
+    border-color: #4caf50 !important; /* גבול ירוק */
+    color: white !important;       /* טקסט לבן */
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); /* זוהר ירוק */
+}
+
+/* פס התקדמות אופציונלי */
+.progress-step.optional {
+    opacity: 0.6;                  /* שקיפות חלקית */
+    border-style: dashed;          /* גבול מקווקו */
+}
+
+/* אפקט אנימציה לפס מושלם */
+.progress-step.completed::after {
+    content: '✓';                  /* סימן וי */
+    position: absolute;            /* מיקום מוחלט */
+    font-size: 16px;               /* גודל גדול */
+    font-weight: bold;             /* טקסט בולט */
+}
+
+/* מספרים בפסי ההתקדמות */
+.progress-step:nth-child(1)::before { content: '1'; }
+.progress-step:nth-child(2)::before { content: '2'; }
+.progress-step:nth-child(3)::before { content: '3'; }
+.progress-step:nth-child(4)::before { content: '4'; }
+.progress-step:nth-child(5)::before { content: '5'; }
+
+/* הסתרת מספרים כשהפס מושלם */
+.progress-step.completed::before {
+    display: none;                 /* הסתרה */
+}
+
+/* סטטוס העלאה */
+.upload-status {
+    text-align: center;            /* יישור למרכז */
+    padding: 15px;                 /* מרווח פנימי */
+    margin: 15px 0;                /* מרווח עליון ותחתון */
+    font-weight: 600;              /* משקל טקסט בולט */
+    border-radius: 10px;           /* פינות עגולות */
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef); /* רקע גרדיינט */
+    border: 2px solid #dee2e6;     /* גבול אפור */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* צל קל */
+    transition: all 0.3s ease;     /* מעבר חלק */
+}
+
+/* מיכל התקדמות העלאה */
+.upload-progress-container {
+    margin: 20px 0;                /* מרווח עליון ותחתון */
+    padding: 20px;                 /* מרווח פנימי */
+    background: linear-gradient(135deg, #f0f8ff, #ffffff); /* רקע גרדיינט */
+    border-radius: 12px;           /* פינות עגולות */
+    border: 1px solid #e3f2fd;     /* גבול כחול בהיר */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* צל */
+}
+
+/* פס התקדמות מפורט */
+#upload-progress-bar {
+    background: linear-gradient(90deg, #4CAF50, #45a049); /* רקע ירוק גרדיינט */
+    height: 100%;                  /* גובה מלא */
+    width: 0%;                     /* התחלה מ-0 */
+    transition: width 0.5s ease;   /* מעבר חלק */
+    border-radius: 4px;            /* פינות עגולות */
+    position: relative;            /* מיקום יחסי */
+    overflow: hidden;              /* הסתרת גלישה */
+}
+
+/* אפקט נוצץ בפס התקדמות */
+#upload-progress-bar::after {
+    content: '';                   /* תוכן ריק */
+    position: absolute;            /* מיקום מוחלט */
+    top: 0;                        /* דבוק לעליון */
+    left: -100%;                   /* מתחיל מחוץ לאלמנט */
+    width: 100%;                   /* רוחב מלא */
+    height: 100%;                  /* גובה מלא */
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent);              /* גרדיינט נוצץ */
+    animation: shimmer 2s infinite; /* אנימציית נוצץ */
+}
+
+/* אנימציית נוצץ */
+@keyframes shimmer {
+    0% { left: -100%; }            /* התחלה */
+    100% { left: 100%; }           /* סוף */
+}
+
 /* ==================== PERSON ELEMENTS ==================== */
 /* תמונת אדם בטבלה */
 .person-image {
@@ -725,25 +875,6 @@ tr:hover {
 .attendance-checker-controls .form-group {
     width: 100%;                   /* רוחב מלא */
     max-width: 300px;              /* רוחב מקסימלי */
-}
-
-/* שדה קלט מספר */
-.number-input {
-    width: 120px;                  /* רוחב */
-    padding: 12px 15px;            /* מרווח פנימי */
-    border: 2px solid #e0e0e0;     /* גבול אפור */
-    border-radius: 8px;            /* פינות עגולות */
-    font-size: 16px;               /* גודל טקסט */
-    text-align: center;            /* יישור למרכז */
-    font-weight: 600;              /* משקל טקסט בולט */
-    transition: all 0.3s ease;     /* מעבר חלק */
-}
-
-/* מיקוד בשדה מספר */
-.number-input:focus {
-    border-color: var(--primary-color); /* גבול כחול */
-    outline: none;                 /* ביטול מיקוד ברירת מחדל */
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); /* צל כחול */
 }
 
 /* עזרה לשדה קלט */
@@ -1183,30 +1314,23 @@ footer {
     }
 }
 
-/* אנימציית מיקוד בשדה */
-@keyframes inputFocus {
-    0% {
-        transform: scale(1);        /* גודל רגיל */
-    }
-    50% {
-        transform: scale(1.02);     /* הגדלה קלה */
-    }
-    100% {
-        transform: scale(1);        /* חזרה לגודל רגיל */
-    }
-}
-
 /* ==================== RESPONSIVE STYLES ==================== */
 /* עיצוב רספונסיבי לטאבלטים */
 @media (max-width: 900px) {
     /* ניווט בפריסה אנכית */
     .navbar {
         flex-direction: column;     /* סידור אנכי */
+        gap: 15px;                  /* מרווח בין אלמנטים */
     }
 
     /* מרווח לוגו */
     .logo {
         margin-bottom: 15px;        /* מרווח תחתון */
+    }
+
+    /* אזור התחברות */
+    .auth-section {
+        margin-left: 0;
     }
 
     /* קישורי ניווט */
@@ -1352,12 +1476,6 @@ footer {
         max-width: none;            /* ביטול רוחב מקסימלי */
     }
 
-    /* שדה קלט מספר */
-    .number-input {
-        width: 100%;                /* רוחב מלא */
-        max-width: 200px;           /* רוחב מקסימלי */
-    }
-
     /* כותרת בדיקת נוכחות */
     .attendance-checker-section h3 {
         font-size: 1.1rem;          /* גודל מופחת */
@@ -1390,6 +1508,611 @@ footer {
     .person-card {
         padding: 10px;              /* מרווח פנימי מופחת */
     }
+}
+
+/* ==================== TARGET UPLOAD SECTION - ENHANCED ==================== */
+/* סקציית העלאת תמונות מטרה - מעוצבת */
+#target-upload {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* רקע גרדיינט סגול-כחול */
+    padding: 60px 0;               /* מרווח פנימי גדול יותר */
+    position: relative;            /* מיקום יחסי */
+    overflow: hidden;              /* הסתרת גלישה */
+}
+
+/* אפקט רקע מונפש */
+#target-upload::before {
+    content: '';                   /* תוכן ריק */
+    position: absolute;            /* מיקום מוחלט */
+    top: -50%;                     /* מעל האלמנט */
+    left: -50%;                    /* משמאל לאלמנט */
+    width: 200%;                   /* רוחב כפול */
+    height: 200%;                  /* גובה כפול */
+    background: linear-gradient(45deg,
+        rgba(255,255,255,0.1) 25%,
+        transparent 25%,
+        transparent 75%,
+        rgba(255,255,255,0.1) 75%); /* גרדיינט פסים */
+    background-size: 60px 60px;    /* גודל הפסים */
+    animation: moveBackground 20s linear infinite; /* אנימציה */
+    pointer-events: none;          /* ביטול אירועים */
+}
+
+/* אנימציית רקע */
+@keyframes moveBackground {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* מיכל סקציית מטרה - מעוצב */
+.target-upload-container {
+    background: rgba(255, 255, 255, 0.95); /* רקע לבן שקוף */
+    border-radius: 25px;           /* פינות עגולות מאוד */
+    padding: 40px;                 /* מרווח פנימי */
+    margin: 30px 0;                /* מרווח עליון ותחתון */
+    border: none;                  /* ביטול גבול */
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15),
+                0 8px 25px rgba(0,0,0,0.1); /* צל כפול */
+    backdrop-filter: blur(10px);   /* אפקט טשטוש רקע */
+    position: relative;            /* מיקום יחסי */
+    z-index: 1;                    /* מעל הרקע */
+}
+
+/* אזור העלאה - מעוצב */
+.upload-area {
+    border: 3px dashed #667eea;    /* גבול מקווקו סגול */
+    border-radius: 20px;           /* פינות עגולות */
+    padding: 50px 40px;            /* מרווח פנימי גדול */
+    text-align: center;            /* יישור למרכז */
+    background: linear-gradient(135deg, #f8fcff, #e8f4fd); /* רקע גרדיינט */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    cursor: pointer;               /* סמן יד */
+    margin-bottom: 40px;           /* מרווח תחתון */
+    position: relative;            /* מיקום יחסי */
+    overflow: hidden;              /* הסתרת גלישה */
+}
+
+/* אפקט רקע לאזור העלאה */
+.upload-area::before {
+    content: '';                   /* תוכן ריק */
+    position: absolute;            /* מיקום מוחלט */
+    top: 50%;                      /* מרכז אנכי */
+    left: 50%;                     /* מרכז אופקי */
+    width: 0;                      /* רוחב התחלתי */
+    height: 0;                     /* גובה התחלתי */
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1), transparent); /* גרדיינט עגול */
+    border-radius: 50%;            /* עיגול מלא */
+    transition: all 0.6s ease;     /* מעבר חלק */
+    transform: translate(-50%, -50%); /* מרכוז */
+    z-index: -1;                   /* מתחת לתוכן */
+}
+
+/* אפקט hover מתקדם לאזור העלאה */
+.upload-area:hover {
+    border-color: #5a67d8;         /* גבול כחול כהה */
+    background: linear-gradient(135deg, #e8f4fd, #dbeafe); /* רקע כחול יותר */
+    transform: translateY(-5px) scale(1.02); /* הרמה והגדלה */
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2); /* צל כחול */
+}
+
+/* הגדלת האפקט ברקע */
+.upload-area:hover::before {
+    width: 300px;                  /* רוחב מורחב */
+    height: 300px;                 /* גובה מורחב */
+}
+
+/* אייקון העלאה - מעוצב */
+.upload-icon {
+    font-size: 64px;               /* גודל גדול מאוד */
+    color: #667eea;                /* צבע סגול */
+    margin-bottom: 25px;           /* מרווח תחתון */
+    animation: floatIcon 3s ease-in-out infinite; /* אנימציית ריחוף */
+    text-shadow: 0 4px 8px rgba(102, 126, 234, 0.3); /* צל טקסט */
+}
+
+/* אנימציית ריחוף לאייקון */
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* טקסט העלאה - מעוצב */
+.upload-text {
+    font-size: 22px;               /* גודל גדול */
+    color: #4a5568;                /* צבע אפור כהה */
+    margin-bottom: 15px;           /* מרווח תחתון */
+    font-weight: 700;              /* משקל טקסט כבד */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1); /* צל טקסט */
+}
+
+/* רמז העלאה - מעוצב */
+.upload-hint {
+    color: #718096;                /* צבע אפור בינוני */
+    font-size: 16px;               /* גודל בינוני */
+    font-style: italic;            /* טקסט נטוי */
+}
+
+/* כפתורי מטרה - מעוצבים */
+.target-btn {
+    padding: 18px 35px;            /* מרווח פנימי גדול */
+    border: none;                  /* ביטול גבול */
+    border-radius: 15px;           /* פינות עגולות */
+    font-size: 18px;               /* גודל טקסט גדול */
+    font-weight: 700;              /* טקסט כבד */
+    cursor: pointer;               /* סמן יד */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    display: flex;                 /* פריסה גמישה */
+    align-items: center;           /* יישור אנכי במרכז */
+    gap: 12px;                     /* מרווח בין אלמנטים */
+    text-decoration: none;         /* ביטול קישור */
+    min-width: 200px;              /* רוחב מינימלי */
+    justify-content: center;       /* יישור למרכז */
+    position: relative;            /* מיקום יחסי */
+    overflow: hidden;              /* הסתרת גלישה */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* צל */
+}
+
+/* אפקט זוהר לכפתורים */
+.target-btn::before {
+    content: '';                   /* תוכן ריק */
+    position: absolute;            /* מיקום מוחלט */
+    top: 0;                        /* דבוק לעליון */
+    left: -100%;                   /* מתחיל מחוץ לכפתור */
+    width: 100%;                   /* רוחב מלא */
+    height: 100%;                  /* גובה מלא */
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent);              /* גרדיינט זוהר */
+    transition: left 0.5s;         /* מעבר חלק */
+}
+
+/* הפעלת הזוהר בhover */
+.target-btn:hover::before {
+    left: 100%;                    /* עוזב מימין */
+}
+
+/* כפתור העלאה - מעוצב */
+.target-btn-upload {
+    background: linear-gradient(135deg, #48bb78, #38a169); /* רקע ירוק גרדיינט */
+    color: white;                  /* טקסט לבן */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* צל טקסט */
+}
+
+/* אפקט hover לכפתור העלאה */
+.target-btn-upload:hover {
+    transform: translateY(-3px) scale(1.05); /* הרמה והגדלה */
+    box-shadow: 0 15px 40px rgba(72, 187, 120, 0.4); /* צל ירוק */
+    background: linear-gradient(135deg, #38a169, #2f855a); /* רקע ירוק כהה יותר */
+}
+
+/* כפתור מחיקה - מעוצב */
+.target-btn-delete {
+    background: linear-gradient(135deg, #f56565, #e53e3e); /* רקע אדום גרדיינט */
+    color: white;                  /* טקסט לבן */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* צל טקסט */
+}
+
+/* אפקט hover לכפתור מחיקה */
+.target-btn-delete:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.05); /* הרמה והגדלה */
+    box-shadow: 0 15px 40px rgba(245, 101, 101, 0.4); /* צל אדום */
+    background: linear-gradient(135deg, #e53e3e, #c53030); /* רקע אדום כהה יותר */
+}
+
+/* כפתור מחיקה לא פעיל */
+.target-btn-delete:disabled {
+    background: linear-gradient(135deg, #cbd5e0, #a0aec0); /* רקע אפור */
+    cursor: not-allowed;           /* סמן חסום */
+    transform: none;               /* ביטול אנימציה */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* צל רגיל */
+}
+
+/* גלריית מטרה - מעוצבת */
+.target-gallery {
+    background: rgba(255, 255, 255, 0.8); /* רקע לבן שקוף */
+    border-radius: 20px;           /* פינות עגולות */
+    padding: 30px;                 /* מרווח פנימי */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* צל */
+    backdrop-filter: blur(5px);    /* אפקט טשטוש */
+}
+
+/* כותרת הגלריה - מעוצבת */
+.target-gallery-header {
+    display: flex;                 /* פריסה גמישה */
+    justify-content: space-between; /* פיזור תוכן */
+    align-items: center;           /* יישור אנכי במרכז */
+    margin-bottom: 25px;           /* מרווח תחתון */
+    padding: 25px;                 /* מרווח פנימי */
+    background: linear-gradient(135deg, #ffffff, #f7fafc); /* רקע גרדיינט */
+    border-radius: 15px;           /* פינות עגולות */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08); /* צל */
+    border: 1px solid rgba(255,255,255,0.8); /* גבול לבן שקוף */
+}
+
+/* כרטיס תמונת מטרה - מעוצב */
+.target-image-card {
+    position: relative;            /* מיקום יחסי */
+    border-radius: 20px;           /* פינות עגולות מאוד */
+    overflow: hidden;              /* הסתרת גלישה */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* צל */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    cursor: pointer;               /* סמן יד */
+    aspect-ratio: 1 / 1;           /* יחס גובה-רוחב 1:1 */
+    background: linear-gradient(135deg, #f7fafc, #edf2f7); /* רקע גרדיינט */
+}
+
+/* אפקט hover מתקדם לכרטיס תמונה */
+.target-image-card:hover {
+    transform: translateY(-8px) scale(1.03); /* הרמה והגדלה */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25); /* צל עמוק */
+}
+
+/* אפקט זוהר לתמונה */
+.target-image-card::before {
+    content: '';                   /* תוכן ריק */
+    position: absolute;            /* מיקום מוחלט */
+    top: 0;                        /* דבוק לעליון */
+    left: 0;                       /* דבוק לשמאל */
+    right: 0;                      /* דבוק לימין */
+    bottom: 0;                     /* דבוק לתחתית */
+    background: linear-gradient(45deg,
+        rgba(255,255,255,0.1),
+        transparent,
+        rgba(255,255,255,0.1));    /* גרדיינט זוהר */
+    opacity: 0;                    /* שקוף בהתחלה */
+    transition: opacity 0.3s ease; /* מעבר חלק */
+    pointer-events: none;          /* ביטול אירועים */
+}
+
+/* הפעלת הזוהר בhover */
+.target-image-card:hover::before {
+    opacity: 1;                    /* גלוי */
+}
+
+/* צ'קבוקס תמונת מטרה - מעוצב */
+.target-image-checkbox {
+    position: absolute;            /* מיקום מוחלט */
+    top: 15px;                     /* מרחק מלמעלה */
+    right: 15px;                   /* מרחק מימין */
+    width: 24px;                   /* רוחב */
+    height: 24px;                  /* גובה */
+    cursor: pointer;               /* סמן יד */
+    z-index: 10;                   /* מעל התמונה */
+    accent-color: #667eea;         /* צבע הסמן */
+    transform: scale(1.2);         /* הגדלה */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* צל */
+}
+
+/* מידע תמונת מטרה - מעוצב */
+.target-image-info {
+    position: absolute;            /* מיקום מוחלט */
+    bottom: 0;                     /* דבוק לתחתית */
+    left: 0;                       /* דבוק לשמאל */
+    right: 0;                      /* דבוק לימין */
+    background: linear-gradient(transparent, rgba(0,0,0,0.8)); /* רקע גרדיינט */
+    color: white;                  /* טקסט לבן */
+    padding: 20px 15px 15px;       /* מרווח פנימי */
+    font-size: 14px;               /* גודל */
+    text-align: center;            /* יישור למרכז */
+    font-weight: 600;              /* משקל טקסט בולט */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5); /* צל טקסט */
+}
+
+/* ==================== FILE PREVIEW COMPONENTS ==================== */
+/* תצוגה מקדימה של קבצים נבחרים */
+.upload-preview {
+    text-align: center;            /* יישור למרכז */
+    padding: 20px;                 /* מרווח פנימי */
+}
+
+/* מיכל קבצים נבחרים */
+.selected-files {
+    margin-top: 20px;              /* מרווח עליון */
+    max-height: 250px;             /* גובה מקסימלי */
+    overflow-y: auto;              /* גלילה אנכית */
+    text-align: left;              /* יישור לשמאל */
+    border-radius: 12px;           /* פינות עגולות */
+    background: rgba(255,255,255,0.9); /* רקע לבן שקוף */
+    padding: 15px;                 /* מרווח פנימי */
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.1); /* צל פנימי */
+}
+
+/* פריט תצוגה מקדימה של קובץ */
+.file-preview-item {
+    display: flex;                 /* פריסה גמישה */
+    align-items: center;           /* יישור אנכי במרכז */
+    padding: 12px 15px;            /* מרווח פנימי */
+    margin: 8px 0;                 /* מרווח עליון ותחתון */
+    background: rgba(255,255,255,0.95); /* רקע לבן שקוף */
+    border: 2px solid rgba(102, 126, 234, 0.2); /* גבול סגול בהיר */
+    border-radius: 12px;           /* פינות עגולות */
+    transition: all 0.3s ease;     /* מעבר חלק */
+    position: relative;            /* מיקום יחסי */
+    overflow: hidden;              /* הסתרת גלישה */
+}
+
+/* אפקט hover לפריט קובץ */
+.file-preview-item:hover {
+    background: rgba(102, 126, 234, 0.05); /* רקע סגול בהיר */
+    border-color: rgba(102, 126, 234, 0.4); /* גבול סגול */
+    transform: translateX(5px);    /* הזזה קלה */
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15); /* צל סגול */
+}
+
+/* אייקון קובץ */
+.file-icon {
+    font-size: 24px;               /* גודל גדול */
+    margin-left: 15px;             /* מרווח משמאל */
+    min-width: 35px;               /* רוחב מינימלי */
+    text-align: center;            /* יישור למרכז */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); /* צל */
+}
+
+/* מידע הקובץ */
+.file-info {
+    flex: 1;                       /* גמישות */
+    margin: 0 15px;                /* מרווח בצדדים */
+    min-width: 0;                  /* רוחב מינימלי אפס */
+}
+
+/* שם הקובץ */
+.file-name {
+    font-weight: 700;              /* משקל טקסט כבד */
+    margin-bottom: 4px;            /* מרווח תחתון */
+    word-break: break-word;        /* שבירת מילים ארוכות */
+    color: #2d3748;                /* צבע כהה */
+    font-size: 15px;               /* גודל טקסט */
+}
+
+/* פרטי הקובץ */
+.file-details {
+    font-size: 13px;               /* גודל קטן */
+    color: #718096;                /* צבע אפור */
+    font-weight: 500;              /* משקל טקסט בינוני */
+}
+
+/* כפתור הסרת קובץ */
+.remove-file-btn {
+    background: linear-gradient(135deg, #f56565, #e53e3e); /* רקע אדום גרדיינט */
+    color: white;                  /* טקסט לבן */
+    border: none;                  /* ביטול גבול */
+    border-radius: 50%;            /* עיגול מלא */
+    width: 28px;                   /* רוחב */
+    height: 28px;                  /* גובה */
+    cursor: pointer;               /* סמן יד */
+    font-size: 16px;               /* גודל טקסט */
+    line-height: 1;                /* גובה שורה */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    display: flex;                 /* פריסה גמישה */
+    align-items: center;           /* יישור אנכי במרכז */
+    justify-content: center;       /* יישור אופקי במרכז */
+    font-weight: bold;             /* טקסט בולט */
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3); /* צל אדום */
+}
+
+/* אפקט hover לכפתור הסרה */
+.remove-file-btn:hover {
+    background: linear-gradient(135deg, #e53e3e, #c53030); /* רקע אדום כהה */
+    transform: scale(1.1) rotate(90deg); /* הגדלה וסיבוב */
+    box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4); /* צל חזק יותר */
+}
+
+/* אפקט לחיצה על כפתור הסרה */
+.remove-file-btn:active {
+    transform: scale(0.95);        /* הקטנה */
+}
+
+/* אזור העלאה עם קבצים */
+.upload-area.has-files {
+    border-color: #667eea;         /* גבול סגול */
+    background: linear-gradient(135deg, #e8f4fd, #f0f8ff); /* רקע כחול בהיר */
+    border-style: solid;           /* גבול רציף */
+}
+
+/* ==================== LOADING AND NOTIFICATION COMPONENTS ==================== */
+/* ספינר טעינת מטרה - מעוצב */
+.target-loading {
+    display: none;                 /* מוסתר בהתחלה */
+    flex-direction: column;        /* סידור אנכי */
+    align-items: center;           /* יישור למרכז */
+    justify-content: center;       /* יישור אנכי למרכז */
+    text-align: center;            /* יישור טקסט למרכז */
+    padding: 40px;                 /* מרווח פנימי */
+    color: #667eea;                /* צבע סגול */
+    font-weight: 600;              /* משקל טקסט בולט */
+    background: rgba(255,255,255,0.9); /* רקע לבן שקוף */
+    border-radius: 15px;           /* פינות עגולות */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1); /* צל */
+    backdrop-filter: blur(5px);    /* אפקט טשטוש */
+}
+
+/* הצגת טעינה */
+.target-loading.show {
+    display: flex;                 /* הצגה כפריסה גמישה */
+}
+
+/* ספינר טעינת מטרה - מתקדם */
+.target-spinner {
+    border: 4px solid rgba(102, 126, 234, 0.2); /* גבול שקוף */
+    border-top: 4px solid #667eea; /* גבול עליון סגול */
+    border-radius: 50%;            /* עיגול מלא */
+    width: 50px;                   /* רוחב */
+    height: 50px;                  /* גובה */
+    animation: spin 1s linear infinite; /* אנימציית סיבוב */
+    margin: 0 auto 20px;           /* מרכוז ומרווח תחתון */
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); /* צל סגול */
+}
+
+/* הודעות התראה - מעוצבות */
+.notification-container {
+    position: fixed;               /* מיקום קבוע */
+    top: 20px;                     /* מרחק מלמעלה */
+    right: 20px;                   /* מרחק מימין */
+    z-index: 10000;                /* מעל הכל */
+    max-width: 420px;              /* רוחב מקסימלי */
+    pointer-events: none;          /* ביטול אירועי עכבר */
+}
+
+/* הודעת התראה בודדת */
+.notification {
+    background: rgba(255, 255, 255, 0.95); /* רקע לבן שקוף */
+    border-radius: 12px;           /* פינות עגולות */
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12),
+                0 2px 8px rgba(0,0,0,0.08); /* צל כפול */
+    margin-bottom: 12px;           /* מרווח תחתון */
+    padding: 18px 20px;            /* מרווח פנימי */
+    display: flex;                 /* פריסה גמישה */
+    justify-content: space-between; /* פיזור תוכן */
+    align-items: center;           /* יישור אנכי במרכז */
+    animation: slideInNotification 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* אנימציית הופעה */
+    border-right: 5px solid #3498db; /* גבול ימני כחול */
+    backdrop-filter: blur(10px);   /* אפקט טשטוש */
+    pointer-events: all;           /* הפעלת אירועי עכבר */
+    position: relative;            /* מיקום יחסי */
+    overflow: hidden;              /* הסתרת גלישה */
+}
+
+/* אפקט רקע להודעה */
+.notification::before {
+    content: '';                   /* תוכן ריק */
+    position: absolute;            /* מיקום מוחלט */
+    top: 0;                        /* דבוק לעליון */
+    left: 0;                       /* דבוק לשמאל */
+    right: 0;                      /* דבוק לימין */
+    height: 2px;                   /* גובה קטן */
+    background: linear-gradient(90deg, #3498db, #2ecc71); /* גרדיינט כחול-ירוק */
+    animation: progressBar 5s linear; /* אנימציית התקדמות */
+}
+
+/* אנימציית פס התקדמות */
+@keyframes progressBar {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+/* הודעת הצלחה */
+.notification.success {
+    border-right-color: #27ae60;  /* גבול ירוק */
+    background: linear-gradient(135deg, rgba(212, 237, 218, 0.95), rgba(195, 230, 203, 0.95)); /* רקע ירוק */
+}
+
+.notification.success::before {
+    background: linear-gradient(90deg, #27ae60, #2ecc71); /* גרדיינט ירוק */
+}
+
+/* הודעת שגיאה */
+.notification.error {
+    border-right-color: #e74c3c;  /* גבול אדום */
+    background: linear-gradient(135deg, rgba(248, 215, 218, 0.95), rgba(245, 198, 203, 0.95)); /* רקע אדום */
+}
+
+.notification.error::before {
+    background: linear-gradient(90deg, #e74c3c, #c0392b); /* גרדיינט אדום */
+}
+
+/* הודעת אזהרה */
+.notification.warning {
+    border-right-color: #f39c12;  /* גבול כתום */
+    background: linear-gradient(135deg, rgba(255, 243, 205, 0.95), rgba(255, 234, 167, 0.95)); /* רקע כתום */
+}
+
+.notification.warning::before {
+    background: linear-gradient(90deg, #f39c12, #e67e22); /* גרדיינט כתום */
+}
+
+/* הודעת מידע */
+.notification.info {
+    border-right-color: #3498db;  /* גבול כחול */
+    background: linear-gradient(135deg, rgba(209, 236, 241, 0.95), rgba(190, 229, 235, 0.95)); /* רקע כחול */
+}
+
+/* תוכן ההודעה */
+.notification-message {
+    flex: 1;                       /* גמישות */
+    margin-right: 15px;            /* מרווח מימין */
+    font-weight: 600;              /* משקל טקסט בולט */
+    font-size: 14px;               /* גודל טקסט */
+    line-height: 1.4;              /* גובה שורה */
+    color: #2c3e50;                /* צבע כהה */
+}
+
+/* כפתור סגירת הודעה */
+.notification-close {
+    background: rgba(0,0,0,0.1);   /* רקע שקוף */
+    border: none;                  /* ביטול גבול */
+    font-size: 18px;               /* גודל גדול */
+    cursor: pointer;               /* סמן יד */
+    color: #666;                   /* צבע אפור */
+    padding: 0;                    /* ביטול מרווח פנימי */
+    width: 28px;                   /* רוחב */
+    height: 28px;                  /* גובה */
+    display: flex;                 /* פריסה גמישה */
+    align-items: center;           /* יישור אנכי במרכז */
+    justify-content: center;       /* יישור אופקי במרכז */
+    border-radius: 50%;            /* עיגול מלא */
+    transition: all 0.3s ease;     /* מעבר חלק */
+    font-weight: bold;             /* טקסט בולט */
+}
+
+/* אפקט hover לכפתור סגירה */
+.notification-close:hover {
+    background: rgba(231, 76, 60, 0.2); /* רקע אדום שקוף */
+    color: #e74c3c;                /* צבע אדום */
+    transform: scale(1.1);         /* הגדלה קלה */
+}
+
+/* הודעה נסגרת */
+.notification.closing {
+    animation: slideOutNotification 0.3s ease-in forwards; /* אנימציית יציאה */
+}
+
+/* אנימציית הופעת הודעה */
+@keyframes slideInNotification {
+    from {
+        transform: translateX(100%) scale(0.8); /* מתחיל מימין וקטן */
+        opacity: 0;                 /* שקוף */
+    }
+    to {
+        transform: translateX(0) scale(1); /* מגיע למיקום רגיל */
+        opacity: 1;                 /* גלוי */
+    }
+}
+
+/* אנימציית יציאת הודעה */
+@keyframes slideOutNotification {
+    from {
+        transform: translateX(0) scale(1); /* מתחיל במיקום רגיל */
+        opacity: 1;                 /* גלוי */
+    }
+    to {
+        transform: translateX(100%) scale(0.8); /* יוצא ימינה וקטן */
+        opacity: 0;                 /* שקוף */
+    }
+}
+
+/* ==================== COUNTER AND BADGE COMPONENTS ==================== */
+/* מונה תמונות */
+.image-count {
+    background: linear-gradient(135deg, #667eea, #764ba2); /* רקע סגול גרדיינט */
+    color: white;                  /* טקסט לבן */
+    border-radius: 50%;            /* עיגול מלא */
+    padding: 4px 8px;              /* מרווח פנימי */
+    font-size: 11px;               /* גודל קטן */
+    position: absolute;            /* מיקום מוחלט */
+    top: -8px;                     /* מעל התמונה */
+    right: -8px;                   /* מימין לתמונה */
+    font-weight: bold;             /* טקסט בולט */
+    min-width: 20px;               /* רוחב מינימלי */
+    text-align: center;            /* יישור למרכז */
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4); /* צל סגול */
+    border: 2px solid white;       /* גבול לבן */
+    animation: pulse 2s infinite;  /* אנימציית דופק */
+}
+
+/* אנימציית דופק למונה */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }
 
 /* ==================== TARGET UPLOAD SECTION ==================== */
@@ -1734,6 +2457,95 @@ footer {
     }
 }
 
+/* סטיילים למודל צפייה בתמונות אדם */
+#person-images-modal .modal-content {
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+#person-images-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 25px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.person-image-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+    aspect-ratio: 1;
+}
+
+.person-image-item:hover {
+    transform: scale(1.05);
+}
+
+.person-image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.person-image-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.no-images {
+    text-align: center;
+    color: #666;
+    padding: 40px;
+    grid-column: 1 / -1;
+    font-style: italic;
+}
+
+#person-images-name {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0;
+}
+
+/* רספונסיבי לטלפונים */
+@media (max-width: 480px) {
+    #person-images-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .person-image-counter {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+        top: 6px;
+        right: 6px;
+        border: 1px solid white;
+    }
+}
+
 /* ==================== UTILITY CLASSES ==================== */
 /* מחלקות עזר שימושיות */
 
@@ -1911,116 +2723,3 @@ footer {
         animation: none !important; /* ביטול אנימציית ספינר */
     }
 }
-
-/* ==================== DARK MODE SUPPORT ==================== */
-/* תמיכה במצב כהה (אופציונלי) */
-@media (prefers-color-scheme: dark) {
-    /* ניתן להוסיף תמיכה במצב כהה כאן */
-    /*
-    :root {
-        --primary-color: #4fa8d8;
-        --secondary-color: #5dcc7a;
-        --dark-color: #ffffff;
-        --light-color: #1a1a1a;
-    }
-
-    body {
-        background-color: #121212;
-        color: #ffffff;
-    }
-    */
-}
-
-.status-absent {
-                background: #f8d7da;
-                color: #721c24;
-            }
-
-            /* סטיילים למודל צפייה בתמונות אדם */
-            #person-images-modal .modal-content {
-                max-width: 800px;
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-
-            #person-images-gallery {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 20px;
-                padding: 25px;
-                max-height: 60vh;
-                overflow-y: auto;
-            }
-
-            .person-image-item {
-                position: relative;
-                border-radius: 8px;
-                overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                transition: transform 0.2s ease;
-                aspect-ratio: 1;
-            }
-
-            .person-image-item:hover {
-                transform: scale(1.05);
-            }
-
-            .person-image-item img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                cursor: pointer;
-            }
-
-            .person-image-counter {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: rgba(0,0,0,0.8);
-                color: white;
-                border-radius: 50%;
-                width: 28px;
-                height: 28px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 14px;
-                font-weight: bold;
-                border: 2px solid white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            }
-
-            .no-images {
-                text-align: center;
-                color: #666;
-                padding: 40px;
-                grid-column: 1 / -1;
-                font-style: italic;
-            }
-
-            #person-images-name {
-                text-align: center;
-                font-size: 18px;
-                font-weight: bold;
-                padding: 15px;
-                border-bottom: 1px solid #eee;
-                margin-bottom: 0;
-            }
-
-            /* רספונסיבי לטלפונים */
-            @media (max-width: 480px) {
-                #person-images-gallery {
-                    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                    gap: 15px;
-                    padding: 15px;
-                }
-
-                .person-image-counter {
-                    width: 22px;
-                    height: 22px;
-                    font-size: 11px;
-                    top: 6px;
-                    right: 6px;
-                    border: 1px solid white;
-                }
-            }
