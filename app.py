@@ -21,11 +21,11 @@
 # ייבוא הקבצים המקומיים
 from Data_Manage import (add_new_person, remove_person, get_all_people, get_person,
                          update_person, toggle_presence, add_new_target, remove_target,
-                         get_all_targets, clear_all_targets)
+                         get_all_targets, clear_all_targets, login_user, register_school,
+                         add_demo_data, print_all_schools)
+
 from Attend_Manage import (extract_all_faces_from_targets, check_attendance_for_all_people)
 
-# ייבוא מערכת School (הוסף!)
-from School import login_user, register_school, add_demo_data, print_all_schools
 
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
@@ -271,63 +271,137 @@ def api_debug_schools():
             'message': f'שגיאה: {str(e)}'
         }), 500
 
+
 # ===============================================================================
-#                               API - ניהול אנשים (CRUD)
+#                               API - ניהול אנשים (CRUD) - מעודכן
 # ===============================================================================
+
 @app.route('/api/people/create_person', methods=['POST'])
 def create_person():
-    """יוצר אדם חדש עם תמונות"""
-    data = request.json
+    """יוצר אדם חדש עם תמונות לבית ספר ספציפי"""
+    try:
+        data = request.json
 
-    # קרא לפונקציה מ-Data_Manage
-    person_details = data['person_details']
-    result = add_new_person(
-        person_details['first_name'],
-        person_details['last_name'],
-        person_details['id_number'],
-        data['image_urls']
-    )
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש'
+            }), 400
 
-    # החזרת תוצאה
-    if result['success']:
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קרא לפונקציה המעודכנת מ-Data_Manage
+        person_details = data['person_details']
+        result = add_new_person(
+            school_index,  # 🎯 הוספנו את school_index!
+            person_details['first_name'],
+            person_details['last_name'],
+            person_details['id_number'],
+            data['image_urls']
+        )
+
+        # החזרת תוצאה
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': result['message'],
+                'person_id': person_details['id_number'],
+                'school_name': result['school_name']
+            }), 201
+        else:
+            return jsonify(result), 409
+
+    except Exception as e:
         return jsonify({
-            'success': True,
-            'message': 'האדם נוצר בהצלחה',
-            'person_id': person_details['id_number']
-        }), 201
-    else:
-        return jsonify(result), 409
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 @app.route('/api/people/<person_id>', methods=['DELETE'])
 def delete_person(person_id):
-    """מוחק אדם מהמערכת"""
-    # קרא לפונקציה מ-Data_Manage
-    remove_person(person_id)
-    return jsonify({'success': True})
+    """מוחק אדם מהמערכת של בית ספר ספציפי"""
+    try:
+        data = request.json or {}
+
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש'
+            }), 400
+
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קרא לפונקציה המעודכנת מ-Data_Manage
+        result = remove_person(school_index, person_id)  # 🎯 הוספנו את school_index!
+
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 @app.route('/api/get_loaded_people', methods=['GET'])
 def get_loaded_people():
-    """מחזיר רשימת אנשים"""
+    """מחזיר רשימת אנשים של בית ספר ספציפי"""
     try:
-        # קריאה לפונקציה מ-Data_Manage
-        people_vector = get_all_people()
+        # קבלת username מ-query parameters
+        username = request.args.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש כ-query parameter (?username=...)'
+            }), 400
 
-        people_list = []
-        for person in people_vector:
-            people_list.append({
-                'first_name': person.first_name,
-                'last_name': person.last_name,
-                'id_number': person.id_number,
-                'image_urls': person.image_urls if hasattr(person, 'image_urls') else [],
-                'is_present': person.get_presence_status()
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קריאה לפונקציה המעודכנת מ-Data_Manage
+        result = get_all_people(school_index)  # 🎯 הוספנו את school_index!
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'people': result['people'],
+                'count': result['count'],
+                'school_name': result['school_name']
             })
+        else:
+            return jsonify(result), 404
 
-        return jsonify({
-            'success': True,
-            'people': people_list
-        })
     except Exception as e:
         return jsonify({
             'success': False,
@@ -337,112 +411,261 @@ def get_loaded_people():
 
 @app.route('/api/people/<person_id>', methods=['GET'])
 def get_person_api(person_id):
-    """מחזיר פרטי אדם ספציפי"""
-    # קריאה לפונקציה מ-Data_Manage
-    person_data = get_person(person_id)
+    """מחזיר פרטי אדם ספציפי מבית ספר ספציפי"""
+    try:
+        # קבלת username מ-query parameters
+        username = request.args.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש כ-query parameter (?username=...)'
+            }), 400
 
-    # המרה לעבודה עם ענן
-    return jsonify({
-        "first_name": person_data["first_name"],
-        "last_name": person_data["last_name"],
-        "id_number": person_data["id_number"],
-        "is_present": person_data["is_present"],
-        "image_urls": person_data["image_urls"],
-        "image_count": person_data["image_count"]
-    }), 200
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קריאה לפונקציה המעודכנת מ-Data_Manage
+        result = get_person(school_index, person_id)  # 🎯 הוספנו את school_index!
+
+        if result['success']:
+            person_data = result['person']
+            return jsonify({
+                "first_name": person_data["first_name"],
+                "last_name": person_data["last_name"],
+                "id_number": person_data["id_number"],
+                "is_present": person_data["is_present"],
+                "image_urls": person_data["image_urls"],
+                "image_count": person_data["image_count"],
+                "school_name": result['school_name']
+            }), 200
+        else:
+            return jsonify(result), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 @app.route('/api/people/<person_id>', methods=['PUT'])
 def update_person_api(person_id):
-    """מעדכן פרטי אדם קיים"""
-    data = request.json
+    """מעדכן פרטי אדם קיים בבית ספר ספציפי"""
+    try:
+        data = request.json
 
-    # קריאה לפונקציה מ-Data_Manage
-    update_person(
-        person_id,
-        data['first_name'],
-        data['last_name'],
-    )
-    return jsonify({'message': 'עודכן בהצלחה'}), 200
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש'
+            }), 400
+
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קריאה לפונקציה המעודכנת מ-Data_Manage
+        result = update_person(
+            school_index,  # 🎯 הוספנו את school_index!
+            person_id,
+            data['first_name'],
+            data['last_name'],
+        )
+
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 @app.route('/api/people/<person_id>/presence', methods=['POST'])
 def toggle_presence_api(person_id):
-    """מחליף סטטוס נוכחות של אדם"""
-    data = request.json
+    """מחליף סטטוס נוכחות של אדם בבית ספר ספציפי"""
+    try:
+        data = request.json
 
-    # קריאה לפונקציה מ-Data_Manage
-    toggle_presence(person_id, data['is_present'])
-    return jsonify({'message': 'סטטוס נוכחות עודכן'}), 200
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש'
+            }), 400
 
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
 
-@app.route('/api/people/stats', methods=['GET'])
-def get_people_stats():
-    """מחזיר סטטיסטיקות על האנשים (כמה רשומים, כמה נוכחים וכו')"""
-    # TODO: מלא את הפונקציה
-    pass
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קריאה לפונקציה המעודכנת מ-Data_Manage
+        result = toggle_presence(school_index, person_id, data['is_present'])  # 🎯 הוספנו את school_index!
+
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 # ===============================================================================
-#                           API - ניהול תמונות מטרה
+#                           API - ניהול תמונות מטרה - מעודכן
 # ===============================================================================
-
 
 @app.route('/api/target-images', methods=['POST'])
 def upload_target_images():
-    """יוצר מטרה חדשה עם תמונות"""
-    data = request.json
+    """יוצר מטרה חדשה עם תמונות לבית ספר ספציפי"""
+    try:
+        data = request.json
 
-    # קרא לפונקציה מ-Data_Manage
-    result = add_new_target(
-        data['camera_number'],
-        data['image_url']
-    )
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש'
+            }), 400
 
-    # החזרת תוצאה - ✅ תיקון הבעיה
-    if result['success']:
-        # הסר את האובייקט target מהתגובה
-        return jsonify({
-            'success': True,
-            'message': result['message'],
-            'camera_number': data['camera_number']
-        }), 201
-    else:
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קרא לפונקציה המעודכנת מ-Data_Manage
+        result = add_new_target(
+            school_index,  # 🎯 הוספנו את school_index!
+            data['camera_number'],
+            data['image_url'],
+            data.get('enable_face_detection', False)
+        )
+
+        # החזרת תוצאה
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': result['message'],
+                'camera_number': data['camera_number'],
+                'school_name': result['school_name']
+            }), 201
+        else:
+            return jsonify(result), 409
+
+    except Exception as e:
         return jsonify({
             'success': False,
-            'error': result['message']
-        }), 409
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 @app.route('/api/targets/<int:camera_number>', methods=['DELETE'])
 def delete_target(camera_number):
-    """מוחק מטרה מהמערכת"""
-    # קרא לפונקציה מ-Data_Manage
-    remove_target(camera_number)
-    return jsonify({'success': True})
+    """מוחק מטרה מהמערכת של בית ספר ספציפי"""
+    try:
+        data = request.json or {}
+
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש'
+            }), 400
+
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קרא לפונקציה המעודכנת מ-Data_Manage
+        result = remove_target(school_index, camera_number)  # 🎯 הוספנו את school_index!
+
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 @app.route('/api/get_target_images', methods=['GET'])
 def get_target_images():
-    """מחזיר את כל תמונות המטרה עם מטא-דטה מפורט"""
+    """מחזיר את כל תמונות המטרה של בית ספר ספציפי עם מטא-דטה מפורט"""
     try:
-        # קריאה לפונקציה מ-Data_Manage
-        targets_vector = get_all_targets()
+        # קבלת username מ-query parameters
+        username = request.args.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש כ-query parameter (?username=...)'
+            }), 400
 
-        targets_list = []
-        for target in targets_vector:
-            targets_list.append({
-                'camera_number': target.camera_number,
-                'images_url': target.image_urls,
-                'is_checked': target.is_checked,
-                'faces_count': target.faces_count,
-                'extracted_faces': target.extracted_faces
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קריאה לפונקציה המעודכנת מ-Data_Manage
+        result = get_all_targets(school_index)  # 🎯 הוספנו את school_index!
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'targets': result['targets'],
+                'count': result['count'],
+                'school_name': result['school_name']
             })
+        else:
+            return jsonify(result), 404
 
-        return jsonify({
-            'success': True,
-            'targets': targets_list
-        })
     except Exception as e:
         return jsonify({
             'success': False,
@@ -452,17 +675,41 @@ def get_target_images():
 
 @app.route('/api/target-images/clear-all', methods=['DELETE'])
 def clear_all_target_images():
-    """מוחק את כל תמונות המטרה (פעולה מסוכנת)"""
-    # קרא לפונקציה מ-Data_Manage
-    clear_all_targets()
-    return jsonify({'success': True})
+    """מוחק את כל תמונות המטרה של בית ספר ספציפי (פעולה מסוכנת)"""
+    try:
+        data = request.json or {}
 
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש'
+            }), 400
 
-@app.route('/api/target-images/stats', methods=['GET'])
-def get_target_images_stats():
-    """מחזיר סטטיסטיקות מפורטות על תמונות המטרה"""
-    # TODO: מלא את הפונקציה
-    pass
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא'
+            }), 404
+
+        # קרא לפונקציה המעודכנת מ-Data_Manage
+        result = clear_all_targets(school_index)  # 🎯 הוספנו את school_index!
+
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 # ===============================================================================
@@ -491,27 +738,52 @@ def delete_person_image(person_id, image_id):
 
 
 # ===============================================================================
-#                        פונקציות ניהול נתונים ובדיקת נוכחות
+#                        פונקציות ניהול נתונים ובדיקת נוכחות - מעודכן
 # ===============================================================================
 
 @app.route('/api/face-recognition/extract-faces', methods=['POST'])
 def extract_faces_from_targets():
-    """מחלץ פנים מכל תמונות המטרה"""
+    """מחלץ פנים מכל תמונות המטרה של בית ספר ספציפי"""
     try:
-        # קריאה לפונקציה מ-Attend_Manage
-        result = extract_all_faces_from_targets()
+        data = request.json or {}
+
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש',
+                'faces_extracted': 0
+            }), 400
+
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא',
+                'faces_extracted': 0
+            }), 404
+
+        # קריאה לפונקציה המעודכנת מ-Attend_Manage
+        from Attend_Manage import extract_all_faces_from_targets
+        result = extract_all_faces_from_targets(school_index)  # 🎯 הוספנו את school_index!
 
         if result['success']:
             return jsonify({
                 'success': True,
                 'faces_extracted': result['faces_extracted'],
-                'message': result['message']
+                'message': result['message'],
+                'school_name': result['school_name']
             }), 200
         else:
             return jsonify({
                 'success': False,
                 'error': result['message'],
-                'faces_extracted': 0
+                'faces_extracted': result['faces_extracted'],
+                'school_name': result.get('school_name')
             }), 400
 
     except Exception as e:
@@ -524,10 +796,37 @@ def extract_faces_from_targets():
 
 @app.route('/api/attendance/check-all', methods=['POST'])
 def check_attendance_all():
-    """בודק נוכחות עבור כל האנשים במערכת"""
+    """בודק נוכחות עבור כל האנשים של בית ספר ספציפי"""
     try:
-        # קריאה לפונקציה מ-Attend_Manage
-        result = check_attendance_for_all_people()
+        data = request.json or {}
+
+        # קבלת username מהבקשה
+        username = data.get('username')
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'שם משתמש נדרש',
+                'checked_people': 0,
+                'present_people': 0,
+                'absent_people': 0
+            }), 400
+
+        # חיפוש אינדקס בית הספר
+        from Data_Manage import get_school_index_by_username
+        school_index = get_school_index_by_username(username)
+
+        if school_index == -1:
+            return jsonify({
+                'success': False,
+                'message': 'בית ספר לא נמצא',
+                'checked_people': 0,
+                'present_people': 0,
+                'absent_people': 0
+            }), 404
+
+        # קריאה לפונקציה המעודכנת מ-Attend_Manage
+        from Attend_Manage import check_attendance_for_all_people
+        result = check_attendance_for_all_people(school_index)  # 🎯 הוספנו את school_index!
 
         if result['success']:
             return jsonify({
@@ -535,14 +834,17 @@ def check_attendance_all():
                 'checked_people': result['checked_people'],
                 'present_people': result['present_people'],
                 'absent_people': result['absent_people'],
-                'message': result['message']
+                'message': result['message'],
+                'school_name': result['school_name']
             }), 200
         else:
             return jsonify({
                 'success': False,
                 'error': result['message'],
                 'checked_people': result['checked_people'],
-                'present_people': result['present_people']
+                'present_people': result['present_people'],
+                'absent_people': result['absent_people'],
+                'school_name': result.get('school_name')
             }), 400
 
     except Exception as e:
@@ -550,7 +852,8 @@ def check_attendance_all():
             'success': False,
             'error': f'שגיאה בבדיקת נוכחות: {str(e)}',
             'checked_people': 0,
-            'present_people': 0
+            'present_people': 0,
+            'absent_people': 0
         }), 500
 
 
@@ -702,7 +1005,7 @@ if __name__ == '__main__':
     print("🏫 מאתחל מערכת בתי ספר...")
     try:
         add_demo_data()
-        from School import get_schools_count
+        from Data_Manage import get_schools_count
         print(f"✅ מערכת בתי ספר מוכנה עם {get_schools_count()} בתי ספר לדוגמה")
     except Exception as e:
         print(f"⚠️  שגיאה באתחול מערכת בתי ספר: {e}")

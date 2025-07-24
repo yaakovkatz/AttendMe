@@ -9,6 +9,7 @@
  * - בדיקת נוכחות באמצעות תמונות מטרה
  * - ניהול תמונות מטרה
  * - ממשק משתמש ידידותי ורספונסיבי
+ * - מערכת התחברות עם הפרדה בין בתי ספר
  */
 
 // ==================== LOGIN FUNCTIONALITY ====================
@@ -46,6 +47,121 @@ function goToLogin(event) {
 // הוספת הפונקציה לחלון הגלובלי כדי שהHTML יוכל לקרוא לה
 window.goToLogin = goToLogin;
 
+// ==================== LOGIN VALIDATION FUNCTIONS ====================
+
+/**
+ * טעינת פרטי המשתמש מ-sessionStorage
+ * מטען את פרטי המשתמש שנשמרו ב-sessionStorage למשתנה הגלובלי
+ * @returns {boolean} האם הטעינה הצליחה
+ */
+function loadUserFromStorage() {
+    try {
+        const storedUser = sessionStorage.getItem('currentUser');
+        if (storedUser) {
+            window.currentUser = JSON.parse(storedUser);
+            console.log('📂 טען פרטי משתמש מהאחסון:', window.currentUser);
+            return true;
+        } else {
+            console.log('❌ לא נמצאו פרטי משתמש באחסון');
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ שגיאה בטעינת פרטי משתמש:', error);
+        return false;
+    }
+}
+
+/**
+ * בדיקה שהמשתמש מחובר
+ * בדיקה בסיסית שקיים currentUser עם username
+ * @returns {boolean} האם המשתמש מחובר
+ */
+function isUserLoggedIn() {
+    return !!(window.currentUser && window.currentUser.username);
+}
+
+/**
+ * קבלת שם המשתמש המחובר
+ * @returns {string|null} שם המשתמש או null אם לא מחובר
+ */
+function getCurrentUsername() {
+    return window.currentUser?.username || null;
+}
+
+/**
+ * בדיקת התחברות עם הפניה לדף login אם לא מחובר
+ * @param {string} actionName - שם הפעולה שמנסים לבצע (לצורך הודעה)
+ * @returns {boolean} האם המשתמש מחובר
+ */
+function requireLogin(actionName = 'פעולה זו') {
+    if (!isUserLoggedIn()) {
+        showNotification(`נדרשת התחברות לביצוע ${actionName}`, 'warning');
+        console.log(`❌ ${actionName} נדחתה - משתמש לא מחובר`);
+
+        // השהיה קצרה והפניה לדף התחברות
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1500);
+
+        return false;
+    }
+
+    console.log(`✅ ${actionName} מאושרת - משתמש מחובר: ${getCurrentUsername()}`);
+    return true;
+}
+
+/**
+ * הצגת מידע על המשתמש המחובר
+ */
+function showUserInfo() {
+    if (isUserLoggedIn()) {
+        const user = window.currentUser;
+        console.log('👤 משתמש מחובר:', {
+            username: user.username,
+            schoolName: user.schoolInfo?.school_name || 'לא זמין',
+            schoolEmail: user.schoolInfo?.school_email || 'לא זמין'
+        });
+
+        // עדכון ממשק אם יש אלמנט מתאים
+        const userDisplay = document.getElementById('current-user-display');
+        if (userDisplay) {
+            userDisplay.innerHTML = `
+                <div class="user-info">
+                    <span class="user-name">👤 ${user.schoolInfo?.school_name || user.username}</span>
+                    <button onclick="logout()" class="logout-btn">התנתק</button>
+                </div>
+            `;
+        }
+    } else {
+        console.log('❌ אין משתמש מחובר');
+    }
+}
+
+/**
+ * התנתקות מהמערכת
+ * מנקה את נתוני המשתמש מ-window ומ-sessionStorage
+ */
+function logout() {
+    console.log('🚪 מתנתק מהמערכת...');
+
+    // ניקוי נתוני התחברות מכל המקומות
+    window.currentUser = null;
+    sessionStorage.removeItem('currentUser');
+
+    console.log('🧹 נתוני התחברות נוקו מ-window ומ-sessionStorage');
+
+    showNotification('התנתקת בהצלחה', 'info');
+
+    // הפניה לדף התחברות
+    setTimeout(() => {
+        window.location.href = '/login';
+    }, 1000);
+}
+
+// הוספת פונקציות לחלון הגלובלי
+window.logout = logout;
+window.showUserInfo = showUserInfo;
+
 // ==================== MAIN INITIALIZATION ====================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -54,6 +170,18 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🌐 URL מלא:', window.location.href);
     console.log('📂 Host:', window.location.host);
     console.log('📁 Path:', window.location.pathname);
+
+    // 🎯 טעינת פרטי משתמש מאחסון לפני הכל!
+    const userLoaded = loadUserFromStorage();
+
+    // בדיקת סטטוס התחברות
+    console.log('🔐 בודק סטטוס התחברות...');
+    if (userLoaded) {
+        console.log('✅ משתמש נטען מהאחסון בהצלחה');
+    } else {
+        console.log('⚠️ לא נמצא משתמש מחובר באחסון');
+    }
+    showUserInfo();
 
     // ==================== GLOBAL VARIABLES ====================
 
@@ -129,9 +257,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // ==================== PEOPLE MANAGEMENT BUTTONS ====================
 
         // כפתור הוספת אדם חדש - פותח מודל הוספה
-        document.getElementById('add-person-btn')?.addEventListener('click', () =>
-            showModal(document.getElementById('add-person-modal'))
-        );
+        document.getElementById('add-person-btn')?.addEventListener('click', () => {
+            if (!requireLogin('הוספת אדם חדש')) return;
+            showModal(document.getElementById('add-person-modal'));
+        });
 
         // טופס הוספת אדם - מטפל בשליחת הנתונים
         document.getElementById('add-person-form')?.addEventListener('submit', handleAddPerson);
@@ -315,6 +444,11 @@ document.addEventListener('DOMContentLoaded', function() {
     async function finishNewPersonCreation() {
         console.log('מסיים יצירת אדם חדש');
 
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('יצירת אדם חדש')) {
+            return;
+        }
+
         // בדיקות תקינות
         if (!tempPersonData.isActive || !tempPersonData.personDetails) {
             showNotification('שגיאה: נתונים זמניים לא תקינים', 'error');
@@ -328,45 +462,28 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        const username = getCurrentUsername(); // 🎯 קבלת שם המשתמש
+
         console.log('📤 שולח בקשה ליצירת אדם עם:', {
+            username: username, // 🎯 הוספה!
             person_details: tempPersonData.personDetails,
             image_urls: tempPersonData.imageUrls,
             image_count: tempPersonData.imageUrls.length
         });
 
         try {
-            // ננסה קודם endpoint חלופי אם הראשי לא עובד
-            let response, data;
+            // ניסיון יצירת אדם עם username
+            const response = await fetch('/api/people/create_person', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: username, // 🎯 הוספת שם המשתמש!
+                    person_details: tempPersonData.personDetails,
+                    image_urls: tempPersonData.imageUrls
+                })
+            });
 
-            try {
-                // נסיון ראשון - endpoint הרגיל
-                response = await fetch('/api/people/create_person', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        person_details: tempPersonData.personDetails,
-                        image_urls: tempPersonData.imageUrls
-                    })
-                });
-
-                data = await response.json();
-            } catch (firstError) {
-                console.log('⚠️ Endpoint הראשי לא עובד, מנסה חלופי...');
-
-                // נסיון שני - endpoint ישן (אם קיים)
-                response = await fetch('/api/add_person', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        first_name: tempPersonData.personDetails.first_name,
-                        last_name: tempPersonData.personDetails.last_name,
-                        id_number: tempPersonData.personDetails.id_number,
-                        image_urls: tempPersonData.imageUrls
-                    })
-                });
-
-                data = await response.json();
-            }
+            const data = await response.json();
             console.log('📨 תגובה מהשרת:', data);
             console.log('📨 status:', response.status);
 
@@ -385,6 +502,14 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (response.status === 409) {
                 // אדם כבר קיים
                 showNotification('אדם עם מספר זהות זה כבר קיים במערכת', 'error');
+            } else if (response.status === 400) {
+                // שגיאה בבקשה - אולי בעיה עם username
+                showNotification(data.message || 'שגיאה בנתוני הבקשה', 'error');
+                console.error('❌ שגיאה 400 - בדוק username:', data);
+            } else if (response.status === 404) {
+                // בית ספר לא נמצא
+                showNotification('בית הספר לא נמצא. נא להתחבר מחדש.', 'error');
+                setTimeout(() => logout(), 2000);
             } else if (response.status === 500) {
                 // שגיאת שרת פנימית
                 showNotification('שגיאה פנימית בשרת - נא לנסות שוב', 'error');
@@ -398,8 +523,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('❌ סוג השגיאה:', error.constructor.name);
             console.error('❌ הודעת השגיאה:', error.message);
 
-            // בדיקה אם זה שגיאת 404
-            if (error.message.includes('Unexpected token')) {
+            // בדיקה אם זה שגיאת רשת
+            if (error.message.includes('Failed to fetch')) {
+                showNotification('שגיאה: לא ניתן להתחבר לשרת', 'error');
+            } else if (error.message.includes('Unexpected token')) {
                 showNotification('שגיאה: ה-API לא נמצא או לא מוגדר נכון', 'error');
             } else {
                 showNotification('שגיאה ביצירת האדם', 'error');
@@ -458,9 +585,16 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleCheckAllPeople() {
         console.log('🚀 מתחיל בדיקת נוכחות כללית');
 
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('בדיקת נוכחות כללית')) {
+            return;
+        }
+
+        const username = getCurrentUsername();
+
         // בדיקה שיש תמונות מטרה
         try {
-            const targetsResponse = await fetch('/api/get_target_images');
+            const targetsResponse = await fetch(`/api/get_target_images?username=${username}`);
             const targetsData = await targetsResponse.json();
 
             if (!targetsData.success || !targetsData.targets || targetsData.targets.length === 0) {
@@ -492,7 +626,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const extractResponse = await fetch('/api/face-recognition/extract-faces', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'}
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: username // 🎯 הוספת שם המשתמש!
+                })
             });
 
             const extractData = await extractResponse.json();
@@ -510,7 +647,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const attendanceResponse = await fetch('/api/attendance/check-all', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'}
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: username // 🎯 הוספת שם המשתמש!
+                })
             });
 
             const attendanceData = await attendanceResponse.json();
@@ -573,6 +713,11 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleAddPerson(event) {
         event.preventDefault(); // מניעת שליחה רגילה של הטופס
 
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('הוספת אדם חדש')) {
+            return;
+        }
+
         const form = event.target;
 
         // איסוף נתונים מהטופס
@@ -616,6 +761,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {Event} event - אירוע הלחיצה
      */
     function handleUploadClick(event) {
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('העלאת תמונה')) {
+            return;
+        }
+
         const personId = event.currentTarget.getAttribute('data-id');
         const person = peopleData.find(p => p.id_number === personId);
 
@@ -630,6 +780,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {Event} event - אירוע הלחיצה
      */
     async function handleDeleteClick(event) {
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('מחיקת אדם')) {
+            return;
+        }
+
         const personId = event.currentTarget.getAttribute('data-id');
         const person = peopleData.find(p => p.id_number === personId);
 
@@ -638,7 +793,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // בקשת אישור מהמשתמש
         if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
             try {
-                const response = await fetch(`/api/people/${personId}`, { method: 'DELETE' });
+                const username = getCurrentUsername();
+
+                const response = await fetch(`/api/people/${personId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        username: username // 🎯 הוספת שם המשתמש!
+                    })
+                });
                 const data = await response.json();
 
                 if (data.success) {
@@ -871,6 +1034,11 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function handleUploadImage(event) {
         event.preventDefault();
+
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('העלאת תמונה')) {
+            return;
+        }
 
         const personId = document.getElementById('upload-person-id').value;
         const fileInput = document.getElementById('person-image');
@@ -1187,7 +1355,17 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function checkServerConnection() {
         try {
-            const response = await fetch('/api/get_loaded_people');
+            let response;
+
+            // אם המשתמש מחובר, נשלח את ה-username
+            if (isUserLoggedIn()) {
+                const username = getCurrentUsername();
+                response = await fetch(`/api/get_loaded_people?username=${username}`);
+            } else {
+                // אם לא מחובר, ננסה בלי username (עשוי להיכשל)
+                response = await fetch('/api/get_loaded_people');
+            }
+
             const data = await response.json();
             console.log('✅ שרת מחובר:', data);
             return true;
@@ -1230,10 +1408,28 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🔄 מתחיל לטעון נתוני אנשים...');
 
         try {
-            const response = await fetch('/api/get_loaded_people');
+            let url = '/api/get_loaded_people';
+
+            // אם המשתמש מחובר, נוסיף את ה-username לבקשה
+            if (isUserLoggedIn()) {
+                const username = getCurrentUsername();
+                url += `?username=${username}`;
+                console.log(`📤 טוען נתונים עבור משתמש: ${username}`);
+            } else {
+                console.log('⚠️ משתמש לא מחובר - מנסה לטעון נתונים כלליים');
+            }
+
+            const response = await fetch(url);
             console.log('📡 תגובת שרת:', response.status);
 
             if (!response.ok) {
+                // אם זה 404 או שגיאה אחרת הקשורה להתחברות
+                if (response.status === 404 || response.status === 400) {
+                    console.log('❌ בעיה עם authentication - מפנה להתחברות');
+                    showNotification('נדרשת התחברות מחדש', 'warning');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
@@ -1438,7 +1634,18 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🔄 טוען תמונות מטרה...');
 
         try {
-            const response = await fetch('/api/get_target_images');
+            let url = '/api/get_target_images';
+
+            // אם המשתמש מחובר, נוסיף את ה-username לבקשה
+            if (isUserLoggedIn()) {
+                const username = getCurrentUsername();
+                url += `?username=${username}`;
+                console.log(`📤 טוען תמונות מטרה עבור משתמש: ${username}`);
+            } else {
+                console.log('⚠️ משתמש לא מחובר - מנסה לטעון תמונות מטרה כלליות');
+            }
+
+            const response = await fetch(url);
             const data = await response.json();
 
             console.log('📡 תגובת שרת לתמונות מטרה:', data);
@@ -1654,6 +1861,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * העלאת תמונות מטרה
      */
     async function uploadTargetFiles() {
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('העלאת תמונות מטרה')) {
+            return;
+        }
+
         const fileInput = document.getElementById('target-file-input');
         const loading = document.getElementById('target-loading');
 
@@ -1662,7 +1874,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        console.log(`📤 מעלה ${fileInput.files.length} תמונות מטרה...`);
+        const username = getCurrentUsername();
+        console.log(`📤 מעלה ${fileInput.files.length} תמונות מטרה עבור משתמש: ${username}...`);
 
         // הצגת loading
         if (loading) loading.style.display = 'flex';
@@ -1694,6 +1907,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         // עכשיו יצירת target עם ה-URL
                         const targetPayload = {
+                            username: username, // 🎯 הוספת שם המשתמש!
                             camera_number: Date.now() + i,
                             image_url: tempData.image_url
                         };
@@ -1707,22 +1921,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
 
                         console.log(`📨 תגובת target server: status ${targetResponse.status}`);
-                        console.log(`📨 response headers:`, [...targetResponse.headers.entries()]);
 
-                        // קרא את התגובה כטקסט קודם
-                        const responseText = await targetResponse.text();
-                        console.log(`📋 raw response text:`, responseText);
-
-                        let targetData;
-                        try {
-                            targetData = JSON.parse(responseText);
-                            console.log(`📋 target response data:`, targetData);
-                        } catch (parseError) {
-                            console.error(`❌ שגיאה בפענוח JSON:`, parseError);
-                            console.error(`❌ התגובה שלא ניתן לפענח:`, responseText);
-                            errorCount++;
-                            continue;
-                        }
+                        const targetData = await targetResponse.json();
+                        console.log(`📋 target response data:`, targetData);
 
                         if (targetData.success) {
                             successCount++;
@@ -1759,8 +1960,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // איפוס הקלט והתצוגה
             fileInput.value = '';
             const uploadArea = document.querySelector('.upload-area');
-            uploadArea.querySelector('.upload-text').textContent = 'לחץ כאן או גרור קבצים להעלאה';
-            uploadArea.style.borderColor = '#ccc';
+            if (uploadArea) {
+                resetUploadArea(uploadArea);
+            }
 
             await loadTargetImages(); // רענון הגלריה
 
@@ -1789,6 +1991,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * מחיקת תמונות מטרה נבחרות
      */
     async function deleteSelectedTargets() {
+        // 🔐 בדיקת התחברות
+        if (!requireLogin('מחיקת תמונות מטרה')) {
+            return;
+        }
+
         const checkedBoxes = document.querySelectorAll('.target-checkbox:checked');
 
         if (checkedBoxes.length === 0) {
@@ -1800,6 +2007,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!confirmed) return;
 
         try {
+            const username = getCurrentUsername();
+
             // איסוף מזהי התמונות למחיקה
             const cameraNumbers = Array.from(checkedBoxes).map(cb =>
                 parseInt(cb.getAttribute('data-camera'))
@@ -1808,7 +2017,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // מחיקה של כל מצלמה
             for (const cameraNumber of new Set(cameraNumbers)) {
                 const response = await fetch(`/api/targets/${cameraNumber}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        username: username // 🎯 הוספת שם המשתמש!
+                    })
                 });
 
                 if (!response.ok) {
@@ -1981,6 +2194,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 return tempPersonData;
             },
 
+            // הצגת מידע משתמש
+            showCurrentUser: () => {
+                console.log('Current User:', window.currentUser);
+                return window.currentUser;
+            },
+
+            // בדיקת התחברות
+            checkLogin: () => {
+                console.log('Current User (window):', window.currentUser);
+                console.log('Current User (sessionStorage):', sessionStorage.getItem('currentUser'));
+                console.log('Logged in:', isUserLoggedIn());
+                console.log('Username:', getCurrentUsername());
+                return {
+                    loggedIn: isUserLoggedIn(),
+                    username: getCurrentUsername(),
+                    userInfo: window.currentUser,
+                    sessionData: sessionStorage.getItem('currentUser')
+                };
+            },
+
+            // טעינה מחדש מאחסון
+            reloadFromStorage: () => {
+                console.log('🔄 טוען מחדש מ-sessionStorage...');
+                const loaded = loadUserFromStorage();
+                console.log('תוצאה:', loaded);
+                showUserInfo();
+                return loaded;
+            },
+
             // טעינה ידנית של נתונים
             refresh: async () => {
                 console.log('🔄 מתחיל רענון ידני...');
@@ -2020,8 +2262,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // ניסיון יצירת אדם ידני
             testCreatePerson: async () => {
+                if (!isUserLoggedIn()) {
+                    console.log('❌ משתמש לא מחובר');
+                    return 'לא מחובר';
+                }
+
                 try {
                     const testData = {
+                        username: getCurrentUsername(), // 🎯 הוספת username!
                         person_details: {
                             first_name: 'טסט',
                             last_name: 'דיבוג',
@@ -2068,6 +2316,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * הודעת סיום טעינה
      */
     console.log('✅ מערכת ניהול נוכחות אותחלה בהצלחה');
+    console.log('🔐 סטטוס התחברות:', isUserLoggedIn() ? `מחובר: ${getCurrentUsername()}` : 'לא מחובר');
+    console.log('📦 sessionStorage:', sessionStorage.getItem('currentUser') ? 'יש נתונים' : 'ריק');
     console.log('📊 נתונים זמינים:', {
         'כמות אנשים': peopleData.length,
         'מצב נתונים זמניים': tempPersonData.isActive ? 'פעיל' : 'לא פעיל'
@@ -2082,6 +2332,7 @@ document.addEventListener('DOMContentLoaded', function() {
  *
  * 🏗️ מבנה הקוד:
  * - משתנים גלובליים ואתחול
+ * - מערכת התחברות ובדיקות אבטחה
  * - מאזיני אירועים
  * - ניהול נתונים זמניים
  * - טיפול בטפסים ומודלים
@@ -2096,6 +2347,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * - ממשק משתמש רספונסיבי ונגיש
  * - טיפול מקיף בשגיאות
  * - כלי דיבוג לסביבת פיתוח
+ * - מערכת התחברות מאובטחת עם הפרדה בין בתי ספר
  *
  * 💡 הערות למפתח:
  * - הקוד כתוב בצורה מודולרית וניתן להרחבה
@@ -2104,4 +2356,5 @@ document.addEventListener('DOMContentLoaded', function() {
  * - הקוד מותאם לעברית וממשק RTL
  * - מותאם למבנה ה-API ב-Python backend
  * - תומך בכל האלמנטים שמופיעים ב-HTML
+ * - כולל מערכת התחברות מאובטחת עם בדיקות לכל פעולה
  */

@@ -245,11 +245,17 @@ async function handleLogin(event) {
             showMessage(result.message, 'success');
             console.log('✅ התחברות מוצלחת:', result.school_info);
 
-            // שמירת פרטי המשתמש בזיכרון הדפדפן (לא localStorage!)
-            window.currentUser = {
-                username: username,
-                schoolInfo: result.school_info
-            };
+            // שמירת פרטי המשתמש ב-sessionStorage
+const userInfo = {
+    username: username,
+    schoolInfo: result.school_info
+};
+
+// שמירה ב-sessionStorage וגם ב-window (לתאימות)
+sessionStorage.setItem('currentUser', JSON.stringify(userInfo));
+window.currentUser = userInfo;
+
+console.log('💾 פרטי משתמש נשמרו:', userInfo);
 
             // העברה לדף הבית אחרי שנייה וחצי
             setTimeout(() => {
