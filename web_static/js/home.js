@@ -1679,21 +1679,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.targets.forEach((target, targetIndex) => {
                     console.log(`🎯 מעבד target ${targetIndex}:`, target);
 
-                    if (target.images_url && Array.isArray(target.images_url) && target.images_url.length > 0) {
-                        target.images_url.forEach((imageUrl, imgIndex) => {
-                            const card = document.createElement('div');
-                            card.className = 'target-image-card';
-                            card.innerHTML = `
-                                <input type="checkbox" class="target-checkbox" data-camera="${target.camera_number}" data-index="${imgIndex}">
-                                <img src="${imageUrl}" alt="מצלמה ${target.camera_number} - תמונה ${imgIndex + 1}" loading="lazy">
-                                <div class="target-image-info">
-                                    <div>מצלמה ${target.camera_number}</div>
-                                    <div>תמונה ${imgIndex + 1}</div>
-                                </div>
-                            `;
-                            galleryGrid.appendChild(card);
-                        });
-                    }
+                    if (target.image_url) {
+    // כל target מכיל תמונה אחת ב-image_url
+    const imageUrl = target.image_url;
+    console.log(`  🖼️  יוצר כרטיס לתמונה: ${imageUrl.substring(0, 50)}...`);
+
+    const card = document.createElement('div');
+    card.className = 'target-image-card';
+    card.innerHTML = `
+        <input type="checkbox" class="target-checkbox" data-camera="${target.camera_number}" data-index="0">
+        <img src="${imageUrl}" alt="מצלמה ${target.camera_number}" loading="lazy">
+        <div class="target-image-info">
+            <div>מצלמה ${target.camera_number}</div>
+            <div>תמונה 1</div>
+        </div>
+    `;
+    galleryGrid.appendChild(card);
+} else {
+    console.log(`  ⚠️  לא נמצאה תמונה עבור target ${targetIndex}`);
+}
                 });
 
                 // הוספת מאזין לצ'קבוקסים
