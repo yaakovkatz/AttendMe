@@ -864,30 +864,47 @@ def check_attendance_all():
 @app.route('/api/upload_temp_image', methods=['POST'])
 def upload_temp_image():
     try:
+        # בדיקת חיבור ל-Cloudinary
+        print("Cloudinary config check:")
+        print(f"Cloud name: {os.environ.get('CLOUDINARY_CLOUD_NAME', 'MISSING')}")
+        print(f"API key: {'EXISTS' if os.environ.get('CLOUDINARY_API_KEY') else 'MISSING'}")
+        print(f"API secret: {'EXISTS' if os.environ.get('CLOUDINARY_API_SECRET') else 'MISSING'}")
+
         # מקבל קובץ ופרטי אדם
         file_to_upload = request.files['image']
         first_name = request.form.get('first_name', '')
         last_name = request.form.get('last_name', '')
         id_number = request.form.get('id_number', '')
 
+        print(f"Uploading file: {file_to_upload.filename}")
+
         # יצירת שם ייחודי עם פרטי האדם
         timestamp = int(time.time())
         public_id = f"{first_name}_{last_name}_{id_number}/image_{timestamp}"
+
+        print(f"Public ID: {public_id}")
 
         result = cloudinary.uploader.upload(
             file_to_upload,
             public_id=public_id
         )
 
+        print(f"Upload successful: {result.get('secure_url')}")
+
         return jsonify({
             'success': True,
             'image_url': result.get('secure_url'),
             'public_id': result.get('public_id')
         })
-    except:
+    except Exception as e:
+        print(f"Upload error: {str(e)}")
+        print(f"Error type: {type(e).__name__}")
+        import traceback
+        traceback.print_exc()
+
         return jsonify({
             'success': False,
-            'error': 'שגיאה בהעלאה'
+            'error': f'שגיאה בהעלאה: {str(e)}'
         })
 
 
