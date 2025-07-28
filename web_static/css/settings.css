@@ -1,0 +1,482 @@
+/* ==================== SETTINGS STYLES ==================== */
+/*
+ * קובץ סגנונות לדף הגדרות המערכת
+ * מכיל: קבוצות הגדרות, מודל בחירת אנשים, הודעות התראה, רכיבים מתקדמים
+ * צריך לטעון אחרי variables.css ו-common.css
+ */
+
+/* ==================== SETTINGS CONTAINER ==================== */
+/* מבנה כללי לדף הגדרות */
+
+/* מיכל הגדרות - גריד של קבוצות הגדרות */
+.settings-container {
+    display: grid;                   /* פריסת גריד */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* עמודות גמישות */
+    gap: 30px;                       /* מרווח בין הקבוצות */
+    margin-bottom: 40px;             /* מרווח תחתון */
+}
+
+/* קבוצת הגדרות - כרטיס הגדרות בודד */
+.settings-group {
+    background-color: white;         /* רקע לבן */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    box-shadow: var(--box-shadow);   /* צל */
+    padding: 25px;                   /* מרווח פנימי */
+}
+
+/* כותרת קבוצת הגדרות */
+.settings-group h3 {
+    margin-bottom: 20px;             /* מרווח תחתון */
+    color: var(--primary-color);     /* צבע כחול */
+    font-size: 1.3rem;               /* גודל בינוני */
+}
+
+/* פעולות הגדרות - כפתורים בתחתית הדף */
+.settings-actions {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: center;         /* יישור למרכז */
+    margin-top: 30px;                /* מרווח עליון */
+}
+
+/* ==================== PERSON SELECTION MODAL ==================== */
+/* חלון בחירת אדם מתקדם עם חיפוש */
+
+/* מודל בחירת אדם - רוחב מורחב */
+#select-person-modal .modal-content {
+    max-width: 600px;                /* רוחב מקסימלי */
+    max-height: 95vh;                /* גובה מקסימלי */
+    overflow: auto;                  /* גלילה */
+}
+
+/* מיכל חיפוש */
+.search-container {
+    margin-bottom: 15px;             /* מרווח תחתון */
+    padding: 0 5px;                  /* מרווח פנימי בצדדים */
+}
+
+/* שדה חיפוש */
+.search-input {
+    width: 100%;                     /* רוחב מלא */
+    padding: 10px;                   /* מרווח פנימי */
+    border: 1px solid #ddd;          /* גבול אפור */
+    border-radius: 5px;              /* פינות עגולות */
+    font-size: 16px;                 /* גודל טקסט */
+}
+
+/* טבלת בחירת אנשים */
+.person-selection-table {
+    width: 100%;                     /* רוחב מלא */
+    border-collapse: collapse;       /* מיזוג גבולות */
+    margin-top: 10px;                /* מרווח עליון */
+    direction: rtl;                  /* כיוון עברית */
+}
+
+/* תאים בטבלת בחירה */
+.person-selection-table th,
+.person-selection-table td {
+    padding: 12px 15px;              /* מרווח פנימי */
+    text-align: right;               /* יישור לימין */
+    border-bottom: 1px solid #e0e0e0; /* גבול תחתון */
+    vertical-align: middle;          /* יישור אנכי במרכז */
+}
+
+/* כותרות טבלת בחירה */
+.person-selection-table th {
+    background-color: #f5f5f5;       /* רקע אפור בהיר */
+    font-weight: bold;               /* טקסט בולט */
+    color: #333;                     /* צבע כהה */
+    position: sticky;                /* מיקום דביק */
+    top: 0;                          /* דבוק לעליון */
+    z-index: 10;                     /* מעל התוכן */
+}
+
+/* שורת בחירת אדם */
+.person-selection-row {
+    cursor: pointer;                 /* סמן יד */
+    transition: background-color 0.2s; /* מעבר חלק */
+}
+
+/* אפקט hover לשורת בחירה */
+.person-selection-row:hover {
+    background-color: #f0f8ff;       /* רקע כחול בהיר */
+}
+
+/* שורת בחירה נבחרת */
+.person-selection-row.selected {
+    background-color: #e3f2fd;       /* רקע כחול בהיר יותר */
+}
+
+/* תא תמונת אדם */
+.person-image-cell {
+    width: 60px;                     /* רוחב קבוע */
+    text-align: center;              /* יישור למרכז */
+}
+
+/* תמונת בחירת אדם */
+.person-selection-image {
+    width: 48px;                     /* רוחב */
+    height: 48px;                    /* גובה */
+    border-radius: 50%;              /* עיגול מלא */
+    object-fit: cover;               /* התאמת גודל תמונה */
+    border: 1px solid #ddd;          /* גבול אפור */
+}
+
+/* תא שם אדם */
+.person-name-cell {
+    font-weight: 500;                /* משקל טקסט בינוני */
+    color: #2c3e50;                  /* צבע כהה */
+}
+
+/* תא מספר זהות */
+.person-id-cell {
+    color: #7f8c8d;                  /* צבע אפור */
+    font-family: monospace;          /* פונט מונוספייס */
+    font-size: 14px;                 /* גודל קטן */
+}
+
+/* הודעת אין אנשים */
+.no-people-message {
+    text-align: center;              /* יישור למרכז */
+    padding: 20px;                   /* מרווח פנימי */
+    color: #666;                     /* צבע אפור */
+}
+
+/* הודעת שגיאה */
+.error-message {
+    text-align: center;              /* יישור למרכז */
+    padding: 20px;                   /* מרווח פנימי */
+    color: #e74c3c;                  /* צבע אדום */
+}
+
+/* ==================== NOTIFICATION SYSTEM ==================== */
+/* מערכת הודעות התראה מתקדמת */
+
+/* הודעות התראה מעוצבות */
+.notification-container {
+    position: fixed;                 /* מיקום קבוע */
+    top: 20px;                       /* מרחק מלמעלה */
+    right: 20px;                     /* מרחק מימין */
+    z-index: 10000;                  /* מעל הכל */
+    max-width: 420px;                /* רוחב מקסימלי */
+    pointer-events: none;            /* ביטול אירועי עכבר */
+}
+
+/* הודעת התראה בודדת */
+.notification {
+    background: rgba(255, 255, 255, 0.95); /* רקע לבן שקוף */
+    border-radius: 12px;             /* פינות עגולות */
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12),
+                0 2px 8px rgba(0,0,0,0.08); /* צל כפול */
+    margin-bottom: 12px;             /* מרווח תחתון */
+    padding: 18px 20px;              /* מרווח פנימי */
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-between;  /* פיזור תוכן */
+    align-items: center;             /* יישור אנכי במרכז */
+    animation: slideInNotification 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* אנימציית הופעה */
+    border-right: 5px solid #3498db; /* גבול ימני כחול */
+    backdrop-filter: blur(10px);     /* אפקט טשטוש */
+    pointer-events: all;             /* הפעלת אירועי עכבר */
+    position: relative;              /* מיקום יחסי */
+    overflow: hidden;                /* הסתרת גלישה */
+}
+
+/* אפקט רקע להודעה */
+.notification::before {
+    content: '';                     /* תוכן ריק */
+    position: absolute;              /* מיקום מוחלט */
+    top: 0;                          /* דבוק לעליון */
+    left: 0;                         /* דבוק לשמאל */
+    right: 0;                        /* דבוק לימין */
+    height: 2px;                     /* גובה קטן */
+    background: linear-gradient(90deg, #3498db, #2ecc71); /* גרדיינט כחול-ירוק */
+    animation: progressBar 5s linear; /* אנימציית התקדמות */
+}
+
+/* אנימציית פס התקדמות */
+@keyframes progressBar {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+/* הודעת הצלחה */
+.notification.success {
+    border-right-color: #27ae60;    /* גבול ירוק */
+    background: linear-gradient(135deg, rgba(212, 237, 218, 0.95), rgba(195, 230, 203, 0.95)); /* רקע ירוק */
+}
+
+.notification.success::before {
+    background: linear-gradient(90deg, #27ae60, #2ecc71); /* גרדיינט ירוק */
+}
+
+/* הודעת שגיאה */
+.notification.error {
+    border-right-color: #e74c3c;    /* גבול אדום */
+    background: linear-gradient(135deg, rgba(248, 215, 218, 0.95), rgba(245, 198, 203, 0.95)); /* רקע אדום */
+}
+
+.notification.error::before {
+    background: linear-gradient(90deg, #e74c3c, #c0392b); /* גרדיינט אדום */
+}
+
+/* הודעת אזהרה */
+.notification.warning {
+    border-right-color: #f39c12;    /* גבול כתום */
+    background: linear-gradient(135deg, rgba(255, 243, 205, 0.95), rgba(255, 234, 167, 0.95)); /* רקע כתום */
+}
+
+.notification.warning::before {
+    background: linear-gradient(90deg, #f39c12, #e67e22); /* גרדיינט כתום */
+}
+
+/* הודעת מידע */
+.notification.info {
+    border-right-color: #3498db;    /* גבול כחול */
+    background: linear-gradient(135deg, rgba(209, 236, 241, 0.95), rgba(190, 229, 235, 0.95)); /* רקע כחול */
+}
+
+/* תוכן ההודעה */
+.notification-message {
+    flex: 1;                         /* גמישות */
+    margin-right: 15px;              /* מרווח מימין */
+    font-weight: 600;                /* משקל טקסט בולט */
+    font-size: 14px;                 /* גודל טקסט */
+    line-height: 1.4;                /* גובה שורה */
+    color: #2c3e50;                  /* צבע כהה */
+}
+
+/* כפתור סגירת הודעה */
+.notification-close {
+    background: rgba(0,0,0,0.1);     /* רקע שקוף */
+    border: none;                    /* ביטול גבול */
+    font-size: 18px;                 /* גודל גדול */
+    cursor: pointer;                 /* סמן יד */
+    color: #666;                     /* צבע אפור */
+    padding: 0;                      /* ביטול מרווח פנימי */
+    width: 28px;                     /* רוחב */
+    height: 28px;                    /* גובה */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    justify-content: center;         /* יישור אופקי במרכז */
+    border-radius: 50%;              /* עיגול מלא */
+    transition: all 0.3s ease;       /* מעבר חלק */
+    font-weight: bold;               /* טקסט בולט */
+}
+
+/* אפקט hover לכפתור סגירה */
+.notification-close:hover {
+    background: rgba(231, 76, 60, 0.2); /* רקע אדום שקוף */
+    color: #e74c3c;                  /* צבע אדום */
+    transform: scale(1.1);           /* הגדלה קלה */
+}
+
+/* הודעה נסגרת */
+.notification.closing {
+    animation: slideOutNotification 0.3s ease-in forwards; /* אנימציית יציאה */
+}
+
+/* ==================== RESULTS PANEL ==================== */
+/* פאנל תוצאות מתקדם */
+
+/* פאנל תוצאות */
+.results-panel {
+    background: white;               /* רקע לבן */
+    border-radius: 12px;             /* פינות עגולות */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* צל */
+    margin-top: 30px;                /* מרווח עליון */
+    overflow: hidden;                /* הסתרת גלישה */
+    border: 1px solid #e9ecef;       /* גבול אפור */
+}
+
+/* כותרת פאנל תוצאות */
+.results-header {
+    background: linear-gradient(135deg, #f8f9fa, #ffffff); /* רקע גרדיינט */
+    padding: 20px 25px;              /* מרווח פנימי */
+    border-bottom: 1px solid #e9ecef; /* גבול תחתון */
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-between;  /* פיזור תוכן */
+    align-items: center;             /* יישור אנכי במרכז */
+}
+
+/* כותרת תוצאות */
+.results-header h3 {
+    margin: 0;                       /* ביטול מרווח */
+    color: var(--primary-color);     /* צבע כחול */
+    font-size: 1.2rem;               /* גודל בינוני */
+}
+
+/* כפתור סגירת תוצאות */
+.close-button {
+    background: none;                /* ביטול רקע */
+    border: none;                    /* ביטול גבול */
+    font-size: 24px;                 /* גודל גדול */
+    cursor: pointer;                 /* סמן יד */
+    color: #666;                     /* צבע אפור */
+    width: 32px;                     /* רוחב */
+    height: 32px;                    /* גובה */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    justify-content: center;         /* יישור אופקי במרכז */
+    border-radius: 50%;              /* עיגול מלא */
+    transition: all 0.3s ease;       /* מעבר חלק */
+}
+
+/* אפקט hover לכפתור סגירה */
+.close-button:hover {
+    background: rgba(231, 76, 60, 0.1); /* רקע אדום שקוף */
+    color: #e74c3c;                  /* צבע אדום */
+}
+
+/* תוכן תוצאות */
+.results-content {
+    padding: 25px;                   /* מרווח פנימי */
+    max-height: 400px;               /* גובה מקסימלי */
+    overflow-y: auto;                /* גלילה אנכית */
+}
+
+/* ==================== ADVANCED COMPONENTS ==================== */
+/* רכיבים מתקדמים נוספים */
+
+/* מצב ריק בגלריה */
+.target-empty-state {
+    text-align: center;              /* יישור למרכז */
+    padding: 60px 20px;              /* מרווח פנימי */
+    color: #7f8c8d;                  /* צבע אפור */
+    grid-column: 1 / -1;             /* כל העמודות */
+}
+
+/* אייקון מצב ריק */
+.target-empty-icon {
+    font-size: 64px;                 /* גודל גדול */
+    margin-bottom: 20px;             /* מרווח תחתון */
+    opacity: 0.5;                    /* שקיפות */
+}
+
+/* כותרת מצב ריק */
+.target-empty-state h3 {
+    color: #7f8c8d;                  /* צבע אפור */
+    margin-bottom: 10px;             /* מרווח תחתון */
+}
+
+/* טקסט מצב ריק */
+.target-empty-state p {
+    color: #bdc3c7;                  /* צבע אפור בהיר */
+}
+
+/* אלמנט עם כלים מתקדמים */
+.page-break-avoid {
+    page-break-inside: avoid;        /* מניעת קריעה בהדפסה */
+}
+
+/* ==================== ANIMATIONS FOR SETTINGS ==================== */
+/* אנימציות ספציפיות להגדרות */
+
+/* אנימציית הופעת הודעה */
+@keyframes slideInNotification {
+    from {
+        transform: translateX(100%) scale(0.8); /* מתחיל מימין וקטן */
+        opacity: 0;                  /* שקוף */
+    }
+    to {
+        transform: translateX(0) scale(1); /* מגיע למיקום רגיל */
+        opacity: 1;                  /* גלוי */
+    }
+}
+
+/* אנימציית יציאת הודעה */
+@keyframes slideOutNotification {
+    from {
+        transform: translateX(0) scale(1); /* מתחיל במיקום רגיל */
+        opacity: 1;                  /* גלוי */
+    }
+    to {
+        transform: translateX(100%) scale(0.8); /* יוצא ימינה וקטן */
+        opacity: 0;                  /* שקוף */
+    }
+}
+
+/* ==================== RESPONSIVE STYLES FOR SETTINGS ==================== */
+/* עיצוב רספונסיבי להגדרות */
+
+/* עיצוב רספונסיבי לטאבלטים */
+@media (max-width: 900px) {
+    /* מיכל הגדרות */
+    .settings-container {
+        grid-template-columns: 1fr;  /* עמודה אחת */
+        gap: 20px;                   /* מרווח מופחת */
+    }
+
+    /* הודעות התראה */
+    .notification-container {
+        top: 10px;                   /* מרחק מופחת מלמעלה */
+        right: 10px;                 /* מרחק מופחת מימין */
+        left: 10px;                  /* מרחק מימין גם */
+        max-width: none;             /* ביטול רוחב מקסימלי */
+    }
+
+    /* הודעת התראה */
+    .notification {
+        margin-bottom: 8px;          /* מרווח מופחת */
+        padding: 15px 18px;          /* מרווח פנימי מופחת */
+    }
+}
+
+/* עיצוב רספונסיבי למובייל */
+@media (max-width: 600px) {
+    /* קבוצת הגדרות */
+    .settings-group {
+        padding: 20px;               /* מרווח פנימי מופחת */
+    }
+
+    /* כותרת קבוצת הגדרות */
+    .settings-group h3 {
+        font-size: 1.1rem;           /* גודל מופחת */
+    }
+
+    /* מודל בחירת אדם */
+    #select-person-modal .modal-content {
+        max-width: 95%;              /* רוחב מותאם למובייל */
+        margin: 20px;                /* מרווח חיצוני */
+    }
+
+    /* תאים בטבלת בחירה */
+    .person-selection-table th,
+    .person-selection-table td {
+        padding: 8px 10px;           /* מרווח פנימי מופחת */
+        font-size: 14px;             /* גודל טקסט מופחת */
+    }
+
+    /* תמונת בחירת אדם */
+    .person-selection-image {
+        width: 36px;                 /* רוחב מופחת */
+        height: 36px;                /* גובה מופחת */
+    }
+
+    /* תוכן ההודעה */
+    .notification-message {
+        font-size: 13px;             /* גודל טקסט מופחת */
+        margin-right: 10px;          /* מרווח מופחת */
+    }
+
+    /* כפתור סגירת הודעה */
+    .notification-close {
+        width: 24px;                 /* רוחב מופחת */
+        height: 24px;                /* גובה מופחת */
+        font-size: 16px;             /* גודל טקסט מופחת */
+    }
+
+    /* פאנל תוצאות */
+    .results-panel {
+        margin-top: 20px;            /* מרווח עליון מופחת */
+    }
+
+    /* כותרת פאנל תוצאות */
+    .results-header {
+        padding: 15px 20px;          /* מרווח פנימי מופחת */
+    }
+
+    /* תוכן תוצאות */
+    .results-content {
+        padding: 20px;               /* מרווח פנימי מופחת */
+        max-height: 300px;           /* גובה מקסימלי מופחת */
+    }
+}

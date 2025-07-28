@@ -1,0 +1,690 @@
+/* ==================== ATTENDANCE STYLES ==================== */
+/*
+ * קובץ סגנונות לניהול נוכחות ודוחות
+ * מכיל: בקרי נוכחות, סטטיסטיקות, בדיקת נוכחות מתקדמת, תוצאות
+ * צריך לטעון אחרי variables.css ו-common.css
+ */
+
+/* ==================== ATTENDANCE CONTROLS ==================== */
+/* בקרים לניהול דוחות נוכחות */
+
+/* בקרי נוכחות - אזור הכפתורים והמסננים */
+.attendance-controls {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-between;  /* פיזור תוכן */
+    margin-bottom: 30px;             /* מרווח תחתון */
+    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+}
+
+/* מסנן תאריך - בחירת תאריך לדוח */
+.date-filter {
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+}
+
+/* תווית מסנן תאריך */
+.date-filter label {
+    margin-left: 10px;               /* מרווח משמאל */
+    font-weight: 500;                /* משקל טקסט בינוני */
+}
+
+/* שדה קלט תאריך */
+.date-filter input {
+    padding: 10px 15px;              /* מרווח פנימי */
+    border: 1px solid #ddd;          /* גבול אפור */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    font-size: 1rem;                 /* גודל טקסט */
+}
+
+/* ==================== ATTENDANCE STATISTICS ==================== */
+/* סטטיסטיקות נוכחות - תצוגת נתונים */
+
+/* סטטיסטיקות נוכחות - גריד של כרטיסי נתונים */
+.attendance-stats {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-around;   /* פיזור שווה */
+    margin: 30px 0;                  /* מרווח עליון ותחתון */
+    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+}
+
+/* כרטיס סטטיסטיקה - תצוגת נתון בודד */
+.stat-card {
+    text-align: center;              /* יישור למרכז */
+    padding: 20px;                   /* מרווח פנימי */
+    flex: 1 1 200px;                 /* גמישות עם בסיס 200px */
+    margin: 10px;                    /* מרווח חיצוני */
+}
+
+/* ערך סטטיסטיקה - המספר הגדול */
+.stat-value {
+    font-size: 3rem;                 /* גודל גדול מאוד */
+    font-weight: bold;               /* טקסט בולט */
+    color: var(--primary-color);     /* צבע כחול */
+    margin-bottom: 10px;             /* מרווח תחתון */
+}
+
+/* תווית סטטיסטיקה - התיאור */
+.stat-label {
+    font-size: 1.2rem;               /* גודל בינוני */
+    color: var(--dark-color);        /* צבע כהה */
+}
+
+/* ==================== ADVANCED CONTROLS ==================== */
+/* בקרים מתקדמים - כפתורי בדיקת נוכחות */
+
+.advanced-controls {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: center;         /* יישור למרכז */
+    gap: 20px;                       /* מרווח בין הכפתורים */
+    margin-bottom: 30px;             /* מרווח תחתון */
+    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+}
+
+/* כפתורים במרכז */
+.advanced-controls .action-button {
+    min-width: 200px;                /* רוחב מינימלי */
+    padding: 15px 25px;              /* מרווח פנימי גדול יותר */
+    font-size: 1.1rem;               /* גודל טקסט גדול יותר */
+}
+
+/* ==================== ATTENDANCE CHECKER ==================== */
+/* מערכת בדיקת נוכחות מתקדמת */
+
+/* סקציית בדיקת נוכחות - אזור מיוחד למתקדמים */
+.attendance-checker-section {
+    background: white;               /* רקע לבן */
+    padding: 30px;                   /* מרווח פנימי */
+    border-radius: 15px;             /* פינות עגולות */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* צל */
+    margin: 30px 0;                  /* מרווח עליון ותחתון */
+    border-right: 4px solid var(--primary-color); /* גבול ימני כחול */
+}
+
+/* כותרת בדיקת נוכחות */
+.attendance-checker-section h3 {
+    color: var(--primary-color);     /* צבע כחול */
+    margin-bottom: 25px;             /* מרווח תחתון */
+    font-size: 1.3rem;               /* גודל בינוני */
+    font-weight: 600;                /* משקל טקסט בולט */
+}
+
+/* בקרי בדיקת נוכחות - תפעול הבדיקה */
+.attendance-checker-controls {
+    display: flex;                   /* פריסה גמישה */
+    flex-direction: column;          /* סידור אנכי */
+    gap: 20px;                       /* מרווח בין האלמנטים */
+    align-items: flex-start;         /* יישור לתחילת הציר */
+}
+
+/* קבוצת שדות בבדיקת נוכחות */
+.attendance-checker-controls .form-group {
+    width: 100%;                     /* רוחב מלא */
+    max-width: 300px;                /* רוחב מקסימלי */
+}
+
+/* עזרה לשדה קלט - הסבר קטן */
+.input-help {
+    color: #666;                     /* צבע אפור */
+    font-size: 14px;                 /* גודל קטן */
+    margin-top: 8px;                 /* מרווח עליון */
+    display: block;                  /* תצוגה בלוק */
+    font-style: italic;              /* טקסט נטוי */
+}
+
+/* ==================== IMAGE STYLES ==================== */
+/* סגנונות תמונות - תיקון גודל התמונות */
+
+/* תמונת אדם בטבלה */
+.person-image {
+    width: 50px;                     /* רוחב קבוע */
+    height: 50px;                    /* גובה קבוע */
+    object-fit: cover;               /* חיתוך פרופורציונלי */
+    border-radius: 50%;              /* עיגול מלא */
+    border: 2px solid #e9ecef;       /* גבול אפור */
+}
+
+/* תמונה בכרטיס אדם */
+.person-card img {
+    width: 40px;                     /* רוחב קטן יותר */
+    height: 40px;                    /* גובה קטן יותר */
+    object-fit: cover;               /* חיתוך פרופורציונלי */
+    border-radius: 50%;              /* עיגול מלא */
+    margin-left: 10px;               /* מרווח משמאל */
+}
+
+/* תמונה בתוצאת בדיקה */
+.result-person-image {
+    width: 60px;                     /* רוחב בינוני */
+    height: 60px;                    /* גובה בינוני */
+    object-fit: cover;               /* חיתוך פרופורציונלי */
+    border-radius: 50%;              /* עיגול מלא */
+    border: 3px solid var(--primary-color); /* גבול כחול */
+}
+
+/* מיכל תמונה בכרטיס אדם */
+.person-image-container {
+    position: relative;              /* מיקום יחסי */
+    display: inline-block;           /* תצוגה בשורה */
+}
+
+/* שכבת overlay בתמונה */
+.person-overlay {
+    position: absolute;              /* מיקום מוחלט */
+    top: 0;                          /* דבוק לעליון */
+    left: 0;                         /* דבוק לשמאל */
+    width: 100%;                     /* רוחב מלא */
+    height: 100%;                    /* גובה מלא */
+    background: rgba(0,123,255,0.8); /* רקע כחול שקוף */
+    border-radius: 50%;              /* עיגול מלא */
+    display: none;                   /* מוסתר בברירת מחדל */
+    align-items: center;             /* יישור אנכי במרכז */
+    justify-content: center;         /* יישור אופקי במרכז */
+    color: white;                    /* צבע לבן */
+    font-size: 16px;                 /* גודל טקסט */
+}
+
+/* הצגת overlay בבחירה */
+.person-card.selected .person-overlay {
+    display: flex;                   /* הצגת overlay */
+}
+
+/* ==================== ATTENDANCE RESULTS ==================== */
+/* תצוגת תוצאות בדיקת נוכחות */
+
+/* תוצאת בדיקת נוכחות - אזור התוצאות */
+.attendance-result {
+    margin-top: 30px;                /* מרווח עליון */
+    padding: 25px;                   /* מרווח פנימי */
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); /* רקע גרדיינט */
+    border-radius: 12px;             /* פינות עגולות */
+    border-right: 4px solid var(--primary-color); /* גבול ימני כחול */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* צל */
+    animation: slideInResult 0.3s ease-out; /* אנימציית כניסה */
+}
+
+/* כותרת התוצאה - שורת מידע עליונה */
+.result-header {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-between;  /* פיזור תוכן */
+    align-items: center;             /* יישור אנכי במרכז */
+    margin-bottom: 20px;             /* מרווח תחתון */
+    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+    gap: 15px;                       /* מרווח בין האלמנטים */
+}
+
+/* כותרת בתוצאה */
+.result-header h4 {
+    color: var(--primary-color);     /* צבע כחול */
+    margin: 0;                       /* ביטול מרווח */
+    font-size: 1.2rem;               /* גודל בינוני */
+}
+
+/* אינדיקטור התקדמות - פס התקדמות עם טקסט */
+.progress-indicator {
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 15px;                       /* מרווח בין האלמנטים */
+}
+
+/* פס התקדמות */
+.progress-bar {
+    width: 200px;                    /* רוחב */
+    height: 8px;                     /* גובה */
+    background: #e0e0e0;             /* רקע אפור */
+    border-radius: 4px;              /* פינות עגולות */
+    overflow: hidden;                /* הסתרת גלישה */
+    position: relative;              /* מיקום יחסי */
+}
+
+/* אנימציה בפס התקדמות - פסים נעים */
+.progress-bar::after {
+    content: '';                     /* תוכן ריק */
+    position: absolute;              /* מיקום מוחלט */
+    top: 0;                          /* דבוק לעליון */
+    left: 0;                         /* דבוק לשמאל */
+    height: 100%;                    /* גובה מלא */
+    background: linear-gradient(45deg,
+        var(--primary-color) 25%,
+        transparent 25%,
+        transparent 50%,
+        var(--primary-color) 50%,
+        var(--primary-color) 75%,
+        transparent 75%);            /* גרדיינט פסים */
+    background-size: 20px 20px;      /* גודל הפסים */
+    animation: progress-animation 1s linear infinite; /* אנימציה אינסופית */
+    width: 100%;                     /* רוחב מלא */
+}
+
+/* פס התקדמות הושלם */
+.progress-bar.completed::after {
+    animation: none;                 /* ביטול אנימציה */
+    background: var(--success-color); /* רקע ירוק */
+}
+
+/* פס התקדמות שגיאה */
+.progress-bar.error::after {
+    animation: none;                 /* ביטול אנימציה */
+    background: var(--danger-color); /* רקע אדום */
+}
+
+/* טקסט סטטוס נוכחות */
+#attendance-status-text {
+    font-size: 14px;                 /* גודל קטן */
+    color: var(--primary-color);     /* צבע כחול */
+    font-weight: 500;                /* משקל טקסט בינוני */
+}
+
+/* תוכן התוצאה - אזור התוצאות המפורט */
+.result-content {
+    font-size: 16px;                 /* גודל טקסט */
+    line-height: 1.6;                /* גובה שורה */
+}
+
+/* תוצאה מוצלחת - הצגה בירוק */
+.result-success {
+    color: var(--success-color);     /* צבע ירוק */
+    font-weight: bold;               /* טקסט בולט */
+    font-size: 18px;                 /* גודל גדול */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 10px;                       /* מרווח בין האלמנטים */
+}
+
+/* תוצאה עם שגיאה - הצגה באדום */
+.result-error {
+    color: var(--danger-color);      /* צבע אדום */
+    font-weight: bold;               /* טקסט בולט */
+    font-size: 18px;                 /* גודל גדול */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 10px;                       /* מרווח בין האלמנטים */
+}
+
+/* תוצאה בעיבוד - הצגה בכחול */
+.result-processing {
+    color: var(--primary-color);     /* צבע כחול */
+    font-style: italic;              /* טקסט נטוי */
+    font-size: 16px;                 /* גודל בינוני */
+}
+
+/* כפתור ביטול בדיקת נוכחות */
+#cancel-attendance-check {
+    background-color: #dc3545;       /* רקע אדום */
+    border-color: #dc3545;           /* גבול אדום */
+}
+
+/* אפקט hover לכפתור ביטול */
+#cancel-attendance-check:hover {
+    background-color: #c82333;       /* אדום כהה יותר */
+    border-color: #bd2130;           /* גבול אדום כהה יותר */
+}
+
+/* ==================== PERSON SELECTOR COMPONENT ==================== */
+/* רכיב בחירת אנשים לבדיקת נוכחות */
+
+/* מיכל בורר אנשים */
+.person-selector-container {
+    background: #f8f9fa;             /* רקע אפור בהיר */
+    border-radius: 8px;              /* פינות עגולות */
+    padding: 20px;                   /* מרווח פנימי */
+    margin-bottom: 20px;             /* מרווח תחתון */
+    border: 1px solid #e9ecef;       /* גבול אפור */
+}
+
+/* כותרת בורר אנשים */
+.person-selector-header {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-between;  /* פיזור תוכן */
+    align-items: center;             /* יישור אנכי במרכז */
+    margin-bottom: 15px;             /* מרווח תחתון */
+}
+
+/* כותרת בבורר */
+.person-selector-header h4 {
+    margin: 0;                       /* ביטול מרווח */
+    color: #495057;                  /* צבע אפור כהה */
+}
+
+/* סטטוס טעינה */
+.loading-status {
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 8px;                        /* מרווח בין האלמנטים */
+    color: #6c757d;                  /* צבע אפור */
+    font-size: 14px;                 /* גודל קטן */
+}
+
+/* ספינר טעינה */
+.loading-spinner {
+    animation: spin 1s linear infinite; /* אנימציית סיבוב */
+}
+
+/* גריד אנשים - רשת בחירת אנשים */
+.people-grid {
+    display: grid;                   /* פריסת גריד */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* עמודות גמישות */
+    gap: 12px;                       /* מרווח בין האלמנטים */
+    max-height: 400px;               /* גובה מקסימלי */
+    overflow-y: auto;                /* גלילה אנכית */
+    border: 1px solid #dee2e6;       /* גבול אפור */
+    border-radius: 6px;              /* פינות עגולות */
+    padding: 15px;                   /* מרווח פנימי */
+    background: white;               /* רקע לבן */
+}
+
+/* כרטיס אדם - רכיב בחירה בודד */
+.person-card {
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    padding: 12px;                   /* מרווח פנימי */
+    border: 2px solid #e9ecef;       /* גבול אפור */
+    border-radius: 6px;              /* פינות עגולות */
+    cursor: pointer;                 /* סמן יד */
+    transition: all 0.2s ease;       /* מעבר חלק */
+    background: white;               /* רקע לבן */
+}
+
+/* אפקט hover לכרטיס אדם */
+.person-card:hover {
+    border-color: #007bff;           /* גבול כחול */
+    background: #f8f9ff;             /* רקע כחול בהיר */
+    transform: translateY(-1px);     /* הרמה קלה */
+    box-shadow: 0 2px 4px rgba(0,123,255,0.1); /* צל כחול */
+}
+
+/* כרטיס אדם נבחר */
+.person-card.selected {
+    border-color: #007bff;           /* גבול כחול */
+    background: #e7f3ff;             /* רקע כחול בהיר */
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.2); /* צל כחול חיצוני */
+}
+
+/* מידע אדם בכרטיס */
+.person-card .person-info {
+    flex: 1;                         /* גמישות */
+}
+
+/* שם אדם בכרטיס */
+.person-card .person-name {
+    font-weight: 600;                /* משקל טקסט בולט */
+    color: #212529;                  /* צבע כהה */
+    margin-bottom: 4px;              /* מרווח תחתון */
+}
+
+/* מספר זהות בכרטיס */
+.person-card .person-id {
+    font-size: 12px;                 /* גודל קטן */
+    color: #6c757d;                  /* צבע אפור */
+}
+
+/* מספר אדם בכרטיס - תג עגול */
+.person-card .person-number {
+    background: #007bff;             /* רקע כחול */
+    color: white;                    /* טקסט לבן */
+    border-radius: 50%;              /* עיגול מלא */
+    width: 24px;                     /* רוחב */
+    height: 24px;                    /* גובה */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    justify-content: center;         /* יישור אופקי במרכז */
+    font-size: 12px;                 /* גודל קטן */
+    font-weight: bold;               /* טקסט בולט */
+    margin-left: 10px;               /* מרווח משמאל */
+}
+
+/* כפתור נסה שוב */
+.retry-button {
+    background: #dc3545;             /* רקע אדום */
+    color: white;                    /* טקסט לבן */
+    border: none;                    /* ביטול גבול */
+    padding: 6px 12px;               /* מרווח פנימי */
+    border-radius: 4px;              /* פינות עגולות */
+    cursor: pointer;                 /* סמן יד */
+    margin-top: 10px;                /* מרווח עליון */
+}
+
+/* אפקט hover לכפתור נסה שוב */
+.retry-button:hover {
+    background: #c82333;             /* אדום כהה יותר */
+}
+
+/* הודעת שגיאה בבורר אנשים */
+.error-message {
+    text-align: center;              /* יישור למרכז */
+    padding: 20px;                   /* מרווח פנימי */
+    color: #e74c3c;                  /* צבע אדום */
+}
+
+/* ==================== PERSON CHECK RESULT ==================== */
+/* תוצאת בדיקה לאדם ספציפי */
+
+.person-check-result {
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 20px;                       /* מרווח בין האלמנטים */
+    padding: 20px;                   /* מרווח פנימי */
+    border-radius: 8px;              /* פינות עגולות */
+    border: 2px solid #e9ecef;       /* גבול אפור */
+}
+
+/* תוצאה חיובית */
+.person-check-result.result-present {
+    border-color: var(--success-color); /* גבול ירוק */
+    background: #f8fff8;             /* רקע ירוק בהיר */
+}
+
+/* תוצאה שלילית */
+.person-check-result.result-absent {
+    border-color: var(--danger-color); /* גבול אדום */
+    background: #fff8f8;             /* רקע אדום בהיר */
+}
+
+/* מידע אדם בתוצאה */
+.result-person-info {
+    display: flex;                   /* פريسה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 15px;                       /* מרווח בין האלמנטים */
+    flex: 1;                         /* גמישות */
+}
+
+/* פרטי אדם בתוצאה */
+.result-person-details h4 {
+    margin: 0 0 5px 0;               /* מרווח תחתון קטן */
+    color: var(--dark-color);        /* צבע כהה */
+}
+
+.result-person-details p {
+    margin: 0;                       /* ביטול מרווח */
+    color: #6c757d;                  /* צבע אפור */
+    font-size: 14px;                 /* גודל קטן */
+}
+
+/* סטטוס תוצאה */
+.result-status {
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 10px;                       /* מרווח בין האלמנטים */
+    font-size: 18px;                 /* גודל גדול */
+    font-weight: bold;               /* טקסט בולט */
+}
+
+/* אייקון תוצאה */
+.result-icon {
+    font-size: 24px;                 /* גודל גדול */
+}
+
+/* רמת ודאות */
+.result-confidence {
+    font-size: 14px;                 /* גודל קטן */
+    color: #6c757d;                  /* צבע אפור */
+    margin-top: 10px;                /* מרווח עליון */
+}
+
+/* זמן בדיקה */
+.result-time {
+    font-size: 14px;                 /* גודל קטן */
+    color: #6c757d;                  /* צבע אפור */
+    margin-top: 5px;                 /* מרווח עליון */
+}
+
+/* ==================== ANIMATIONS ==================== */
+/* אנימציות ספציפיות לנוכחות */
+
+/* אנימציית התקדמות - פסים נעים */
+@keyframes progress-animation {
+    0% { transform: translateX(-20px); } /* תחילה */
+    100% { transform: translateX(20px); } /* סוף */
+}
+
+/* אנימציית החלקה לתוצאה */
+@keyframes slideInResult {
+    from {
+        opacity: 0;                  /* שקוף בהתחלה */
+        transform: translateY(-10px); /* הזחה עליונה */
+    }
+    to {
+        opacity: 1;                  /* גלוי בסוף */
+        transform: translateY(0);    /* מיקום רגיל */
+    }
+}
+
+/* אנימציית סיבוב לספינר */
+@keyframes spin {
+    0% { transform: rotate(0deg); }   /* תחילה */
+    100% { transform: rotate(360deg); } /* סיבוב מלא */
+}
+
+/* ==================== RESPONSIVE STYLES FOR ATTENDANCE ==================== */
+/* עיצוב רספונסיבי לנוכחות */
+
+/* עיצוב רספונסיבי לטאבלטים */
+@media (max-width: 900px) {
+    /* בקרי נוכחות */
+    .attendance-controls {
+        flex-direction: column;      /* סידור אנכי */
+    }
+
+    /* מסנן תאריך */
+    .date-filter {
+        margin-bottom: 10px;         /* מרווח תחתון */
+    }
+
+    /* שדה תאריך */
+    .date-filter input {
+        width: 100%;                 /* רוחב מלא */
+    }
+
+    /* בקרים מתקדמים */
+    .advanced-controls {
+        flex-direction: column;      /* סידור אנכי */
+        align-items: center;         /* יישור למרכז */
+    }
+
+    .advanced-controls .action-button {
+        width: 100%;                 /* רוחב מלא */
+        max-width: 300px;            /* רוחב מקסימלי */
+    }
+
+    /* כותרת התוצאה */
+    .result-header {
+        flex-direction: column;      /* סידור אנכי */
+        align-items: flex-start;     /* יישור לתחילה */
+        gap: 15px;                   /* מרווח בין האלמנטים */
+    }
+
+    /* אינדיקטור התקדמות */
+    .progress-indicator {
+        width: 100%;                 /* רוחב מלא */
+        justify-content: space-between; /* פיזור תוכן */
+    }
+
+    /* פס התקדמות */
+    .progress-bar {
+        flex: 1;                     /* גמישות */
+        min-width: 150px;            /* רוחב מינימלי */
+    }
+
+    /* טקסט סטטוס */
+    #attendance-status-text {
+        font-size: 13px;             /* גודל מופחת */
+    }
+}
+
+/* עיצוב רספונסיבי למובייל */
+@media (max-width: 600px) {
+    /* ערך סטטיסטיקה קטן יותר */
+    .stat-value {
+        font-size: 2.5rem;           /* גודל מופחת */
+    }
+
+    /* תווית סטטיסטיקה קטנה יותר */
+    .stat-label {
+        font-size: 1rem;             /* גודל מופחת */
+    }
+
+    /* סקציית בדיקת נוכחות */
+    .attendance-checker-section {
+        padding: 20px;               /* מרווח פנימי מופחת */
+        margin: 20px 0;              /* מרווח חיצוני מופחת */
+    }
+
+    /* בקרי בדיקת נוכחות */
+    .attendance-checker-controls {
+        align-items: stretch;        /* מתיחה לרוחב מלא */
+    }
+
+    /* קבוצת שדות */
+    .attendance-checker-controls .form-group {
+        max-width: none;             /* ביטול רוחב מקסימלי */
+    }
+
+    /* כותרת בדיקת נוכחות */
+    .attendance-checker-section h3 {
+        font-size: 1.1rem;           /* גודל מופחת */
+    }
+
+    /* אינדיקטור התקדמות במובייל */
+    .progress-indicator {
+        flex-direction: column;      /* סידור אנכי */
+        gap: 10px;                   /* מרווח מופחת */
+        align-items: stretch;        /* מתיחה לרוחב מלא */
+    }
+
+    /* פס התקדמות במובייל */
+    .progress-bar {
+        width: 100%;                 /* רוחב מלא */
+    }
+
+    /* טקסט סטטוס במובייל */
+    #attendance-status-text {
+        text-align: center;          /* יישור למרכז */
+    }
+
+    /* גריד אנשים במובייל */
+    .people-grid {
+        grid-template-columns: 1fr;  /* עמודה אחת */
+        gap: 8px;                    /* מרווח מופחת */
+    }
+
+    /* כרטיס אדם במובייל */
+    .person-card {
+        padding: 10px;               /* מרווח פנימי מופחת */
+    }
+
+    /* תוצאת בדיקה במובייל */
+    .person-check-result {
+        flex-direction: column;      /* סידור אנכי */
+        align-items: flex-start;     /* יישור לתחילה */
+        gap: 15px;                   /* מרווח מופחת */
+    }
+
+    /* מידע אדם במובייל */
+    .result-person-info {
+        width: 100%;                 /* רוחב מלא */
+    }
+
+    /* סטטוס תוצאה במובייל */
+    .result-status {
+        align-self: center;          /* יישור למרכז */
+    }
+}

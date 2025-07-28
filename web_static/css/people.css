@@ -1,0 +1,365 @@
+/* ==================== PEOPLE MANAGEMENT STYLES ==================== */
+/*
+ * קובץ סגנונות לניהול אנשים במערכת
+ * מכיל: בקרי ניהול, אלמנטי אדם, מד התקדמות העלאה, גלריית תמונות אדם
+ * צריך לטעון אחרי variables.css ו-common.css
+ */
+
+/* ==================== PEOPLE CONTROLS ==================== */
+/* אזור הבקרים לניהול אנשים - חיפוש והוספה */
+
+/* בקרי ניהול אנשים - שורת כפתורים ושדה חיפוש */
+.people-controls {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-between;  /* פיזור תוכן */
+    margin-bottom: 30px;             /* מרווח תחתון */
+    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+}
+
+/* שדה חיפוש אנשים - קלט לחיפוש לפי שם או ת"ז */
+.people-controls input {
+    padding: 10px 15px;              /* מרווח פנימי */
+    border: 1px solid #ddd;          /* גבול אפור */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    font-size: 1rem;                 /* גודל טקסט */
+    min-width: 300px;                /* רוחב מינימלי */
+}
+
+/* רשימת האנשים - מיכל הטבלה */
+.people-list {
+    overflow-x: auto;                /* גלילה אופקית למסכים קטנים */
+}
+
+/* ==================== PERSON ELEMENTS ==================== */
+/* אלמנטים חזותיים הקשורים לאדם בודד */
+
+/* תמונת אדם בטבלה - תמונה עגולה קטנה */
+.person-image {
+    width: 50px;                     /* רוחב קבוע */
+    height: 50px;                    /* גובה קבוע */
+    border-radius: 50%;              /* עיגול מלא */
+    object-fit: cover;               /* התאמת גודל תמונה */
+}
+
+/* סטטוס אדם - תג צבעוני להצגת מצב נוכחות */
+.person-status {
+    display: inline-block;           /* תצוגה בשורה עם מימדים */
+    padding: 5px 10px;               /* מרווח פנימי */
+    border-radius: 20px;             /* פינות עגולות מאוד */
+    font-size: 0.8rem;               /* גודל טקסט קטן */
+    font-weight: 500;                /* משקל טקסט בינוני */
+}
+
+/* סטטוס נוכח - צבע ירוק */
+.status-present {
+    background-color: #d4f6e2;       /* רקע ירוק בהיר */
+    color: var(--success-color);     /* טקסט ירוק */
+}
+
+/* סטטוס נעדר - צבע אדום */
+.status-absent {
+    background-color: #fde2e2;       /* רקע אדום בהיר */
+    color: var(--danger-color);      /* טקסט אדום */
+}
+
+/* פעולות על אדם - מיכל כפתורי פעולה */
+.person-actions {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: center;         /* יישור למרכז */
+}
+
+/* כפתורי פעולה על אדם - עריכה, העלאה, מחיקה */
+.person-actions button {
+    background: none;                /* ביטול רקע */
+    border: none;                    /* ביטול גבול */
+    font-size: 1.1rem;               /* גודל טקסט */
+    margin: 0 5px;                   /* מרווח בצדדים */
+    cursor: pointer;                 /* סמן יד */
+    transition: var(--transition);   /* מעבר חלק */
+}
+
+/* כפתור עריכה - צבע כחול */
+.person-actions button.edit {
+    color: var(--primary-color);     /* צבע כחול */
+}
+
+/* כפתור העלאה - צבע ירוק */
+.person-actions button.upload {
+    color: var(--secondary-color);   /* צבע ירוק */
+}
+
+/* כפתור צפייה בתמונות - צבע כחול */
+.person-actions button.view-images {
+    color: var(--primary-color);     /* צבע כחול */
+}
+
+/* כפתור מחיקה - צבע אדום */
+.person-actions button.delete {
+    color: var(--danger-color);      /* צבע אדום */
+}
+
+/* אפקט hover לכפתורי פעולה - הגדלה קלה */
+.person-actions button:hover {
+    transform: scale(1.2);           /* הגדלה קלה */
+}
+
+/* ==================== UPLOAD PROGRESS COMPONENTS ==================== */
+/* רכיבים להצגת התקדמות העלאת תמונות */
+
+/* מד התקדמות העלאת תמונות - סרגל פסים עגולים */
+.upload-progress {
+    display: flex;                   /* פריסה גמישה */
+    gap: 10px;                       /* מרווח בין הפסים */
+    margin: 15px 0;                  /* מרווח עליון ותחתון */
+    justify-content: center;         /* יישור למרכז */
+    align-items: center;             /* יישור אנכי במרכז */
+}
+
+/* פס התקדמות בודד - עיגול עם מספר */
+.progress-step {
+    width: 40px;                     /* רוחב קבוע */
+    height: 40px;                    /* גובה קבוע */
+    border-radius: 50%;              /* עיגול מלא */
+    border: 3px solid #ddd;          /* גבול אפור */
+    background: #f5f5f5;             /* רקע אפור בהיר */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    justify-content: center;         /* יישור אופקי למרכז */
+    font-weight: bold;               /* טקסט בולט */
+    color: #999;                     /* צבע אפור */
+    transition: all 0.3s ease;       /* מעבר חלק */
+    position: relative;              /* מיקום יחסי */
+    font-size: 12px;                 /* גודל טקסט */
+}
+
+/* פס התקדמות מושלם - צבע ירוק */
+.progress-step.completed {
+    background: #4caf50 !important;  /* רקע ירוק */
+    border-color: #4caf50 !important; /* גבול ירוק */
+    color: white !important;         /* טקסט לבן */
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); /* זוהר ירוק */
+}
+
+/* פס התקדמות אופציונלי - עיצוב מקווקו */
+.progress-step.optional {
+    opacity: 0.6;                    /* שקיפות חלקית */
+    border-style: dashed;            /* גבול מקווקו */
+}
+
+/* אפקט אנימציה לפס מושלם - סימן וי */
+.progress-step.completed::after {
+    content: '✓';                    /* סימן וי */
+    position: absolute;              /* מיקום מוחלט */
+    font-size: 16px;                 /* גודל גדול */
+    font-weight: bold;               /* טקסט בולט */
+}
+
+/* מספרים בפסי ההתקדמות */
+.progress-step:nth-child(1)::before { content: '1'; }
+.progress-step:nth-child(2)::before { content: '2'; }
+.progress-step:nth-child(3)::before { content: '3'; }
+.progress-step:nth-child(4)::before { content: '4'; }
+.progress-step:nth-child(5)::before { content: '5'; }
+
+/* הסתרת מספרים כשהפס מושלם */
+.progress-step.completed::before {
+    display: none;                   /* הסתרה */
+}
+
+/* סטטוס העלאה - הודעת מצב */
+.upload-status {
+    text-align: center;              /* יישור למרכז */
+    padding: 15px;                   /* מרווח פנימי */
+    margin: 15px 0;                  /* מרווח עליון ותחתון */
+    font-weight: 600;                /* משקל טקסט בולט */
+    border-radius: 10px;             /* פינות עגולות */
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef); /* רקע גרדיינט */
+    border: 2px solid #dee2e6;       /* גבול אפור */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* צל קל */
+    transition: all 0.3s ease;       /* מעבר חלק */
+}
+
+/* מיכל התקדמות העלאה - אזור מפורט */
+.upload-progress-container {
+    margin: 20px 0;                  /* מרווח עליון ותחתון */
+    padding: 20px;                   /* מרווח פנימי */
+    background: linear-gradient(135deg, #f0f8ff, #ffffff); /* רקע גרדיינט */
+    border-radius: 12px;             /* פינות עגולות */
+    border: 1px solid #e3f2fd;       /* גבול כחול בהיר */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* צל */
+}
+
+/* פס התקדמות מפורט - אנימציה מתקדמת */
+#upload-progress-bar {
+    background: linear-gradient(90deg, #4CAF50, #45a049); /* רקע ירוק גרדיינט */
+    height: 100%;                    /* גובה מלא */
+    width: 0%;                       /* התחלה מ-0 */
+    transition: width 0.5s ease;     /* מעבר חלק */
+    border-radius: 4px;              /* פינות עגולות */
+    position: relative;              /* מיקום יחסי */
+    overflow: hidden;                /* הסתרת גלישה */
+}
+
+/* אפקט נוצץ בפס התקדמות */
+#upload-progress-bar::after {
+    content: '';                     /* תוכן ריק */
+    position: absolute;              /* מיקום מוחלט */
+    top: 0;                          /* דבוק לעליון */
+    left: -100%;                     /* מתחיל מחוץ לאלמנט */
+    width: 100%;                     /* רוחב מלא */
+    height: 100%;                    /* גובה מלא */
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent);                /* גרדיינט נוצץ */
+    animation: shimmer 2s infinite;  /* אנימציית נוצץ */
+}
+
+/* אנימציית נוצץ - תנועה מצד לצד */
+@keyframes shimmer {
+    0% { left: -100%; }              /* התחלה */
+    100% { left: 100%; }             /* סוף */
+}
+
+/* ==================== PERSON IMAGES MODAL ==================== */
+/* חלון צפייה בכל תמונות האדם */
+
+/* תוכן מודל תמונות אדם - רוחב מורחב */
+#person-images-modal .modal-content {
+    max-width: 800px;                /* רוחב מקסימלי גדול */
+    max-height: 90vh;                /* גובה מקסימלי */
+    overflow-y: auto;                /* גלילה אנכית */
+}
+
+/* גלריית תמונות אדם - גריד של תמונות */
+#person-images-gallery {
+    display: grid;                   /* פריסת גריד */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* עמודות גמישות */
+    gap: 20px;                       /* מרווח בין התמונות */
+    padding: 25px;                   /* מרווח פנימי */
+    max-height: 60vh;                /* גובה מקסימלי */
+    overflow-y: auto;                /* גלילה אנכית */
+}
+
+/* פריט תמונה בגלריה - כרטיס תמונה בודד */
+.person-image-item {
+    position: relative;              /* מיקום יחסי */
+    border-radius: 8px;              /* פינות עגולות */
+    overflow: hidden;                /* הסתרת גלישה */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* צל */
+    transition: transform 0.2s ease; /* מעבר חלק */
+    aspect-ratio: 1;                 /* יחס גובה-רוחב 1:1 */
+}
+
+/* אפקט hover לפריט תמונה */
+.person-image-item:hover {
+    transform: scale(1.05);          /* הגדלה קלה */
+}
+
+/* תמונה בפריט - תמונת האדם */
+.person-image-item img {
+    width: 100%;                     /* רוחב מלא */
+    height: 100%;                    /* גובה מלא */
+    object-fit: cover;               /* התאמת גודל */
+    cursor: pointer;                 /* סמן יד */
+}
+
+/* מונה תמונות - מספר התמונה */
+.person-image-counter {
+    position: absolute;              /* מיקום מוחלט */
+    top: 10px;                       /* מרחק מלמעלה */
+    right: 10px;                     /* מרחק מימין */
+    background: rgba(0,0,0,0.8);     /* רקע שחור שקוף */
+    color: white;                    /* טקסט לבן */
+    border-radius: 50%;              /* עיגול מלא */
+    width: 28px;                     /* רוחב */
+    height: 28px;                    /* גובה */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    justify-content: center;         /* יישור אופקי במרכז */
+    font-size: 14px;                 /* גודל טקסט */
+    font-weight: bold;               /* טקסט בולט */
+    border: 2px solid white;         /* גבול לבן */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3); /* צל */
+}
+
+/* הודעת אין תמונות */
+.no-images {
+    text-align: center;              /* יישור למרכז */
+    color: #666;                     /* צבע אפור */
+    padding: 40px;                   /* מרווח פנימי */
+    grid-column: 1 / -1;             /* התפרסות על כל העמודות */
+    font-style: italic;              /* טקסט נטוי */
+}
+
+/* שם האדם במודל תמונות */
+#person-images-name {
+    text-align: center;              /* יישור למרכז */
+    font-size: 18px;                 /* גודל בינוני */
+    font-weight: bold;               /* טקסט בולט */
+    padding: 15px;                   /* מרווח פנימי */
+    border-bottom: 1px solid #eee;   /* גבול תחתון */
+    margin-bottom: 0;                /* ביטול מרווח תחתון */
+}
+
+/* מונה תמונות באלמנט אדם - תג קטן */
+.image-count {
+    background: linear-gradient(135deg, #667eea, #764ba2); /* רקע סגול גרדיינט */
+    color: white;                    /* טקסט לבן */
+    border-radius: 50%;              /* עיגול מלא */
+    padding: 4px 8px;                /* מרווח פנימי */
+    font-size: 11px;                 /* גודל קטן */
+    position: absolute;              /* מיקום מוחלט */
+    top: -8px;                       /* מעל התמונה */
+    right: -8px;                     /* מימין לתמונה */
+    font-weight: bold;               /* טקסט בולט */
+    min-width: 20px;                 /* רוחב מינימלי */
+    text-align: center;              /* יישור למרכז */
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4); /* צל סגול */
+    border: 2px solid white;         /* גבול לבן */
+    animation: pulse 2s infinite;    /* אנימציית דופק */
+}
+
+/* אנימציית דופק למונה */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ==================== RESPONSIVE STYLES FOR PEOPLE ==================== */
+/* עיצוב רספונסיבי לניהול אנשים */
+
+/* עיצוב רספונסיבי לטאבלטים */
+@media (max-width: 900px) {
+    /* בקרי אנשים */
+    .people-controls {
+        flex-direction: column;      /* סידור אנכי */
+    }
+
+    /* שדה חיפוש */
+    .people-controls input {
+        margin-top: 10px;            /* מרווח עליון */
+        min-width: auto;             /* ביטול רוחב מינימלי */
+        width: 100%;                 /* רוחב מלא */
+    }
+}
+
+/* עיצוב רספונסיבי למובייל */
+@media (max-width: 480px) {
+    /* גלריית תמונות אדם */
+    #person-images-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* עמודות קטנות יותר */
+        gap: 15px;                   /* מרווח מופחת */
+        padding: 15px;               /* מרווח פנימי מופחת */
+    }
+
+    /* מונה תמונות קטן יותר */
+    .person-image-counter {
+        width: 22px;                 /* רוחב מופחת */
+        height: 22px;                /* גובה מופחת */
+        font-size: 11px;             /* גודל טקסט מופחת */
+        top: 6px;                    /* מיקום מותאם */
+        right: 6px;                  /* מיקום מותאם */
+        border: 1px solid white;     /* גבול דק יותר */
+    }
+}

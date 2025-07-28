@@ -1,8 +1,3 @@
-# ❌ הסרנו את הייבוא הישן:
-# from Data_Manage import people_vector
-# from Data_Manage import targets_vector
-
-# ✅ הוספנו ייבוא חדש:
 from Data_Manage import validate_school_index, schools_database
 
 import cv2

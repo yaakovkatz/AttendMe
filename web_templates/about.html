@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}AttendMe - אודותינו{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- ========== ABOUT PAGE ========== -->
+
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>אודות AttendMe</h1>
+            <p class="hero-subtitle">חדשנות בטכנולוגיית זיהוי פנים לרישום נוכחות חכם ומדויק</p>
+        </div>
+        <div class="hero-visual">
+            <div class="logo-large">
+                <span class="logo-icon">👁️</span>
+                <span class="logo-text">AttendMe</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Story Section -->
+<section class="our-story section">
+    <div class="container">
+        <div class="content-grid">
+            <div class="content-text">
+                <h2>הסיפור שלנו</h2>
+                <p>AttendMe נולדה מתוך צורך אמיתי לשפר את תהליכי רישום הנוכחות במוסדות חינוך. ראינו מורים שמבלים זמן יקר בבדיקת נוכחות ידנית, ובתי ספר שמתקשים לעקוב אחר תלמידים באופן יעיל ומדויק.</p>
+                
+                <p>החלטנו לפתח פתרון טכנולוגי מתקדם המבוסס על בינה מלאכותית וזיהוי פנים, שיחסוך זמן יקר למורים ויספק למנהלים נתונים מדויקים ובזמן אמת על נוכחות התלמידים.</p>
+                
+                <p>היום, AttendMe משרתת מאות בתי ספר וגני ילדים ברחבי הארץ, ומסייעת לאלפי מורים וקולט נתוני נוכחות של עשרות אלפי תלמידים מדי יום.</p>
+            </div>
+            <div class="content-visual">
+                <div class="story-illustration">
+                    <div class="story-step">
+                        <div class="step-icon">🎯</div>
+                        <h4>זיהוי הצורך</h4>
+                        <p>מורים מבלים זמן רב על רישום נוכחות ידני</p>
+                    </div>
+                    <div class="story-step">
+                        <div class="step-icon">💡</div>
+                        <h4>הפתרון החדשני</h4>
+                        <p>פיתוח מערכת זיהוי פנים מתקדמת ומדויקת</p>
+                    </div>
+                    <div class="story-step">
+                        <div class="step-icon">🚀</div>
+                        <h4>השפעה חיובית</h4>
+                        <p>חיסכון בזמן ושיפור איכות החינוך</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Vision -->
+<section class="mission-vision section">
+    <div class="container">
+        <div class="mv-grid">
+            <div class="mv-card mission">
+                <div class="mv-icon">🎯</div>
+                <h3>המשימה שלנו</h3>
+                <p>לספק למוסדות חינוך כלים טכנולוגיים מתקדמים שמשפרים את יעילות הניהול החינוכי, חוסכים זמן יקר למורים ומאפשרים להם להתמקד במה שחשוב באמת - החינוך והטיפוח של התלמידים.</p>
+            </div>
+            <div class="mv-card vision">
+                <div class="mv-icon">🔮</div>
+                <h3>החזון שלנו</h3>
+                <p>להיות הפתרון המוביל בעולם לרישום נוכחות חכם במוסדות חינוך, תוך יצירת סביבה טכנולוגית מתקדמת שמקדמת חדשנות וחשיבה עתידנית בחינוך.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="our-values section">
+    <div class="container">
+        <h2 class="section-title">הערכים שלנו</h2>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">🔒</div>
+                <h3>פרטיות ואבטחה</h3>
+                <p>אנו מתחייבים להגן על המידע האישי והרגיש של התלמידים והמוסדות החינוכיים ברמת אבטחה הגבוהה ביותר.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">⚡</div>
+                <h3>חדשנות מתמדת</h3>
+                <p>אנו משקיעים ברציפות במחקר ופיתוח כדי להביא לכם את הטכנולוגיות החדשניות והמתקדמות ביותר.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🤝</div>
+                <h3>שותפות אמיתית</h3>
+                <p>אנו רואים בלקוחותינו כשותפים, ועובדים יחד איתם כדי להבין את הצרכים ולספק פתרונות מותאמים אישית.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🎯</div>
+                <h3>מדויקות ואמינות</h3>
+                <p>המערכת שלנו מספקת תוצאות מדויקות ואמינות, כדי שתוכלו לסמוך עליה בכל המשימות החשובות.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🌱</div>
+                <h3>פשטות וידידותיות</h3>
+                <p>אנו מאמינים שטכנולוגיה מתקדמת צריכה להיות פשוטה ונגישה לכולם, ללא צורך בידע טכני מוקדם.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">💡</div>
+                <h3>חינוך איכותי</h3>
+                <p>המטרה העליונה שלנו היא לתרום להעלאת איכות החינוך על ידי שחרור זמן למורים ומתן כלים טובים יותר למנהלים.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Section -->
+<section class="our-technology section">
+    <div class="container">
+        <h2 class="section-title">הטכנולוגיה שלנו</h2>
+        <div class="tech-content">
+            <div class="tech-overview">
+                <h3>בינה מלאכותית מתקדמת</h3>
+                <p>המערכת שלנו מבוססת על אלגוריתמים מתקדמים של למידת מכונה וזיהוי פנים, המפותחים על ידי צוות מהנדסים מומחים בתחום הבינה המלאכותית.</p>
+            </div>
+            
+            <div class="tech-features">
+                <div class="tech-feature">
+                    <div class="tech-icon">🧠</div>
+                    <h4>למידת מכונה עמוקה</h4>
+                    <p>רשתות נוירונים מתקדמות המתמחות בזיהוי דפוסים ברזולוציה גבוהה</p>
+                </div>
+                <div class="tech-feature">
+                    <div class="tech-icon">⚡</div>
+                    <h4>עיבוד בזמן אמת</h4>
+                    <p>זיהוי וזיוג פנים תוך שניות ספורות עם דיוק של מעל 99%</p>
+                </div>
+                <div class="tech-feature">
+                    <div class="tech-icon">🔄</div>
+                    <h4>למידה מתמדת</h4>
+                    <p>המערכת משתפרת עם הזמן ולומדת מכל תמונה ובדיקה</p>
+                </div>
+                <div class="tech-feature">
+                    <div class="tech-icon">🌐</div>
+                    <h4>פריסה בענן</h4>
+                    <p>תשתית בענן מתקדמת המאפשרת גישה מכל מקום ובכל זמן</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="our-impact section">
+    <div class="container">
+        <h2 class="section-title">ההשפעה שלנו</h2>
+        <div class="stats-grid">
+            <div class="stat-card" data-target="500">
+                <div class="stat-number">0</div>
+                <div class="stat-label">מוסדות חינוך</div>
+                <div class="stat-description">בתי ספר וגני ילדים הסומכים עלינו</div>
+            </div>
+            <div class="stat-card" data-target="50000">
+                <div class="stat-number">0</div>
+                <div class="stat-label">תלמידים</div>
+                <div class="stat-description">נרשמת נוכחותם מדי יום</div>
+            </div>
+            <div class="stat-card" data-target="2000">
+                <div class="stat-number">0</div>
+                <div class="stat-label">מורים</div>
+                <div class="stat-description">חוסכים זמן יקר מדי יום</div>
+            </div>
+            <div class="stat-card" data-target="99">
+                <div class="stat-number">0</div>
+                <div class="stat-label">אחוז דיוק</div>
+                <div class="stat-description">בזיהוי פנים ורישום נוכחות</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="our-team section">
+    <div class="container">
+        <h2 class="section-title">הצוות שלנו</h2>
+        <p class="team-intro">צוות מקצועי ומנוסה של מהנדסים, מפתחים ומומחי חינוך</p>
+        
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="member-avatar">
+                    <div class="avatar-placeholder">👨‍💼</div>
+                </div>
+                <h3>דר' מיכאל כהן</h3>
+                <p class="member-role">מנכ"ל ומייסד</p>
+                <p class="member-bio">דוקטור למדעי המחשב עם התמחות בבינה מלאכותית. 15 שנות ניסיון בפיתוח מערכות מתקדמות.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">
+                    <div class="avatar-placeholder">👩‍💻</div>
+                </div>
+                <h3>רחל לוי</h3>
+                <p class="member-role">מנהלת פיתוח</p>
+                <p class="member-bio">מומחית בפיתוח תוכנה ולמידת מכונה עם ניסיון של 12 שנה בחברות הטכנולוגיה המובילות.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">
+                    <div class="avatar-placeholder">👨‍🔬</div>
+                </div>
+                <h3>אלכס פטרוב</h3>
+                <p class="member-role">ראש צוות AI</p>
+                <p class="member-bio">מומחה בזיהוי תבניות וחזון מחשב. מוביל את הפיתוח של אלגוריתמי הזיהוי המתקדמים שלנו.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">
+                    <div class="avatar-placeholder">👩‍🎓</div>
+                </div>
+                <h3>שרה גולדברג</h3>
+                <p class="member-role">יועצת חינוכית</p>
+                <p class="member-bio">מחנכת בכירה עם 20 שנות ניסיון, מוודאת שהמוצר עונה על הצרכים האמיתיים של מוסדות החינוך.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Awards & Recognition -->
+<section class="recognition section">
+    <div class="container">
+        <h2 class="section-title">הכרה והישגים</h2>
+        <div class="awards-grid">
+            <div class="award-card">
+                <div class="award-icon">🏆</div>
+                <h3>פרס החדשנות בחינוך 2024</h3>
+                <p>זכינו בפרס החדשנות הטכנולוגית בחינוך על המוצר AttendMe</p>
+            </div>
+            <div class="award-card">
+                <div class="award-icon">⭐</div>
+                <h3>תעודת ISO 27001</h3>
+                <p>הסמכה בינלאומית לניהול אבטחת מידע ברמה הגבוהה ביותר</p>
+            </div>
+            <div class="award-card">
+                <div class="award-icon">🛡️</div>
+                <h3>אישור משרד החינוך</h3>
+                <p>המוצר מאושר לשימוש במוסדות חינוך ציבוריים</p>
+            </div>
+            <div class="award-card">
+                <div class="award-icon">🌟</div>
+                <h3>דירוג 5 כוכבים</h3>
+                <p>דירוג ממוצע של 4.9/5 מלקוחותינו המרוצים</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="about-cta section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>מעוניינים להצטרף אלינו?</h2>
+            <p>גלו איך AttendMe יכולה לשפר את הניהול במוסד החינוכי שלכם</p>
+            <div class="cta-buttons">
+                {% if current_user %}
+                    <a href="{{ url_for('people') }}" class="cta-button">התחילו עכשיו</a>
+                    <a href="{{ url_for('contact') }}" class="cta-button secondary">צרו קשר</a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="cta-button">הרשמו היום</a>
+                    <a href="{{ url_for('contact') }}" class="cta-button secondary">בקשו הדגמה</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/about.js') }}"></script>
+{% endblock %}

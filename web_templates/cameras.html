@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}AttendMe - ניהול מצלמות ותמונות מטרה{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cameras.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- ========== CAMERAS & TARGET IMAGES PAGE ========== -->
+
+<section id="target-upload" class="section">
+    <div class="container">
+        <h2 class="section-title">📸 ניהול תמונות מטרה</h2>
+        <p style="text-align: center; color: white; margin-bottom: 30px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">העלה, נהל ומחק תמונות לבדיקת נוכחות</p>
+
+        <!-- Upload Area -->
+        <div class="target-upload-container">
+            <div class="upload-area" onclick="document.getElementById('target-file-input').click()">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">לחץ כאן או גרור קבצים להעלאה</div>
+                <div class="upload-hint">תמיכה בתמונות וסרטונים (JPG, PNG, MP4, וכו')</div>
+            </div>
+
+            <input type="file" id="target-file-input" multiple accept="image/*,video/*" style="display: none;">
+
+            <!-- Action Buttons -->
+            <div class="target-buttons-row">
+                <button class="target-btn target-btn-upload" onclick="uploadTargetFiles()" disabled>
+                    📤 בחר קבצים תחילה
+                </button>
+                <button class="target-btn target-btn-delete" id="target-delete-btn" onclick="deleteSelectedTargets()" disabled>
+                    🗑️ מחק נבחרים
+                </button>
+                <button class="target-btn target-btn-clear" onclick="clearFileSelection()">
+                    🧹 נקה בחירה
+                </button>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="target-loading" id="target-loading" style="display: none;">
+                <div class="target-spinner"></div>
+                <div>טוען...</div>
+            </div>
+
+            <!-- Gallery -->
+            <div class="target-gallery">
+                <div class="target-gallery-header">
+                    <div class="target-gallery-title">
+                        🖼️ גלריית תמונות מטרה
+                    </div>
+                    <div class="target-gallery-stats" id="target-gallery-stats">
+                        טוען...
+                    </div>
+                    <div class="target-gallery-actions">
+                        <button class="gallery-action-btn" onclick="selectAllTargets()" title="בחר הכל">
+                            <i class="fas fa-check-square"></i>
+                        </button>
+                        <button class="gallery-action-btn" onclick="deselectAllTargets()" title="בטל בחירה">
+                            <i class="fas fa-square"></i>
+                        </button>
+                        <button class="gallery-action-btn" onclick="refreshTargetGallery()" title="רענן">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="target-gallery-grid" id="target-gallery-grid">
+                    <!-- תמונות יטענו כאן -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Multiple Cameras Section -->
+<section id="cameras-grid" class="section">
+    <div class="container">
+        <h2 class="section-title">🎥 רשת מצלמות</h2>
+
+        <!-- Cameras Grid Container -->
+        <div class="cameras-grid-container" id="cameras-grid-container">
+            <!-- Camera Slot 1 -->
+            <div class="camera-slot" id="camera-slot-1">
+                <div class="add-camera-placeholder" onclick="addNewCamera(1)">
+                    <div class="add-camera-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="add-camera-text">הוסף מצלמה</div>
+                </div>
+            </div>
+
+            <!-- Camera Slot 2 -->
+            <div class="camera-slot" id="camera-slot-2">
+                <div class="add-camera-placeholder" onclick="addNewCamera(2)">
+                    <div class="add-camera-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="add-camera-text">הוסף מצלמה</div>
+                </div>
+            </div>
+
+            <!-- Camera Slot 3 -->
+            <div class="camera-slot" id="camera-slot-3">
+                <div class="add-camera-placeholder" onclick="addNewCamera(3)">
+                    <div class="add-camera-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="add-camera-text">הוסף מצלמה</div>
+                </div>
+            </div>
+
+            <!-- Camera Slot 4 -->
+            <div class="camera-slot" id="camera-slot-4">
+                <div class="add-camera-placeholder" onclick="addNewCamera(4)">
+                    <div class="add-camera-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="add-camera-text">הוסף מצלמה</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/cameras.js') }}"></script>
+{% endblock %}

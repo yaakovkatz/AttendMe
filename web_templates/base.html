@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AttendMe - מערכת רישום נוכחות באמצעות זיהוי פנים{% endblock %}</title>
+
+    <!-- ========== CSS FILES ========== -->
+    <!-- קבצים חובה - תמיד ראשונים -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- קבצי CSS ספציפיים לדף -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- ========== HEADER ========== -->
+    <!-- כותרת עליונה קבועה עם ניווט -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <!-- לוגו -->
+                <div class="logo">
+                    <span class="logo-icon">👁️</span>
+                    AttendMe
+                </div>
+
+                <!-- ניווט ראשי -->
+                <div class="nav-container">
+                    <ul class="nav-links">
+                        <li><a href="{{ url_for('home') }}"{% if current_page == 'home' %} class="active"{% endif %}>דף בית</a></li>
+                    </ul>
+
+                    <!-- תפריט למשתמשים מחוברים -->
+                    {% if current_user %}
+                        <ul class="nav-links user-nav">
+                            <li><a href="{{ url_for('people') }}"{% if current_page == 'people' %} class="active"{% endif %}>ניהול אנשים</a></li>
+                            <li><a href="{{ url_for('attendance') }}"{% if current_page == 'attendance' %} class="active"{% endif %}>נוכחות ודוחות</a></li>
+                            <li><a href="{{ url_for('cameras') }}"{% if current_page == 'cameras' %} class="active"{% endif %}>מצלמות</a></li>
+                            <li><a href="{{ url_for('settings') }}"{% if current_page == 'settings' %} class="active"{% endif %}>הגדרות</a></li>
+                        </ul>
+                    {% endif %}
+
+                    <!-- תפריט כללי -->
+                    <ul class="nav-links general-nav">
+                        <li><a href="{{ url_for('about') }}"{% if current_page == 'about' %} class="active"{% endif %}>אודותינו</a></li>
+                        <li><a href="{{ url_for('contact') }}"{% if current_page == 'contact' %} class="active"{% endif %}>יצירת קשר</a></li>
+                    </ul>
+                </div>
+
+                <!-- אזור התחברות -->
+                <div class="auth-section">
+                    {% if current_user %}
+                        <!-- משתמש מחובר -->
+                        <div class="user-info">
+                            <span class="user-name">👤 {{ current_user.schoolInfo.school_name or current_user.username }}</span>
+                            <a href="{{ url_for('logout') }}" class="login-btn">
+                                <i class="fas fa-sign-out-alt"></i> התנתק
+                            </a>
+                        </div>
+                    {% else %}
+                        <!-- משתמש לא מחובר -->
+                        <a href="{{ url_for('login') }}" class="login-btn">
+                            <i class="fas fa-sign-in-alt"></i> התחברות
+                        </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <!-- תוכן ראשי - ייחודי לכל דף -->
+    <main>
+        <!-- הודעות Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification {{ category }} active" style="position: fixed; top: 80px; right: 20px; z-index: 1001;">
+                        <span class="notification-message">{{ message }}</span>
+                        <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- תוכן הדף -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <!-- כותרת תחתונה -->
+    <footer>
+        <div class="container">
+            <p class="copyright">© 2025 AttendMe - כל הזכויות שמורות</p>
+            <div class="footer-links">
+                <a href="{{ url_for('about') }}">אודותינו</a>
+                <a href="{{ url_for('contact') }}">יצירת קשר</a>
+                <a href="{{ url_for('privacy') }}">מדיניות פרטיות</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== JAVASCRIPT FILES ========== -->
+    <!-- קבצי JS חובה - תמיד ראשונים -->
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+
+    <!-- קבצי JS ספציפיים לדף -->
+    {% block extra_js %}{% endblock %}
+
+    <!-- אתחול אחרון -->
+    <script>
+        // אתחול גלובלי
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 AttendMe System Loaded');
+
+            // טעינת פרטי משתמש אם קיים
+            {% if current_user %}
+                window.currentUser = {{ current_user | tojson }};
+                console.log('👤 User loaded:', window.currentUser.username);
+            {% else %}
+                window.currentUser = null;
+                console.log('🔒 No user logged in');
+            {% endif %}
+
+            // הסרת הודעות flash אחרי 5 שניות
+            setTimeout(() => {
+                document.querySelectorAll('.notification').forEach(notification => {
+                    notification.classList.add('closing');
+                    setTimeout(() => notification.remove(), 300);
+                });
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

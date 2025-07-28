@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}AttendMe - ניהול אנשים{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/people.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- ========== PEOPLE MANAGEMENT PAGE ========== -->
+
+<section id="people-management" class="section">
+    <div class="container">
+        <h2 class="section-title">ניהול אנשים</h2>
+        
+        <!-- Controls -->
+        <div class="people-controls">
+            <button id="add-person-btn" class="action-button">
+                <i class="fas fa-user-plus"></i> הוסף אדם חדש
+            </button>
+            <input type="text" id="search-people" placeholder="חיפוש לפי שם או ת.ז.">
+        </div>
+
+        <!-- People List -->
+        <div class="people-list">
+            <table id="people-table">
+                <thead>
+                    <tr>
+                        <th>תמונה</th>
+                        <th>שם מלא</th>
+                        <th>ת.ז.</th>
+                        <th>סטטוס נוכחות</th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody id="people-table-body">
+                    <!-- תוכן הטבלה יתמלא דינמית ע"י JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== MODALS ========== -->
+
+    <!-- Modal for adding new person -->
+    <div id="add-person-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>הוספת אדם חדש</h3>
+            <form id="add-person-form">
+                <div class="form-group">
+                    <label for="first-name">שם פרטי:</label>
+                    <input type="text" id="first-name" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last-name">שם משפחה:</label>
+                    <input type="text" id="last-name" name="last_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="id-number">מספר ת.ז.:</label>
+                    <input type="text" id="id-number" name="id_number" required pattern="[0-9]+" title="נא להזין ספרות בלבד">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="action-button">המשך</button>
+                    <button type="button" class="action-button secondary close-modal-btn">ביטול</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for uploading image -->
+    <div id="upload-image-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>העלאת תמונה</h3>
+            
+            <!-- Upload Status -->
+            <div id="upload-status" class="upload-status">
+                יש להעלות לפחות 3 תמונות ועד 5 תמונות בסך הכל
+            </div>
+            
+            <!-- Progress Steps -->
+            <div class="upload-progress">
+                <div class="progress-step" id="progress-step-1"></div>
+                <div class="progress-step" id="progress-step-2"></div>
+                <div class="progress-step" id="progress-step-3"></div>
+                <div class="progress-step optional" id="progress-step-4"></div>
+                <div class="progress-step optional" id="progress-step-5"></div>
+            </div>
+            
+            <form id="upload-image-form">
+                <input type="hidden" id="upload-person-id" name="id_number">
+                <div class="form-group">
+                    <label for="person-image">בחר תמונה:</label>
+                    <input type="file" id="person-image" name="file" accept="image/*" multiple required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="action-button">העלה</button>
+                    <button type="button" id="finish-upload-button" style="display: none;" class="action-button secondary">צור</button>
+                    <button type="button" class="action-button secondary close-modal-btn">ביטול</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for viewing all person images -->
+    <div id="person-images-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>תמונות של <span id="person-images-name"></span></h3>
+            <div class="person-images-gallery" id="person-images-gallery">
+                <!-- התמונות יתווספו כאן דינמית -->
+            </div>
+            <div class="form-actions">
+                <button type="button" class="action-button secondary close-modal-btn">סגור</button>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/people.js') }}"></script>
+{% endblock %}

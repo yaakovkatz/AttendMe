@@ -1,0 +1,885 @@
+/* ==================== COMMON STYLES ==================== */
+/*
+ * קובץ סגנונות משותפים לכל דפי האפליקציה
+ * מכיל: איפוס CSS, layout בסיסי, header, footer, כפתורים, modals, טפסים, טבלאות ואנימציות
+ * צריך לטעון אחרי variables.css
+ */
+
+/* ==================== GLOBAL RESET ==================== */
+/* איפוס ברירות מחדל של דפדפן וקביעת פונט גלובלי */
+* {
+    margin: 0;                     /* איפוס מרווחים חיצוניים */
+    padding: 0;                    /* איפוס מרווחים פנימיים */
+    box-sizing: border-box;        /* חישוב גודל כולל גבולות ומרווחים */
+    font-family: 'Segoe UI', 'Arial', sans-serif; /* פונט ברירת מחדל */
+}
+
+/* ==================== BODY STYLING ==================== */
+/* עיצוב בסיסי לגוף הדף */
+body {
+    background-color: var(--light-color); /* צבע רקע בהיר */
+    color: var(--dark-color);              /* צבע טקסט כהה */
+    line-height: 1.6;                      /* גובה שורה נוח לקריאה */
+}
+
+/* ==================== BASIC ELEMENTS ==================== */
+/* עיצוב בסיסי לאלמנטים גלובליים */
+a {
+    text-decoration: none;         /* ביטול קו תחתון */
+    color: var(--primary-color);   /* צבע כחול */
+}
+
+ul {
+    list-style: none;              /* ביטול נקודות */
+}
+
+/* ==================== LAYOUT COMPONENTS ==================== */
+/* רכיבי פריסה בסיסיים לכל האפליקציה */
+
+/* מיכל מרכזי לתוכן - מרכז את התוכן ומגביל רוחב */
+.container {
+    max-width: 1200px;             /* רוחב מקסימלי */
+    margin: 0 auto;                /* מרכוז אוטומטי */
+    padding: 0 20px;               /* מרווח פנימי מהצדדים */
+}
+
+/* עיצוב בסיסי לכל סקציה - מגדיר מרווחים וגובה מינימלי */
+section {
+    padding: 100px 0;              /* מרווח פנימי עליון ותחתון */
+    min-height: 100vh;             /* גובה מינימלי של מסך מלא */
+}
+
+/* עיצוב בסיסי לסקציות - רקע לבן כברירת מחדל */
+.section {
+    background-color: white;       /* רקע לבן */
+    padding: 120px 0 80px;         /* מרווח פנימי */
+}
+
+/* סקציות זוגיות מקבלות רקע בהיר לחילופין */
+.section:nth-child(even) {
+    background-color: var(--light-color); /* רקע בהיר */
+}
+
+/* כותרת סקציה - עיצוב אחיד לכל כותרות הסקציות */
+.section-title {
+    text-align: center;            /* יישור למרכז */
+    font-size: 2rem;               /* גודל גדול */
+    margin-bottom: 50px;           /* מרווח תחתון */
+    color: var(--dark-color);      /* צבע כהה */
+    position: relative;            /* מיקום יחסי לקו תחתון */
+}
+
+/* קו תחתון לכותרת הסקציה - אלמנט דקורטיבי */
+.section-title::after {
+    content: '';                   /* תוכן ריק */
+    position: absolute;            /* מיקום מוחלט */
+    bottom: -15px;                 /* מתחת לכותרת */
+    left: 50%;                     /* במרכז */
+    transform: translateX(-50%);   /* יישור למרכז מדויק */
+    width: 80px;                   /* רוחב הקו */
+    height: 4px;                   /* עובי הקו */
+    background-color: var(--primary-color); /* צבע כחול */
+    border-radius: 2px;            /* פינות עגולות */
+}
+
+/* ==================== IMPROVED HEADER & NAVIGATION ==================== */
+/* כותרת עליונה מעודכנת עם ניווט מתקדם */
+
+/* עיצוב כותרת עליונה קבועה - גמישה יותר */
+header {
+    background-color: white;
+    box-shadow: var(--box-shadow);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 100;
+    padding: 10px 0; /* מרווח פנימי קטן יותר */
+    min-height: 70px; /* גובה מינימלי קבוע */
+}
+
+/* עיצוב פס הניווט - פריסה מעודכנת */
+.navbar {
+    display: flex;
+    flex-wrap: wrap; /* מאפשר מעבר לשורה חדשה */
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px; /* מרווח אחיד בין כל האלמנטים */
+    min-height: 50px; /* גובה מינימלי לניווט */
+}
+
+/* עיצוב לוגו - קומפקטי יותר */
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.3rem; /* גודל מעט קטן יותר */
+    font-weight: bold;
+    color: var(--primary-color);
+    flex-shrink: 0; /* לא מתכווץ */
+}
+
+/* אייקון הלוגו */
+.logo-icon {
+    margin-left: 8px; /* מרווח קטן יותר */
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+}
+
+/* מיכל ניווט ראשי - גמיש וקומפקטי */
+.nav-container {
+    display: flex;
+    flex: 1; /* תופס מקום זמין */
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* רשימת קישורי הניווט - קומפקטית יותר */
+.nav-links {
+    display: flex;
+    flex-wrap: wrap; /* מאפשר מעבר לשורה */
+    justify-content: center;
+    gap: 8px; /* מרווח קטן יותר */
+    margin: 0;
+}
+
+/* אלמנט בודד ברשימת הניווט */
+.nav-links li {
+    margin: 0; /* ביטול מרווח ישן */
+}
+
+/* עיצוב קישורי הניווט - קומפקטי יותר */
+.nav-links a {
+    font-weight: 500;
+    font-size: 0.9rem; /* גודל קטן יותר */
+    transition: var(--transition);
+    padding: 8px 12px; /* מרווח פנימי קטן יותר */
+    border-radius: var(--border-radius);
+    white-space: nowrap; /* מונע שבירת שורה */
+    display: block;
+}
+
+/* אפקט hover וסטטוס פעיל לקישורי ניווט */
+.nav-links a:hover,
+.nav-links a.active {
+    color: white;
+    background-color: var(--primary-color);
+    transform: translateY(-1px); /* הרמה קלה */
+}
+
+/* ניווט למשתמשים מחוברים - קבוצה נפרדת */
+.user-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin: 5px 0;
+}
+
+/* ניווט כללי - קבוצה נפרדת */
+.general-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+/* אזור התחברות - קומפקטי יותר */
+.auth-section {
+    flex-shrink: 0; /* לא מתכווץ */
+    margin-left: 0;
+}
+
+/* מידע משתמש */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* שם משתמש */
+.user-name {
+    font-size: 0.85rem;
+    color: var(--dark-color);
+    white-space: nowrap;
+}
+
+/* כפתור התחברות מעוצב - קומפקטי יותר */
+.login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px; /* קטן יותר */
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px; /* עגול יותר */
+    font-weight: 500;
+    font-size: 0.85rem; /* קטן יותר */
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    white-space: nowrap;
+}
+
+/* אפקט hover לכפתור התחברות */
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, #2980b9, #27ae60);
+}
+
+/* אייקון בכפתור התחברות */
+.login-btn i {
+    font-size: 0.9rem;
+}
+
+/* תיקון לתוכן הראשי - מרווח מהכותרת */
+main {
+    margin-top: 70px; /* מרווח קטן יותר מהכותרת */
+}
+
+/* ==================== RESPONSIVE NAVIGATION IMPROVEMENTS ==================== */
+
+/* עיצוב רספונסיבי לטאבלטים - 1024px ומטה */
+@media (max-width: 1024px) {
+    header {
+        min-height: 85px; /* גובה מינימלי למובייל */
+    }
+
+    .navbar {
+        flex-direction: column; /* סידור אנכי */
+        gap: 10px;
+        padding: 15px 0;
+        min-height: 65px;
+    }
+
+    .nav-container {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .nav-links a {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .user-info {
+        justify-content: center;
+    }
+
+    main {
+        margin-top: 85px; /* מרווח למובייל */
+    }
+}
+
+/* עיצוב רספונסיבי לטאבלטים קטנים - 900px ומטה */
+@media (max-width: 900px) {
+    header {
+        padding: 8px 0;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo-icon {
+        font-size: 1.3rem;
+    }
+
+    .nav-links {
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .nav-links a {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
+
+    .login-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .user-name {
+        font-size: 0.8rem;
+    }
+}
+
+/* עיצוב רספונסיבי למובייל - 600px ומטה */
+@media (max-width: 600px) {
+    header {
+        min-height: 95px; /* גובה מינימלי למובייל קטן */
+    }
+
+    .navbar {
+        gap: 8px;
+        padding: 10px 0;
+        min-height: 75px;
+    }
+
+    .logo {
+        font-size: 1.1rem;
+    }
+
+    .nav-links {
+        gap: 4px;
+    }
+
+    .nav-links a {
+        padding: 4px 6px;
+        font-size: 0.75rem;
+    }
+
+    .login-btn {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+
+    .user-name {
+        font-size: 0.75rem;
+    }
+
+    /* הסתרת טקסט ארוך במובייל */
+    .user-name {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    main {
+        margin-top: 95px; /* מרווח למובייל קטן */
+    }
+}
+
+/* עיצוב רספונסיבי למובייל קטן - 480px ומטה */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px;
+    }
+
+    .navbar {
+        gap: 5px;
+    }
+
+    .nav-links {
+        gap: 2px;
+    }
+
+    .nav-links a {
+        padding: 3px 5px;
+        font-size: 0.7rem;
+    }
+
+    .login-btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+
+    /* במובייל קטן - שורה אחת לכל קבוצת ניווט */
+    .user-nav {
+        width: 100%;
+    }
+
+    .general-nav {
+        width: 100%;
+    }
+}
+
+/* ==================== BUTTONS ==================== */
+/* מערכת כפתורים אחידה לכל האפליקציה */
+
+/* כפתור קריאה לפעולה (CTA) - כפתור ראשי בולט */
+.cta-button {
+    display: inline-block;         /* תצוגה בשורה עם אפשרות למימדים */
+    background-color: var(--primary-color); /* רקע כחול */
+    color: white;                  /* טקסט לבן */
+    padding: 12px 25px;            /* מרווח פנימי */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    font-weight: bold;             /* טקסט בולט */
+    transition: var(--transition); /* מעבר חלק */
+    cursor: pointer;               /* סמן יד */
+    border: none;                  /* ביטול גבול */
+    text-align: center;            /* יישור טקסט למרכז */
+    margin: 5px;                   /* מרווח חיצוני */
+}
+
+/* אפקט hover לכפתור CTA */
+.cta-button:hover {
+    background-color: var(--secondary-color); /* שינוי לירוק */
+    transform: translateY(-3px);    /* הרמה קלה */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* צל עמוק יותר */
+}
+
+/* כפתור משני - גרסה עם גבול */
+.cta-button.secondary {
+    background-color: white;       /* רקע לבן */
+    color: var(--primary-color);   /* טקסט כחול */
+    border: 2px solid var(--primary-color); /* גבול כחול */
+}
+
+/* אפקט hover לכפתור משני */
+.cta-button.secondary:hover {
+    background-color: var(--primary-color); /* רקע כחול */
+    color: white;                  /* טקסט לבן */
+}
+
+/* כפתור ראשי - גרסה ירוקה */
+.cta-button.primary {
+    background-color: var(--secondary-color); /* רקע ירוק */
+}
+
+/* כפתור לא פעיל */
+.cta-button:disabled {
+    background-color: #ccc;        /* רקע אפור */
+    cursor: not-allowed;           /* סמן חסום */
+    transform: none;               /* ביטול אנימציה */
+    box-shadow: none;              /* ביטול צל */
+}
+
+/* כפתור פעולה - עם אייקונים */
+.action-button {
+    display: inline-flex;          /* פריסה גמישה בשורה */
+    align-items: center;           /* יישור אנכי במרכז */
+    justify-content: center;       /* יישור אופקי במרכז */
+    background-color: var(--primary-color); /* רקע כחול */
+    color: white;                  /* טקסט לבן */
+    padding: 10px 20px;            /* מרווח פנימי */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    font-weight: 500;              /* משקל טקסט בינוני */
+    transition: var(--transition); /* מעבר חלק */
+    cursor: pointer;               /* סמן יד */
+    border: none;                  /* ביטול גבול */
+    margin: 5px;                   /* מרווח חיצוני */
+    font-size: 1rem;               /* גודל טקסט */
+}
+
+/* אייקון בכפתור פעולה */
+.action-button i {
+    margin-left: 8px;              /* מרווח משמאל */
+}
+
+/* אפקט hover לכפתור פעולה */
+.action-button:hover {
+    background-color: var(--secondary-color); /* שינוי לירוק */
+    transform: translateY(-2px);   /* הרמה קלה */
+}
+
+/* כפתור פעולה משני */
+.action-button.secondary {
+    background-color: white;       /* רקע לבן */
+    color: var(--primary-color);   /* טקסט כחול */
+    border: 1px solid var(--primary-color); /* גבול כחול */
+}
+
+/* אפקט hover לכפתור משני */
+.action-button.secondary:hover {
+    background-color: var(--primary-color); /* רקע כחול */
+    color: white;                  /* טקסט לבן */
+}
+
+/* כפתור פעולה מסוכן */
+.action-button.danger {
+    background-color: var(--danger-color); /* רקע אדום */
+}
+
+/* אפקט hover לכפתור מסוכן */
+.action-button.danger:hover {
+    background-color: #c0392b;     /* אדום כהה יותר */
+}
+
+/* כפתור לא פעיל */
+.action-button:disabled {
+    background-color: #6c757d;     /* רקע אפור */
+    cursor: not-allowed;           /* סמן חסום */
+    opacity: 0.6;                  /* שקיפות */
+    transform: none;               /* ביטול אנימציה */
+}
+
+/* ==================== TABLE STYLING ==================== */
+/* עיצוב טבלאות אחיד לכל האפליקציה */
+
+/* עיצוב טבלה בסיסי */
+table {
+    width: 100%;                   /* רוחב מלא */
+    border-collapse: collapse;     /* מיזוג גבולות */
+    margin-bottom: 30px;           /* מרווח תחתון */
+}
+
+/* תאים בטבלה - כותרות ותוכן */
+th, td {
+    padding: 15px;                 /* מרווח פנימי */
+    text-align: right;             /* יישור לימין (עברית) */
+    border-bottom: 1px solid #ddd; /* גבול תחתון */
+}
+
+/* כותרות טבלה */
+th {
+    background-color: var(--primary-color); /* רקע כחול */
+    color: white;                  /* טקסט לבן */
+    font-weight: 500;              /* משקל טקסט בינוני */
+}
+
+/* שורות זוגיות בטבלה */
+tr:nth-child(even) {
+    background-color: #f9f9f9;     /* רקע אפור בהיר */
+}
+
+/* אפקט hover לשורות טבלה */
+tr:hover {
+    background-color: #f1f1f1;     /* רקע אפור בהיר יותר */
+}
+
+/* ==================== MODAL STYLING ==================== */
+/* חלונות מודל (pop-up) אחידים */
+
+/* חלון מודל - רקע שקוף שמכסה את המסך */
+.modal {
+    display: none;                 /* מוסתר בהתחלה */
+    position: fixed;               /* מיקום קבוע */
+    top: 0;                        /* דבוק לעליון */
+    left: 0;                       /* דבוק לשמאל */
+    width: 100%;                   /* רוחב מלא */
+    height: 100%;                  /* גובה מלא */
+    background-color: rgba(0, 0, 0, 0.5); /* רקע שקוף כהה */
+    z-index: 1000;                 /* מעל הכל */
+    opacity: 0;                    /* שקוף בהתחלה */
+    transition: opacity 0.3s ease; /* מעבר חלק */
+}
+
+/* מודל פעיל - מוצג למשתמש */
+.modal.active {
+    display: flex;                 /* פריסה גמישה */
+    align-items: center;           /* יישור אנכי במרכז */
+    justify-content: center;       /* יישור אופקי במרכז */
+    opacity: 1;                    /* גלוי */
+}
+
+/* תוכן המודל - החלון הלבן שמכיל את התוכן */
+.modal-content {
+    background-color: white;       /* רקע לבן */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    padding: 15px 20px;            /* מרווח פנימי */
+    max-width: 500px;              /* רוחב מקסימלי */
+    width: 80%;                    /* רוחב יחסי */
+    max-height: 85vh;              /* גובה מקסימלי */
+    overflow-y: auto;              /* גלילה אנכית */
+    position: relative;            /* מיקום יחסי */
+    transform: translateY(-20px);  /* הזחה עליונה */
+    transition: transform 0.3s ease; /* מעבר חלק */
+}
+
+/* תוכן מודל פעיל */
+.modal.active .modal-content {
+    transform: translateY(0);      /* חזרה למיקום */
+}
+
+/* כפתור סגירת מודל */
+.close-modal {
+    position: absolute;            /* מיקום מוחלט */
+    top: 15px;                     /* מרחק מלמעלה */
+    left: 15px;                    /* מרחק משמאל */
+    font-size: 1.5rem;             /* גודל גדול */
+    cursor: pointer;               /* סמן יד */
+    color: #666;                   /* צבע אפור */
+    transition: var(--transition); /* מעבר חלק */
+}
+
+/* אפקט hover לכפתור סגירה */
+.close-modal:hover {
+    color: var(--danger-color);    /* שינוי לאדום */
+}
+
+/* כותרת מודל */
+.modal h3 {
+    text-align: center;            /* יישור למרכז */
+    margin-bottom: 12px;           /* מרווח תחתון */
+    color: var(--primary-color);   /* צבע כחול */
+    font-size: 18px;               /* גודל */
+}
+
+/* ==================== FORM STYLING ==================== */
+/* עיצוב טפסים אחיד לכל האפליקציה */
+
+/* קבוצת שדות בטופס */
+.form-group {
+    margin-bottom: 12px;           /* מרווח תחתון */
+}
+
+/* תווית שדה */
+.form-group label {
+    display: block;                /* תצוגה בלוק */
+    margin-bottom: 4px;            /* מרווח תחתון */
+    font-weight: 500;              /* משקל טקסט בינוני */
+    font-size: 14px;               /* גודל */
+}
+
+/* שדות קלט - טקסט, דוא"ל וכו' */
+.form-group input,
+.form-group select {
+    width: 100%;                   /* רוחב מלא */
+    padding: 8px 12px;             /* מרווח פנימי */
+    border: 1px solid #ddd;        /* גבול אפור */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    font-size: 14px;               /* גודל */
+}
+
+/* קבוצת צ'קבוקס */
+.checkbox-group {
+    display: flex;                 /* פריסה גמישה */
+    align-items: center;           /* יישור אנכי במרכז */
+}
+
+/* צ'קבוקס */
+.checkbox-group input {
+    width: auto;                   /* רוחב אוטומטי */
+    margin-left: 10px;             /* מרווח משמאל */
+}
+
+/* תצוגה מקדימה של תמונה */
+.image-preview {
+    margin: 15px 0;                /* מרווח עליון ותחתון */
+    text-align: center;            /* יישור למרכז */
+}
+
+/* תמונה בתצוגה מקדימה */
+.image-preview img {
+    max-width: 100%;               /* רוחב מקסימלי */
+    max-height: 250px;             /* גובה מקסימלי */
+    border-radius: var(--border-radius); /* פינות עגולות */
+    border: 1px solid #ddd;        /* גבול אפור */
+}
+
+/* פעולות טופס - כפתורים בתחתית */
+.form-actions {
+    display: flex;                 /* פריסה גמישה */
+    justify-content: space-between; /* פיזור תוכן */
+    margin-top: 12px;              /* מרווח עליון */
+    margin-bottom: 8px;            /* מרווח תחתון */
+}
+
+/* כפתורים בפעולות טופס */
+.form-actions .action-button {
+    padding: 8px 14px;             /* מרווח פנימי */
+    font-size: 14px;               /* גודל */
+    margin: 0 4px;                 /* מרווח */
+}
+
+/* ==================== FOOTER ==================== */
+/* כותרת תחתונה */
+footer {
+    background-color: var(--dark-color); /* רקע כהה */
+    color: white;                  /* טקסט לבן */
+    text-align: center;            /* יישור למרכז */
+    padding: 30px 0;               /* מרווח פנימי */
+}
+
+/* ==================== ANIMATIONS ==================== */
+/* אנימציות גלובליות לכל האפליקציה */
+
+/* אנימציית סיבוב - לספינרים */
+@keyframes spin {
+    from { transform: rotate(0deg); }   /* תחילה */
+    to { transform: rotate(360deg); }   /* סוף */
+}
+
+/* ==================== RESPONSIVE STYLES ==================== */
+/* עיצוב רספונסיבי בסיסי */
+
+/* עיצוב רספונסיבי לטאבלטים */
+@media (max-width: 900px) {
+    /* פעולות טופס */
+    .form-actions {
+        flex-direction: column;     /* סידור אנכי */
+    }
+
+    /* כפתור בפעולות טופס */
+    .form-actions button {
+        margin-bottom: 10px;        /* מרווח תחתון */
+    }
+}
+
+/* עיצוב רספונסיבי למובייל */
+@media (max-width: 600px) {
+    /* סקציות עם מרווח קטן יותר */
+    .section {
+        padding: 100px 0 60px;      /* מרווח מופחת */
+    }
+
+    /* כותרת סקציה קטנה יותר */
+    .section-title {
+        font-size: 1.5rem;          /* גודל מופחת */
+    }
+
+    /* תאי טבלה קטנים יותר */
+    th, td {
+        padding: 10px;              /* מרווח מופחת */
+        font-size: 0.9rem;          /* גודל מופחת */
+    }
+}
+
+/* ==================== UTILITY CLASSES ==================== */
+/* מחלקות עזר שימושיות */
+
+/* הסתרת אלמנטים */
+.hidden {
+    display: none !important;      /* הסתרה מוחלטת */
+}
+
+/* מחלקה לטעינה */
+.loading {
+    opacity: 0.7;                  /* שקיפות */
+    pointer-events: none;          /* ביטול אירועים */
+    cursor: wait;                  /* סמן המתנה */
+}
+
+/* טקסט במרכז */
+.text-center {
+    text-align: center;            /* יישור למרכז */
+}
+
+/* טקסט לימין */
+.text-right {
+    text-align: right;             /* יישור לימין */
+}
+
+/* טקסט לשמאל */
+.text-left {
+    text-align: left;              /* יישור לשמאל */
+}
+
+/* מרווח עליון */
+.mt-1 { margin-top: 10px; }        /* מרווח עליון קטן */
+.mt-2 { margin-top: 20px; }        /* מרווח עליון בינוני */
+.mt-3 { margin-top: 30px; }        /* מרווח עליון גדול */
+
+/* מרווח תחתון */
+.mb-1 { margin-bottom: 10px; }     /* מרווח תחתון קטן */
+.mb-2 { margin-bottom: 20px; }     /* מרווח תחתון בינוני */
+.mb-3 { margin-bottom: 30px; }     /* מרווח תחתון גדול */
+
+/* מרווח פנימי */
+.p-1 { padding: 10px; }            /* מרווח פנימי קטן */
+.p-2 { padding: 20px; }            /* מרווח פנימי בינוני */
+.p-3 { padding: 30px; }            /* מרווח פנימי גדול */
+
+/* צבעי טקסט */
+.text-primary { color: var(--primary-color); }    /* טקסט כחול */
+.text-secondary { color: var(--secondary-color); } /* טקסט ירוק */
+.text-success { color: var(--success-color); }     /* טקסט הצלחה */
+.text-danger { color: var(--danger-color); }       /* טקסט סכנה */
+.text-warning { color: var(--warning-color); }     /* טקסט אזהרה */
+
+/* רקעים */
+.bg-primary { background-color: var(--primary-color); }    /* רקע כחול */
+.bg-secondary { background-color: var(--secondary-color); } /* רקע ירוק */
+.bg-light { background-color: var(--light-color); }        /* רקע בהיר */
+.bg-white { background-color: white; }                     /* רקע לבן */
+
+/* צלים */
+.shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.12); }    /* צל קטן */
+.shadow { box-shadow: var(--box-shadow); }                 /* צל רגיל */
+.shadow-lg { box-shadow: 0 10px 25px rgba(0,0,0,0.15); }  /* צל גדול */
+
+/* פינות עגולות */
+.rounded { border-radius: var(--border-radius); }          /* פינות עגולות רגילות */
+.rounded-lg { border-radius: 12px; }                       /* פינות עגולות גדולות */
+.rounded-full { border-radius: 50%; }                      /* עיגול מלא */
+
+/* גמישות */
+.flex { display: flex; }                                   /* פריסה גמישה */
+.flex-column { flex-direction: column; }                   /* כיוון אנכי */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}                                                          /* מרכוז מלא */
+
+/* רוחב מלא */
+.w-full { width: 100%; }                                   /* רוחב מלא */
+.h-full { height: 100%; }                                  /* גובה מלא */
+
+/* מעברים */
+.transition { transition: var(--transition); }             /* מעבר חלק */
+
+/* ==================== PRINT STYLES ==================== */
+/* סגנונות להדפסה */
+@media print {
+    /* הסתרת אלמנטים בהדפסה */
+    .no-print,
+    header,
+    .cta-buttons,
+    .action-button,
+    footer {
+        display: none !important;   /* הסתרה מוחלטת */
+    }
+
+    /* עיצוב כללי להדפסה */
+    body {
+        background: white;          /* רקע לבן */
+        color: black;               /* טקסט שחור */
+        font-size: 12pt;            /* גודל פונט להדפסה */
+        line-height: 1.4;           /* גובה שורה */
+    }
+
+    /* טבלאות בהדפסה */
+    table {
+        page-break-inside: avoid;   /* מניעת קריעת עמוד */
+        border-collapse: collapse;  /* מיזוג גבולות */
+    }
+
+    /* תאי טבלה בהדפסה */
+    th, td {
+        border: 1px solid #000;     /* גבול שחור */
+        padding: 8px;               /* מרווח פנימי */
+    }
+
+    /* כותרות בהדפסה */
+    h1, h2, h3 {
+        page-break-after: avoid;    /* מניעת קריעה אחרי כותרת */
+        color: black;               /* צבע שחור */
+    }
+}
+
+/* ==================== HIGH CONTRAST MODE ==================== */
+/* תמיכה במצב ניגודיות גבוהה */
+@media (prefers-contrast: high) {
+    :root {
+        --primary-color: #0066cc;   /* כחול עמוק יותר */
+        --secondary-color: #009900; /* ירוק עמוק יותר */
+        --dark-color: #000000;      /* שחור מלא */
+        --light-color: #ffffff;     /* לבן מלא */
+        --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* צל חזק יותר */
+    }
+
+    /* גבולות חזקים יותר */
+    .action-button,
+    .cta-button,
+    input,
+    select {
+        border: 2px solid var(--dark-color); /* גבול שחור */
+    }
+
+    /* אפקט hover חזק יותר */
+    .action-button:hover,
+    .cta-button:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7); /* צל חזק */
+    }
+}
+
+/* ==================== REDUCED MOTION ==================== */
+/* תמיכה במצב תנועה מופחתת */
+@media (prefers-reduced-motion: reduce) {
+    /* ביטול כל האנימציות */
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important; /* אנימציה קצרה מאוד */
+        animation-iteration-count: 1 !important; /* חזרה אחת בלבד */
+        transition-duration: 0.01ms !important; /* מעבר קצר מאוד */
+        scroll-behavior: auto !important; /* גלילה רגילה */
+    }
+}

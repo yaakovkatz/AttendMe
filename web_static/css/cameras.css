@@ -1,0 +1,1242 @@
+/* ==================== CAMERAS & TARGET IMAGES STYLES ==================== */
+/*
+ * קובץ סגנונות לניהול מצלמות ותמונות מטרה
+ * מכיל: העלאת תמונות מטרה, גלריה, אפקטים מתקדמים, רכיבי קבצים
+ * צריך לטעון אחרי variables.css ו-common.css
+ */
+
+/* ==================== TARGET UPLOAD SECTION - ENHANCED ==================== */
+/* סקציית העלאת תמונות מטרה מעוצבת עם אפקטים מתקדמים */
+
+/* רקע מיוחד לסקציית מטרה */
+#target-upload {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* רקע גרדיינט סגול-כחול */
+    padding: 60px 0;                 /* מרווח פנימי גדול יותר */
+    position: relative;              /* מיקום יחסי */
+    overflow: hidden;                /* הסתרת גלישה */
+}
+
+/* רקע ללא אנימציה */
+
+/* מיכל סקציית מטרה - מעוצב עם אפקטי זכוכית */
+.target-upload-container {
+    background: rgba(255, 255, 255, 0.95); /* רקע לבן שקוף */
+    border-radius: 25px;             /* פינות עגולות מאוד */
+    padding: 40px;                   /* מרווח פנימי */
+    margin: 30px 0;                  /* מרווח עליון ותחתון */
+    border: none;                    /* ביטול גבול */
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15),
+                0 8px 25px rgba(0,0,0,0.1); /* צל כפול */
+    backdrop-filter: blur(10px);     /* אפקט טשטוש רקע */
+    position: relative;              /* מיקום יחסי */
+    z-index: 1;                      /* מעל הרקע */
+}
+
+/* ==================== UPLOAD AREA - ENHANCED ==================== */
+/* אזור העלאה מעוצב עם אינטראקטיביות מתקדמת */
+
+/* אזור העלאה מעוצב */
+.upload-area {
+    border: 3px dashed #667eea;      /* גבול מקווקו סגול */
+    border-radius: 20px;             /* פינות עגולות */
+    padding: 50px 40px;              /* מרווח פנימי גדול */
+    text-align: center;              /* יישור למרכז */
+    background: linear-gradient(135deg, #f8fcff, #e8f4fd); /* רקע גרדיינט */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    cursor: pointer;                 /* סמן יד */
+    margin-bottom: 40px;             /* מרווח תחתון */
+    position: relative;              /* מיקום יחסי */
+    overflow: hidden;                /* הסתרת גלישה */
+}
+
+/* אפקט רקע לאזור העלאה */
+.upload-area::before {
+    content: '';                     /* תוכן ריק */
+    position: absolute;              /* מיקום מוחלט */
+    top: 50%;                        /* מרכז אנכי */
+    left: 50%;                       /* מרכז אופקי */
+    width: 0;                        /* רוחב התחלתי */
+    height: 0;                       /* גובה התחלתי */
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1), transparent); /* גרדיינט עגול */
+    border-radius: 50%;              /* עיגול מלא */
+    transition: all 0.6s ease;       /* מעבר חלק */
+    transform: translate(-50%, -50%); /* מרכוז */
+    z-index: -1;                     /* מתחת לתוכן */
+}
+
+/* אפקט hover מתקדם לאזור העלאה */
+.upload-area:hover {
+    border-color: #5a67d8;           /* גבול כחול כהה */
+    background: linear-gradient(135deg, #e8f4fd, #dbeafe); /* רקע כחול יותר */
+    transform: translateY(-5px) scale(1.02); /* הרמה והגדלה */
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2); /* צל כחול */
+}
+
+/* הגדלת האפקט ברקע */
+.upload-area:hover::before {
+    width: 300px;                    /* רוחב מורחב */
+    height: 300px;                   /* גובה מורחב */
+}
+
+/* אייקון העלאה מעוצב עם אנימציה */
+.upload-icon {
+    font-size: 64px;                 /* גודל גדול מאוד */
+    color: #667eea;                  /* צבע סגול */
+    margin-bottom: 25px;             /* מרווח תחתון */
+    animation: floatIcon 3s ease-in-out infinite; /* אנימציית ריחוף */
+    text-shadow: 0 4px 8px rgba(102, 126, 234, 0.3); /* צל טקסט */
+}
+
+/* אנימציית ריחוף לאייקון */
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* טקסט העלאה מעוצב */
+.upload-text {
+    font-size: 22px;                 /* גודל גדול */
+    color: #4a5568;                  /* צבע אפור כהה */
+    margin-bottom: 15px;             /* מרווח תחתון */
+    font-weight: 700;                /* משקל טקסט כבד */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1); /* צל טקסט */
+}
+
+/* רמז העלאה מעוצב */
+.upload-hint {
+    color: #718096;                  /* צבע אפור בינוני */
+    font-size: 16px;                 /* גודל בינוני */
+    font-style: italic;              /* טקסט נטוי */
+}
+
+/* ==================== TARGET BUTTONS - ENHANCED ==================== */
+/* כפתורי מטרה מעוצבים עם אפקטים מתקדמים */
+
+/* כפתורי מטרה מעוצבים */
+.target-btn {
+    padding: 18px 35px;              /* מרווח פנימי גדול */
+    border: none;                    /* ביטול גבול */
+    border-radius: 15px;             /* פינות עגולות */
+    font-size: 18px;                 /* גודל טקסט גדול */
+    font-weight: 700;                /* טקסט כבד */
+    cursor: pointer;                 /* סמן יד */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 12px;                       /* מרווח בין אלמנטים */
+    text-decoration: none;           /* ביטול קישור */
+    min-width: 200px;                /* רוחב מינימלי */
+    justify-content: center;         /* יישור למרכז */
+    position: relative;              /* מיקום יחסי */
+    overflow: hidden;                /* הסתרת גלישה */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* צל */
+}
+
+/* אפקט זוהר לכפתורים */
+.target-btn::before {
+    content: '';                     /* תוכן ריק */
+    position: absolute;              /* מיקום מוחלט */
+    top: 0;                          /* דבוק לעליון */
+    left: -100%;                     /* מתחיל מחוץ לכפתור */
+    width: 100%;                     /* רוחב מלא */
+    height: 100%;                    /* גובה מלא */
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent);                /* גרדיינט זוהר */
+    transition: left 0.5s;           /* מעבר חלק */
+}
+
+/* הפעלת הזוהר בhover */
+.target-btn:hover::before {
+    left: 100%;                      /* עוזב מימין */
+}
+
+/* כפתור העלאה מעוצב */
+.target-btn-upload {
+    background: linear-gradient(135deg, #48bb78, #38a169); /* רקע ירוק גרדיינט */
+    color: white;                    /* טקסט לבן */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* צל טקסט */
+}
+
+/* אפקט hover לכפתור העלאה */
+.target-btn-upload:hover {
+    transform: translateY(-3px) scale(1.05); /* הרמה והגדלה */
+    box-shadow: 0 15px 40px rgba(72, 187, 120, 0.4); /* צל ירוק */
+    background: linear-gradient(135deg, #38a169, #2f855a); /* רקע ירוק כהה יותר */
+}
+
+/* כפתור מחיקה מעוצב */
+.target-btn-delete {
+    background: linear-gradient(135deg, #f56565, #e53e3e); /* רקע אדום גרדיינט */
+    color: white;                    /* טקסט לבן */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* צל טקסט */
+}
+
+/* אפקט hover לכפתור מחיקה */
+.target-btn-delete:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.05); /* הרמה והגדלה */
+    box-shadow: 0 15px 40px rgba(245, 101, 101, 0.4); /* צל אדום */
+    background: linear-gradient(135deg, #e53e3e, #c53030); /* רקע אדום כהה יותר */
+}
+
+/* כפתור מחיקה לא פעיל */
+.target-btn-delete:disabled {
+    background: linear-gradient(135deg, #cbd5e0, #a0aec0); /* רקע אפור */
+    cursor: not-allowed;             /* סמן חסום */
+    transform: none;                 /* ביטול אנימציה */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* צל רגיל */
+}
+
+/* כפתור ניקוי מעוצב */
+.target-btn-clear {
+    background: linear-gradient(135deg, #90cdf4, #63b3ed); /* רקע כחול בהיר גרדיינט */
+    color: white;                    /* טקסט לבן */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* צל טקסט */
+}
+
+/* אפקט hover לכפתור ניקוי */
+.target-btn-clear:hover {
+    transform: translateY(-3px) scale(1.05); /* הרמה והגדלה */
+    box-shadow: 0 15px 40px rgba(144, 205, 244, 0.4); /* צל כחול */
+    background: linear-gradient(135deg, #63b3ed, #4299e1); /* רקע כחול כהה יותר */
+}
+
+/* שורת כפתורי מטרה */
+.target-buttons-row {
+    display: flex;                   /* פריסה גמישה */
+    gap: 20px;                       /* מרווח בין הכפתורים */
+    justify-content: center;         /* יישור למרכז */
+    margin-bottom: 30px;             /* מרווח תחתון */
+    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+}
+
+/* ==================== TARGET GALLERY - ENHANCED ==================== */
+/* גלריית תמונות מטרה מעוצבת */
+
+/* גלריית מטרה מעוצבת */
+.target-gallery {
+    background: rgba(255, 255, 255, 0.8); /* רקע לבן שקוף */
+    border-radius: 20px;             /* פינות עגולות */
+    padding: 30px;                   /* מרווח פנימי */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* צל */
+    backdrop-filter: blur(5px);      /* אפקט טשטוש */
+}
+
+/* כותרת הגלריה מעוצבת */
+.target-gallery-header {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: space-between;  /* פיזור תוכן */
+    align-items: center;             /* יישור אנכי במרכז */
+    margin-bottom: 25px;             /* מרווח תחתון */
+    padding: 25px;                   /* מרווח פנימי */
+    background: linear-gradient(135deg, #ffffff, #f7fafc); /* רקע גרדיינט */
+    border-radius: 15px;             /* פינות עגולות */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08); /* צל */
+    border: 1px solid rgba(255,255,255,0.8); /* גבול לבן שקוף */
+}
+
+/* כותרת גלריית מטרה */
+.target-gallery-title {
+    font-size: 20px;                 /* גודל גדול */
+    color: #2c3e50;                  /* צבע כהה */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    gap: 10px;                       /* מרווח בין אלמנטים */
+    font-weight: 600;                /* משקל טקסט בולט */
+}
+
+/* סטטיסטיקות הגלריה */
+.target-gallery-stats {
+    font-size: 14px;                 /* גודל קטן */
+    color: #7f8c8d;                  /* צבע אפור */
+}
+
+/* פעולות גלריה */
+.target-gallery-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.gallery-action-btn {
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #4a5568;
+}
+
+.gallery-action-btn:hover {
+    background: linear-gradient(135deg, #cbd5e0, #a0aec0);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* गريד הגלריה */
+.target-gallery-grid {
+    display: grid;                   /* פריסת גריד */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* עמודות גמישות */
+    gap: 20px;                       /* מרווח בין התמונות */
+    padding: 20px 0;                 /* מרווח פנימי עליון ותחתון */
+    min-height: 100px;               /* גובה מינימלי */
+    justify-items: center;           /* יישור פריטים למרכז */
+    place-items: center;             /* יישור פריטים למרכז בכל הכיוונים */
+}
+
+/* כרטיס תמונת מטרה מעוצב */
+.target-image-card {
+    position: relative;              /* מיקום יחסי */
+    border-radius: 20px;             /* פינות עגולות מאוד */
+    overflow: hidden;                /* הסתרת גלישה */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* צל */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    cursor: pointer;                 /* סמן יד */
+    aspect-ratio: 1 / 1;             /* יחס גובה-רוחב 1:1 */
+    background: linear-gradient(135deg, #f7fafc, #edf2f7); /* רקע גרדיינט */
+}
+
+/* אפקט hover מתקדם לכרטיס תמונה */
+.target-image-card:hover {
+    transform: translateY(-8px) scale(1.03); /* הרמה והגדלה */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25); /* צל עמוק */
+}
+
+/* אפקט זוהר לתמונה */
+.target-image-card::before {
+    content: '';                     /* תוכן ריק */
+    position: absolute;              /* מיקום מוחלט */
+    top: 0;                          /* דבוק לעליון */
+    left: 0;                         /* דבוק לשמאל */
+    right: 0;                        /* דבוק לימין */
+    bottom: 0;                       /* דבוק לתחתית */
+    background: linear-gradient(45deg,
+        rgba(255,255,255,0.1),
+        transparent,
+        rgba(255,255,255,0.1));      /* גרדיינט זוהר */
+    opacity: 0;                      /* שקוף בהתחלה */
+    transition: opacity 0.3s ease;   /* מעבר חלק */
+    pointer-events: none;            /* ביטול אירועים */
+}
+
+/* הפעלת הזוהר בhover */
+.target-image-card:hover::before {
+    opacity: 1;                      /* גלוי */
+}
+
+/* תמונה או וידאו בכרטיס */
+.target-image-card img,
+.target-image-card video {
+    width: 100%;                     /* רוחב מלא */
+    height: 100%;                    /* גובה מלא */
+    object-fit: cover;               /* התאמת גודל */
+    display: block;                  /* תצוגה בלוק */
+}
+
+/* צ'קבוקס תמונת מטרה מעוצב */
+.target-checkbox {
+    position: absolute;              /* מיקום מוחלט */
+    top: 15px;                       /* מרחק מלמעלה */
+    right: 15px;                     /* מרחק מימין */
+    width: 24px;                     /* רוחב */
+    height: 24px;                    /* גובה */
+    cursor: pointer;                 /* סמן יד */
+    z-index: 10;                     /* מעל התמונה */
+    accent-color: #667eea;           /* צבע הסמן */
+    transform: scale(1.2);           /* הגדלה */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* צל */
+}
+
+/* wrapper לתמונת מטרה */
+.target-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* overlay לפעולות תמונה */
+.target-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.target-image-card:hover .target-image-overlay {
+    opacity: 1;
+}
+
+/* כפתורי פעולה בתמונה */
+.target-action-btn {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #4a5568;
+}
+
+.target-action-btn:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.target-action-btn.delete {
+    color: #e53e3e;
+}
+
+.target-action-btn.delete:hover {
+    color: #c53030;
+    background: #fed7d7;
+}
+
+/* מידע תמונת מטרה מעוצב */
+.target-image-info {
+    position: absolute;              /* מיקום מוחלט */
+    bottom: 0;                       /* דבוק לתחתית */
+    left: 0;                         /* דבוק לשמאל */
+    right: 0;                        /* דבוק לימין */
+    background: linear-gradient(transparent, rgba(0,0,0,0.8)); /* רקע גרדיינט */
+    color: white;                    /* טקסט לבן */
+    padding: 20px 15px 15px;         /* מרווח פנימי */
+    font-size: 14px;                 /* גודל */
+    text-align: center;              /* יישור למרכז */
+    font-weight: 600;                /* משקל טקסט בולט */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5); /* צל טקסט */
+}
+
+.target-camera-number {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.target-timestamp {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* ==================== CAMERAS GRID STYLES ==================== */
+/* עיצוב לרשת המצלמות */
+
+#cameras-grid {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    padding: 60px 0;
+}
+
+/* מיכל רשת המצלמות */
+.cameras-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* 2 עמודות */
+    grid-template-rows: 1fr 1fr;     /* 2 שורות */
+    gap: 30px;                       /* מרווח בין המצלמות */
+    max-width: 1200px;               /* רוחב מקסימלי */
+    margin: 0 auto;                  /* מרכוז */
+    padding: 20px;                   /* מרווח פנימי */
+}
+
+/* חריץ מצלמה */
+.camera-slot {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    aspect-ratio: 16/9;              /* יחס 16:9 */
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.camera-slot:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+/* placeholder להוספת מצלמה */
+.add-camera-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f8fcff, #e8f4fd);
+    border: 3px dashed #cbd5e0;
+    transition: all 0.3s ease;
+}
+
+.add-camera-placeholder:hover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #e8f4fd, #dbeafe);
+}
+
+.add-camera-icon {
+    font-size: 48px;
+    color: #a0aec0;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.add-camera-placeholder:hover .add-camera-icon {
+    color: #667eea;
+    transform: scale(1.1);
+}
+
+.add-camera-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #718096;
+    transition: all 0.3s ease;
+}
+
+.add-camera-placeholder:hover .add-camera-text {
+    color: #4a5568;
+}
+
+/* מצלמה פעילה */
+.camera-active {
+    padding: 0;
+    background: #000;
+}
+
+.camera-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #000;
+}
+
+/* תמונת/וידאו המצלמה */
+.camera-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;              /* תמונה תכסה את כל השטח */
+    display: block;
+}
+
+/* overlay על המצלמה */
+.camera-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.4) 0%,
+        transparent 30%,
+        transparent 70%,
+        rgba(0,0,0,0.6) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+    color: white;
+    pointer-events: none;
+}
+
+.camera-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status-light {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e53e3e;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.status-light.active {
+    background: #48bb78;
+    animation: pulse 2s infinite;
+}
+
+.status-light.connecting {
+    background: #ed8936;
+    animation: blink 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+.camera-info {
+    text-align: right;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* בקרי מצלמה */
+.camera-controls {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    pointer-events: all;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.camera-control-btn {
+    background: rgba(255,255,255,0.95);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #4a5568;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+}
+
+.camera-control-btn:hover {
+    background: white;
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+.camera-control-btn:active {
+    transform: scale(1.05) translateY(-1px);
+}
+
+.camera-control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    background: rgba(255,255,255,0.6);
+}
+
+.camera-control-btn.danger {
+    color: #e53e3e;
+    border-color: rgba(229, 62, 62, 0.3);
+}
+
+.camera-control-btn.danger:hover {
+    background: rgba(254, 215, 215, 0.9);
+    border-color: rgba(229, 62, 62, 0.5);
+    color: #c53030;
+}
+
+.camera-control-btn.primary {
+    color: #667eea;
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.camera-control-btn.primary:hover {
+    background: rgba(237, 242, 247, 0.9);
+    border-color: rgba(102, 126, 234, 0.5);
+    color: #5a67d8;
+}
+
+.camera-control-btn.success {
+    color: #48bb78;
+    border-color: rgba(72, 187, 120, 0.3);
+}
+
+.camera-control-btn.success:hover {
+    background: rgba(240, 253, 244, 0.9);
+    border-color: rgba(72, 187, 120, 0.5);
+    color: #38a169;
+}
+
+/* הגדרות מצלמה */
+.camera-settings {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    color: #4a5568;
+    font-size: 13px;
+    backdrop-filter: blur(15px);
+    pointer-events: all;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    min-width: 200px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+}
+
+.camera-settings[style*="block"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.camera-settings:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px) scale(1);
+}
+
+.camera-settings h4 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+    text-align: center;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+.camera-settings .setting-group {
+    margin-bottom: 15px;
+}
+
+.camera-settings .setting-group:last-child {
+    margin-bottom: 0;
+}
+
+.camera-settings label {
+    display: block;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 13px;
+}
+
+.camera-settings select,
+.camera-settings input[type="number"] {
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #2d3748;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.camera-settings select:focus,
+.camera-settings input[type="number"]:focus {
+    outline: none;
+    border-color: #667eea;
+    background: linear-gradient(135deg, #ffffff, #f7fafc);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.camera-settings select:hover,
+.camera-settings input[type="number"]:hover {
+    border-color: #cbd5e0;
+    background: linear-gradient(135deg, #ffffff, #f7fafc);
+}
+
+/* checkbox מעוצב */
+.camera-settings .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 10px;
+    background: linear-gradient(135deg, #f0f8ff, #e8f4fd);
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.camera-settings .checkbox-container:hover {
+    background: linear-gradient(135deg, #e8f4fd, #dbeafe);
+    border-color: #cbd5e0;
+}
+
+.camera-settings input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+    cursor: pointer;
+    margin: 0;
+}
+
+.camera-settings .checkbox-label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* כפתור סגירת הגדרות */
+.camera-settings .close-settings {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.camera-settings .close-settings:hover {
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+    transform: scale(1.1);
+}
+
+/* סמל הגדרות */
+.settings-icon {
+    display: inline-block;
+    margin-left: 5px;
+    color: #667eea;
+}
+
+/* ==================== FILE PREVIEW COMPONENTS ==================== */
+/* רכיבי תצוגה מקדימה של קבצים */
+
+/* תצוגה מקדימה של קבצים נבחרים */
+.upload-preview {
+    text-align: center;              /* יישור למרכז */
+    padding: 20px;                   /* מרווח פנימי */
+}
+
+/* מיכל קבצים נבחרים */
+.selected-files {
+    margin-top: 20px;                /* מרווח עליון */
+    max-height: 250px;               /* גובה מקסימלי */
+    overflow-y: auto;                /* גלילה אנכית */
+    text-align: left;                /* יישור לשמאל */
+    border-radius: 12px;             /* פינות עגולות */
+    background: rgba(255,255,255,0.9); /* רקע לבן שקוף */
+    padding: 15px;                   /* מרווח פנימי */
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.1); /* צל פנימי */
+}
+
+/* פריט תצוגה מקדימה של קובץ */
+.file-preview-item {
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    padding: 12px 15px;              /* מרווח פנימי */
+    margin: 8px 0;                   /* מרווח עליון ותחתון */
+    background: rgba(255,255,255,0.95); /* רקע לבן שקוף */
+    border: 2px solid rgba(102, 126, 234, 0.2); /* גבול סגול בהיר */
+    border-radius: 12px;             /* פינות עגולות */
+    transition: all 0.3s ease;       /* מעבר חלק */
+    position: relative;              /* מיקום יחסי */
+    overflow: hidden;                /* הסתרת גלישה */
+}
+
+/* אפקט hover לפריט קובץ */
+.file-preview-item:hover {
+    background: rgba(102, 126, 234, 0.05); /* רקע סגול בהיר */
+    border-color: rgba(102, 126, 234, 0.4); /* גבול סגול */
+    transform: translateX(5px);      /* הזזה קלה */
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15); /* צל סגול */
+}
+
+/* אייקון קובץ */
+.file-icon {
+    font-size: 24px;                 /* גודל גדול */
+    margin-left: 15px;               /* מרווח משמאל */
+    min-width: 35px;                 /* רוחב מינימלי */
+    text-align: center;              /* יישור למרכז */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); /* צל */
+}
+
+/* מידע הקובץ */
+.file-info {
+    flex: 1;                         /* גמישות */
+    margin: 0 15px;                  /* מרווח בצדדים */
+    min-width: 0;                    /* רוחב מינימלי אפס */
+}
+
+/* שם הקובץ */
+.file-name {
+    font-weight: 700;                /* משקל טקסט כבד */
+    margin-bottom: 4px;              /* מרווח תחתון */
+    word-break: break-word;          /* שבירת מילים ארוכות */
+    color: #2d3748;                  /* צבע כהה */
+    font-size: 15px;                 /* גודל טקסט */
+}
+
+/* פרטי הקובץ */
+.file-details {
+    font-size: 13px;                 /* גודל קטן */
+    color: #718096;                  /* צבע אפור */
+    font-weight: 500;                /* משקל טקסט בינוני */
+}
+
+/* כפתור הסרת קובץ */
+.remove-file-btn {
+    background: linear-gradient(135deg, #f56565, #e53e3e); /* רקע אדום גרדיינט */
+    color: white;                    /* טקסט לבן */
+    border: none;                    /* ביטול גבול */
+    border-radius: 50%;              /* עיגול מלא */
+    width: 28px;                     /* רוחב */
+    height: 28px;                    /* גובה */
+    cursor: pointer;                 /* סמן יד */
+    font-size: 16px;                 /* גודל טקסט */
+    line-height: 1;                  /* גובה שורה */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* מעבר חלק */
+    display: flex;                   /* פריסה גמישה */
+    align-items: center;             /* יישור אנכי במרכז */
+    justify-content: center;         /* יישור אופקי במרכז */
+    font-weight: bold;               /* טקסט בולט */
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3); /* צל אדום */
+}
+
+/* אפקט hover לכפתור הסרה */
+.remove-file-btn:hover {
+    background: linear-gradient(135deg, #e53e3e, #c53030); /* רקע אדום כהה */
+    transform: scale(1.1) rotate(90deg); /* הגדלה וסיבוב */
+    box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4); /* צל חזק יותר */
+}
+
+/* אפקט לחיצה על כפתור הסרה */
+.remove-file-btn:active {
+    transform: scale(0.95);          /* הקטנה */
+}
+
+/* אזור העלאה עם קבצים */
+.upload-area.has-files {
+    border-color: #667eea;           /* גבול סגול */
+    background: linear-gradient(135deg, #e8f4fd, #f0f8ff); /* רקע כחול בהיר */
+    border-style: solid;             /* גבול רציף */
+}
+
+/* ==================== LOADING COMPONENTS ==================== */
+/* רכיבי טעינה ספציפיים למצלמות */
+
+/* ספינר טעינת מטרה מעוצב */
+.target-loading {
+    display: none;                   /* מוסתר בהתחלה */
+    flex-direction: column;          /* סידור אנכי */
+    align-items: center;             /* יישור למרכז */
+    justify-content: center;         /* יישור אנכי למרכז */
+    text-align: center;              /* יישור טקסט למרכז */
+    padding: 40px;                   /* מרווח פנימי */
+    color: #667eea;                  /* צבע סגול */
+    font-weight: 600;                /* משקל טקסט בולט */
+    background: rgba(255,255,255,0.9); /* רקע לבן שקוף */
+    border-radius: 15px;             /* פינות עגולות */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1); /* צל */
+    backdrop-filter: blur(5px);      /* אפקט טשטוש */
+}
+
+/* הצגת טעינה */
+.target-loading.show {
+    display: flex;                   /* הצגה כפריסה גמישה */
+}
+
+/* ספינר טעינת מטרה מתקדם */
+.target-spinner {
+    border: 4px solid rgba(102, 126, 234, 0.2); /* גבול שקוף */
+    border-top: 4px solid #667eea;   /* גבול עליון סגול */
+    border-radius: 50%;              /* עיגול מלא */
+    width: 50px;                     /* רוחב */
+    height: 50px;                    /* גובה */
+    animation: spin 1s linear infinite; /* אנימציית סיבוב */
+    margin: 0 auto 20px;             /* מרכוז ומרווח תחתון */
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); /* צל סגול */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* שדה קלט קובץ מוסתר */
+#target-file-input {
+    display: none;                   /* מוסתר */
+}
+
+/* הודעות ריקות */
+.empty-gallery,
+.gallery-error {
+    grid-column: 1 / -1;             /* משתרע על כל העמודות */
+    width: 100%;                     /* רוחב מלא */
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;                  /* מרכוז אוטומטי */
+}
+
+.empty-gallery .empty-icon,
+.gallery-error .error-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-gallery h3,
+.gallery-error h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #4a5568;
+}
+
+.empty-gallery p {
+    font-size: 16px;
+    margin-bottom: 0;
+}
+
+.retry-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* מודל לצפייה בתמונות */
+.image-viewer-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.image-viewer-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.image-viewer-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.viewer-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ==================== RESPONSIVE STYLES FOR CAMERAS ==================== */
+/* עיצוב רספונסיבי למצלמות */
+
+/* עיצוב רספונסיבי לטאבלטים */
+@media (max-width: 768px) {
+    /* שורת כפתורי מטרה */
+    .target-buttons-row {
+        flex-direction: column;      /* סידור אנכי */
+        align-items: center;         /* יישור למרכז */
+    }
+
+    /* כפתור מטרה במובייל */
+    .target-btn {
+        width: 100%;                 /* רוחב מלא */
+        max-width: 300px;            /* רוחב מקסימלי */
+    }
+
+    /* גריד הגלריה במובייל */
+    .target-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* עמודות קטנות יותר */
+        gap: 15px;                   /* מרווח מופחת */
+    }
+
+    /* כותרת הגלריה במובייל */
+    .target-gallery-header {
+        flex-direction: column;      /* סידור אנכי */
+        text-align: center;          /* יישור למרכז */
+        gap: 10px;                   /* מרווח בין אלמנטים */
+    }
+
+    /* אזור העלאה במובייל */
+    .upload-area {
+        padding: 30px 20px;          /* מרווח פנימי מופחת */
+    }
+
+    /* אייקון העלאה במובייל */
+    .upload-icon {
+        font-size: 36px;             /* גודל מופחת */
+    }
+
+    /* טקסט העלאה במובייל */
+    .upload-text {
+        font-size: 16px;             /* גודל מופחת */
+    }
+
+    /* רשת מצלמות במובייל */
+    .cameras-grid-container {
+        grid-template-columns: 1fr;  /* עמודה אחת */
+        grid-template-rows: repeat(4, 1fr); /* 4 שורות */
+        gap: 20px;
+    }
+
+    /* הגדרות מצלמה במובייל */
+    .camera-settings {
+        right: 10px;
+        top: 10px;
+        min-width: 180px;
+        padding: 15px;
+        font-size: 12px;
+    }
+
+    .camera-settings h4 {
+        font-size: 14px;
+    }
+
+    /* בקרי מצלמה במובייל */
+    .camera-controls {
+        gap: 8px;
+        padding: 8px 12px;
+    }
+
+    .camera-control-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* מיכל העלאת מטרה במובייל קטן */
+    .target-upload-container {
+        padding: 20px;               /* מרווח פנימי מופחת */
+        margin: 10px 0;              /* מרווח חיצוני מופחת */
+    }
+
+    /* אזור העלאה במובייל קטן */
+    .upload-area {
+        padding: 20px 15px;          /* מרווח פנימי מופחת */
+    }
+
+    /* גריד הגלריה במובייל קטן */
+    .target-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* עמודות קטנות מאוד */
+        gap: 10px;                   /* מרווח קטן */
+    }
+
+    /* רשת מצלמות במובייל קטן */
+    .cameras-grid-container {
+        padding: 10px;
+        gap: 15px;
+    }
+
+    .add-camera-icon {
+        font-size: 36px;
+    }
+
+    .add-camera-text {
+        font-size: 16px;
+    }
+
+    /* הגדרות מצלמה במובייל קטן */
+    .camera-settings {
+        right: 5px;
+        top: 5px;
+        min-width: 160px;
+        padding: 12px;
+        font-size: 11px;
+    }
+
+    .camera-settings h4 {
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    .camera-settings .setting-group {
+        margin-bottom: 12px;
+    }
+
+    .camera-settings select,
+    .camera-settings input[type="number"] {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    /* בקרי מצלמה במובייל קטן */
+    .camera-controls {
+        gap: 6px;
+        padding: 6px 10px;
+    }
+
+    .camera-control-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+    }
+
+    /* סטטוס מצלמה במובייל קטן */
+    .camera-status {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .camera-info {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+}
