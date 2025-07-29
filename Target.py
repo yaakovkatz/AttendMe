@@ -20,7 +20,7 @@ class Target:
         # מידע אישי
         self.camera_number = camera_number
         self.image_url = images_url
-        self._is_checked = False  # שים לב לקו תחתון
+        self._is_checked = False
         self.extracted_faces = []
         self.faces_count = 0
         self.yolo_model = None
@@ -30,22 +30,6 @@ class Target:
         self.MIN_SHARPNESS = 100
         self.MAX_NOISE_THRESHOLD = 50
         self.MIN_CONTRAST = 30
-
-        # טעינת מודל YOLO רק אם נדרש ואם הקובץ קיים
-        if enable_face_detection:
-            try:
-                if os.path.exists(yolo_model_path):
-                    self.yolo_model = YOLO(yolo_model_path)
-                    print_status(f"✅ מודל YOLO נטען בהצלחה: {yolo_model_path}")
-                    self.extract_faces()  # רק אם יש מודל
-                else:
-                    print_status(f"⚠️ קובץ מודל YOLO לא נמצא: {yolo_model_path}")
-                    print_status("ℹ️ ממשיך בלי זיהוי פנים")
-            except Exception as e:
-                print_status(f"❌ שגיאה בטעינת מודל YOLO: {str(e)}")
-                print_status("ℹ️ ממשיך בלי זיהוי פנים")
-        else:
-            print_status("ℹ️ זיהוי פנים מבוטל")
 
     @property
     def is_checked(self):
