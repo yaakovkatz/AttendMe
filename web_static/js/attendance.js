@@ -7,6 +7,8 @@
  * - דוחות נוכחות וסטטיסטיקות
  * - ייצוא נתונים
  * - ניהול תוצאות בדיקות
+ *
+ * ⚠️ דרישה: הקובץ מצפה לפונקציה getCurrentSchoolIndex() שמחזירה את מזהה בית הספר
  */
 
 // ==================== GLOBAL VARIABLES ====================
@@ -22,6 +24,16 @@ let selectedPersonId = null;
 
 // מצב בדיקה פעילה
 let isCheckingAttendance = false;
+
+// ==================== HELPER FUNCTIONS FOR SCHOOL INDEX ====================
+
+/**
+ * קבלת מזהה בית הספר הנוכחי
+ * @returns {number} מזהה בית הספר
+ */
+function getCurrentSchoolIndex() {
+    return window.currentUser?.schoolInfo?.school_index ?? 0;
+}
 
 // ==================== INITIALIZATION ====================
 
@@ -127,12 +139,12 @@ async function loadAttendanceData() {
     console.log('📊 טוען נתוני נוכחות...');
 
     try {
-        const username = getCurrentUsername();
+        const schoolIndex = getCurrentSchoolIndex();
         const selectedDate = document.getElementById('attendance-date').value;
 
         // בניית URL עם פרמטרים
         const params = new URLSearchParams({
-            username: username
+            school_index: schoolIndex
         });
 
         if (selectedDate) {
@@ -187,8 +199,8 @@ async function loadPeopleForSelection() {
     if (errorDiv) errorDiv.style.display = 'none';
 
     try {
-        const username = getCurrentUsername();
-        const response = await fetch(`/api/get_loaded_people?username=${username}`);
+        const schoolIndex = getCurrentSchoolIndex();
+        const response = await fetch(`/api/get_loaded_people?school_index=${schoolIndex}`);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -353,7 +365,7 @@ async function handleCheckAllPeople() {
     showNotification('מתחיל בדיקת נוכחות כללית...', 'info');
 
     try {
-        const username = getCurrentUsername();
+        const schoolIndex = getCurrentSchoolIndex();
 
         // שלב 1: חילוץ פנים
         showNotification('שלב 1: מחלץ פנים מתמונות מטרה...', 'info');
@@ -361,7 +373,7 @@ async function handleCheckAllPeople() {
         const extractResponse = await fetch('/api/face-recognition/extract-faces', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ username: username })
+            body: JSON.stringify({ school_index: schoolIndex })
         });
 
         const extractData = await extractResponse.json();
@@ -377,7 +389,7 @@ async function handleCheckAllPeople() {
         const attendanceResponse = await fetch('/api/attendance/check-all', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ username: username })
+            body: JSON.stringify({ school_index: schoolIndex })
         });
 
         const attendanceResult = await attendanceResponse.json();
@@ -476,7 +488,7 @@ async function handleCheckSelectedPerson() {
     updateResultsProgress('מתחיל בדיקה...', 0);
 
     try {
-        const username = getCurrentUsername();
+        const schoolIndex = getCurrentSchoolIndex();
 
         // שלב 1: חילוץ פנים
         updateResultsProgress('מחלץ פנים מתמונות מטרה...', 25);
@@ -484,7 +496,7 @@ async function handleCheckSelectedPerson() {
         const extractResponse = await fetch('/api/face-recognition/extract-faces', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ username: username })
+            body: JSON.stringify({ school_index: schoolIndex })
         });
 
         const extractData = await extractResponse.json();
@@ -499,7 +511,7 @@ async function handleCheckSelectedPerson() {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                username: username,
+                school_index: schoolIndex,
                 person_id: selectedPersonId
             })
         });
@@ -646,8 +658,8 @@ function updateAttendanceStats() {
  */
 async function checkTargetImages() {
     try {
-        const username = getCurrentUsername();
-        const response = await fetch(`/api/get_target_images?username=${username}`);
+        const schoolIndex = getCurrentSchoolIndex();
+        const response = await fetch(`/api/get_target_images?school_index=${schoolIndex}`);
         const data = await response.json();
 
         if (!data.success || !data.targets || data.targets.length === 0) {

@@ -9,7 +9,8 @@ let tempRegistrationData = {
     school_phone: '',
     school_address: '',
     admin_username: '',
-    admin_password: ''
+    admin_password: '',
+    school_index: ''
 };
 
 // ==================== INITIALIZATION ====================
@@ -248,7 +249,7 @@ async function handleLogin(event) {
             // שמירת פרטי המשתמש ב-sessionStorage
 const userInfo = {
     username: username,
-    schoolInfo: result.school_info
+    schoolInfo: result.school_info,
 };
 
 // שמירה ב-sessionStorage וגם ב-window (לתאימות)
@@ -320,6 +321,15 @@ async function handleRegister(event) {
         if (result.success) {
             showMessage(result.message, 'success');
             console.log('✅ הרשמה מוצלחת:', result.school_info);
+
+            // שמירת מידע הרישום כולל המיקום בווקטור
+            const registrationInfo = {
+                school_name: result.school_info?.school_name,
+                admin_username: result.school_info?.admin_username,
+                position_in_database: result.position_in_database,
+                school_email: result.school_info?.school_email
+            };
+            localStorage.setItem('last_registered_school', JSON.stringify(registrationInfo));
 
             // ניקוי הטופס והנתונים הזמניים
             document.getElementById('register-form').reset();

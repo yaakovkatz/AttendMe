@@ -2,7 +2,8 @@ from datetime import datetime
 
 
 class School:
-    def __init__(self, school_name, school_email, school_phone, school_address, admin_username, admin_password):
+    def __init__(self, school_name, school_email, school_phone, school_address,
+                 admin_username, admin_password, school_index=None):
 
         self.school_name = school_name
         self.school_email = school_email
@@ -11,6 +12,7 @@ class School:
         self.admin_username = admin_username
         self.admin_password = admin_password
         self.created_at = self._get_current_time()
+        self.school_index = school_index
         self.people_vector = []
         self.targets_vector = []
 
@@ -27,5 +29,6 @@ class School:
             'school_phone': self.school_phone,
             'school_address': self.school_address,
             'admin_username': self.admin_username,
-            'created_at': self.created_at
+            'created_at': self.created_at,
+            'school_index': self.school_index
         }

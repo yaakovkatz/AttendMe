@@ -2,7 +2,6 @@ from Person import Person
 from Target import Target
 from School import School
 
-# וקטור גלובלי לשמירת נתונים - רק בתי ספר
 schools_database = []
 
 """==================================School========================="""
@@ -95,25 +94,31 @@ def register_school(school_data):
 
     # יצירת אובייקט בית ספר חדש
     try:
+        # חישוב המיקום החדש בווקטור (האינדקס הבא)
+        new_position = len(schools_database)
+
         new_school = School(
             school_name=school_name,
             school_email=school_email,
             school_phone=school_phone,
             school_address=school_address,
             admin_username=admin_username,
-            admin_password=admin_password
+            admin_password=admin_password,
+            school_index=new_position
         )
 
         # הוספה לווקטור הגלובלי
         schools_database.append(new_school)
 
         print(f"✅ בית הספר '{school_name}' נרשם בהצלחה עם המשתמש '{admin_username}'")
+        print(f"📍 מיקום בווקטור: {new_position}")
         print(f"📊 סה\"כ בתי ספר במערכת: {len(schools_database)}")
 
         return {
             'success': True,
             'message': f"בית הספר '{school_name}' נרשם בהצלחה! המשתמש '{admin_username}' יכול כעת להתחבר למערכת",
-            'school_info': new_school.get_school_info()
+            'school_info': new_school.get_school_info(),
+            'position_in_database': new_position  # החזרת המיקום גם בתגובה
         }
 
     except Exception as e:
@@ -123,7 +128,6 @@ def register_school(school_data):
             'message': f"שגיאה ביצירת בית הספר: {str(e)}",
             'error_type': 'creation_error'
         }
-
 
 # ==================== UTILITY FUNCTIONS ====================
 

@@ -370,11 +370,11 @@ function formatHebrewTime(timestamp) {
 }
 
 /**
- * קבלת שם המשתמש הנוכחי
+ * קבלת מיקום הבית ספר בווקטור
  * @returns {string|null} שם המשתמש או null
  */
-function getCurrentUsername() {
-    return window.currentUser?.username || null;
+function getCurrentSchoolIndex() {
+    return window.currentUser?.schoolInfo?.school_index || 0;
 }
 
 /**

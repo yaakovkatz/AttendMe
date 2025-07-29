@@ -319,7 +319,7 @@ def api_login():
             return jsonify({
                 'success': True,
                 'message': result['message'],
-                'school_info': result['school_info']  # תואם ל-login.js
+                'school_info': result['school_info']
             })
         else:
             return jsonify({
@@ -350,7 +350,8 @@ def api_register():
             return jsonify({
                 'success': True,
                 'message': result['message'],
-                'school_info': result['school_info']
+                'school_info': result['school_info'],
+                'position_in_database': result['position_in_database']
             })
         else:
             return jsonify({
@@ -379,30 +380,23 @@ def create_person():
         data = request.json
         print(f"📥 קיבלנו נתונים: {data}")
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        print(f"👤 Username: {username}")
-
-        if not username:
-            print("❌ חסר username")
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש'
+                'message': 'מזהה בית ספר נדרש'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        print("🔍 מחפש אינדקס בית ספר...")
-        school_index = get_school_index_by_username(username)
-        print(f"📊 School index: {school_index}")
-
-        if school_index == -1:
-            print("❌ בית ספר לא נמצא")
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
-        print("✅ בית ספר נמצא, ממשיך...")
+        print(f"📊 School index: {school_index}")
+        print("✅ מזהה בית ספר תקין, ממשיך...")
 
         # קרא לפונקציה המעודכנת מ-Data_Manage
         person_details = data['person_details']
@@ -441,22 +435,20 @@ def delete_person(person_id):
     try:
         data = request.json or {}
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש'
+                'message': 'מזהה בית ספר נדרש'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קרא לפונקציה המעודכנת מ-Data_Manage
         result = remove_person(school_index, person_id)
@@ -477,22 +469,28 @@ def delete_person(person_id):
 def get_loaded_people():
     """מחזיר רשימת אנשים של בית ספר ספציפי"""
     try:
-        # קבלת username מ-query parameters
-        username = request.args.get('username')
-        if not username:
+        # קבלת school_index מ-query parameters
+        school_index = request.args.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש כ-query parameter (?username=...)'
+                'message': 'מזהה בית ספר נדרש כ-query parameter (?school_index=...)'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        try:
+            school_index = int(school_index)
+        except ValueError:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר חייב להיות מספר'
+            }), 400
+
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
+            return jsonify({
+                'success': False,
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קריאה לפונקציה המעודכנת מ-Data_Manage
         result = get_all_people(school_index)
@@ -518,22 +516,28 @@ def get_loaded_people():
 def get_person_api(person_id):
     """מחזיר פרטי אדם ספציפי מבית ספר ספציפי"""
     try:
-        # קבלת username מ-query parameters
-        username = request.args.get('username')
-        if not username:
+        # קבלת school_index מ-query parameters
+        school_index = request.args.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש כ-query parameter (?username=...)'
+                'message': 'מזהה בית ספר נדרש כ-query parameter (?school_index=...)'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        try:
+            school_index = int(school_index)
+        except ValueError:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר חייב להיות מספר'
+            }), 400
+
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
+            return jsonify({
+                'success': False,
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קריאה לפונקציה המעודכנת מ-Data_Manage
         result = get_person(school_index, person_id)
@@ -565,22 +569,20 @@ def update_person_api(person_id):
     try:
         data = request.json
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש'
+                'message': 'מזהה בית ספר נדרש'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קריאה לפונקציה המעודכנת מ-Data_Manage
         result = update_person(
@@ -608,22 +610,20 @@ def toggle_presence_api(person_id):
     try:
         data = request.json
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש'
+                'message': 'מזהה בית ספר נדרש'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קריאה לפונקציה המעודכנת מ-Data_Manage
         result = toggle_presence(school_index, person_id, data['is_present'])
@@ -650,22 +650,20 @@ def upload_target_images():
     try:
         data = request.json
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש'
+                'message': 'מזהה בית ספר נדרש'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קרא לפונקציה המעודכנת מ-Data_Manage
         result = add_new_target(
@@ -699,22 +697,20 @@ def delete_target(camera_number):
     try:
         data = request.json or {}
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש'
+                'message': 'מזהה בית ספר נדרש'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קרא לפונקציה המעודכנת מ-Data_Manage
         result = remove_target(school_index, camera_number)
@@ -735,22 +731,28 @@ def delete_target(camera_number):
 def get_target_images():
     """מחזיר את כל תמונות המטרה של בית ספר ספציפי עם מטא-דטה מפורט"""
     try:
-        # קבלת username מ-query parameters
-        username = request.args.get('username')
-        if not username:
+        # קבלת school_index מ-query parameters
+        school_index = request.args.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש כ-query parameter (?username=...)'
+                'message': 'מזהה בית ספר נדרש כ-query parameter (?school_index=...)'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        try:
+            school_index = int(school_index)
+        except ValueError:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר חייב להיות מספר'
+            }), 400
+
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
+            return jsonify({
+                'success': False,
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קריאה לפונקציה המעודכנת מ-Data_Manage
         result = get_all_targets(school_index)
@@ -778,22 +780,20 @@ def clear_all_target_images():
     try:
         data = request.json or {}
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש'
+                'message': 'מזהה בית ספר נדרש'
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא'
-            }), 404
+                'message': 'מזהה בית ספר לא תקין'
+            }), 400
 
         # קרא לפונקציה המעודכנת מ-Data_Manage
         result = clear_all_targets(school_index)
@@ -845,24 +845,22 @@ def extract_faces_from_targets():
     try:
         data = request.json or {}
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש',
+                'message': 'מזהה בית ספר נדרש',
                 'faces_extracted': 0
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא',
+                'message': 'מזהה בית ספר לא תקין',
                 'faces_extracted': 0
-            }), 404
+            }), 400
 
         # קריאה לפונקציה המעודכנת מ-Attend_Manage
         from Attend_Manage import extract_all_faces_from_targets
@@ -897,28 +895,26 @@ def check_attendance_all():
     try:
         data = request.json or {}
 
-        # קבלת username מהבקשה
-        username = data.get('username')
-        if not username:
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
             return jsonify({
                 'success': False,
-                'message': 'שם משתמש נדרש',
+                'message': 'מזהה בית ספר נדרש',
                 'checked_people': 0,
                 'present_people': 0,
                 'absent_people': 0
             }), 400
 
-        # חיפוש אינדקס בית הספר
-        school_index = get_school_index_by_username(username)
-
-        if school_index == -1:
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
             return jsonify({
                 'success': False,
-                'message': 'בית ספר לא נמצא',
+                'message': 'מזהה בית ספר לא תקין',
                 'checked_people': 0,
                 'present_people': 0,
                 'absent_people': 0
-            }), 404
+            }), 400
 
         # קריאה לפונקציה המעודכנת מ-Attend_Manage
         from Attend_Manage import check_attendance_for_all_people
@@ -1144,13 +1140,11 @@ if __name__ == '__main__':
 """
 📝 השינויים שבוצעו:
 
-✅ הוספת get_school_index_by_username לייבוא
-✅ החלפת api_login להשתמש בפונקציה מ-Data_Manage
-✅ הוספת api_register עם הפונקציה מ-Data_Manage  
-✅ תיקון create_person להשתמש בפונקציה הנכונה
-✅ הוספת initialize_demo_data לאתחול נתוני בדיקה
-✅ הוספת קריאה ל-initialize_demo_data בהפעלת השרת
-✅ שינוי שמות error handlers כדי למנוע קונפליקט
+✅ החלפת כל הפונקציות להשתמש ב-school_index ישירות
+✅ הוספת בדיקות תקינות ל-school_index
+✅ הוספת המיקום בווקטור לתגובת api_register
+✅ ביטול הצורך בחיפוש אינדקס בכל בקשה
+✅ יעילות משופרת - פחות עבודה בכל API call
 
-המערכת כעת משתמשת במלואה במחלקות School, Person ו-Target הקיימות!
+עכשיו הצד לקוח צריך לשלוח school_index בכל בקשה במקום username.
 """

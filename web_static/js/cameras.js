@@ -7,6 +7,8 @@
  * - בקרת מצלמות מרובות (הפעלה, עצירה, צילום)
  * - גלריית תמונות מטרה
  * - הגדרות מצלמה מתקדמות
+ *
+ * ⚠️ דרישה: הקובץ מצפה לפונקציה getCurrentSchoolIndex() שמחזירה את מזהה בית הספר
  */
 
 // ==================== GLOBAL VARIABLES ====================
@@ -35,6 +37,16 @@ const defaultCameraSettings = {
 
 // טיימרים לצילום אוטומטי
 let autoCaptureTimers = {};
+
+// ==================== HELPER FUNCTIONS FOR SCHOOL INDEX ====================
+
+/**
+ * קבלת מזהה בית הספר הנוכחי
+ * @returns {number} מזהה בית הספר
+ */
+function getCurrentSchoolIndex() {
+    return window.currentUser?.schoolInfo?.school_index ?? 0;
+}
 
 // ==================== INITIALIZATION ====================
 
@@ -326,9 +338,9 @@ async function captureFromCamera(slotId) {
 
                 if (tempData.success) {
                     // יצירת target עם ה-URL
-                    const username = getCurrentUsername();
+                    const schoolIndex = getCurrentSchoolIndex();
                     const targetPayload = {
-                        username: username,
+                        school_index: schoolIndex,
                         camera_number: Date.now() + slotId,
                         image_url: tempData.image_url
                     };
@@ -476,8 +488,8 @@ async function loadTargetImages() {
     console.log('🔄 טוען תמונות מטרה...');
 
     try {
-        const username = getCurrentUsername();
-        const url = `/api/get_target_images?username=${username}`;
+        const schoolIndex = getCurrentSchoolIndex();
+        const url = `/api/get_target_images?school_index=${schoolIndex}`;
 
         const response = await fetch(url);
         const data = await response.json();
@@ -731,8 +743,8 @@ async function uploadTargetFiles() {
         return;
     }
 
-    const username = getCurrentUsername();
-    console.log(`📤 מעלה ${selectedFiles.length} תמונות מטרה עבור משתמש: ${username}...`);
+    const schoolIndex = getCurrentSchoolIndex();
+    console.log(`📤 מעלה ${selectedFiles.length} תמונות מטרה עבור בית ספר: ${schoolIndex}...`);
 
     const loading = document.getElementById('target-loading');
     if (loading) loading.style.display = 'flex';
@@ -762,7 +774,7 @@ async function uploadTargetFiles() {
 
                     // יצירת target עם ה-URL
                     const targetPayload = {
-                        username: username,
+                        school_index: schoolIndex,
                         camera_number: Date.now() + i,
                         image_url: tempData.image_url
                     };
@@ -896,7 +908,7 @@ async function deleteSelectedTargets() {
     if (!confirmed) return;
 
     try {
-        const username = getCurrentUsername();
+        const schoolIndex = getCurrentSchoolIndex();
         const cameraNumbers = Array.from(checkedBoxes).map(cb =>
             parseInt(cb.getAttribute('data-camera'))
         );
@@ -905,7 +917,7 @@ async function deleteSelectedTargets() {
             const response = await fetch(`/api/targets/${cameraNumber}`, {
                 method: 'DELETE',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username: username })
+                body: JSON.stringify({ school_index: schoolIndex })
             });
 
             if (!response.ok) {
@@ -933,11 +945,11 @@ async function deleteSingleTarget(cameraNumber) {
     if (!confirmed) return;
 
     try {
-        const username = getCurrentUsername();
+        const schoolIndex = getCurrentSchoolIndex();
         const response = await fetch(`/api/targets/${cameraNumber}`, {
             method: 'DELETE',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ username: username })
+            body: JSON.stringify({ school_index: schoolIndex })
         });
 
         if (handleApiResponse(response, await response.json())) {

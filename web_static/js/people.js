@@ -8,6 +8,8 @@
  * - העלאת תמונות לאנשים
  * - מחיקת ועריכת אנשים
  * - חיפוש וסינון
+ *
+ * ⚠️ דרישה: הקובץ מצפה לפונקציה getCurrentSchoolIndex() שמחזירה את מזהה בית הספר
  */
 
 // ==================== GLOBAL VARIABLES ====================
@@ -31,6 +33,16 @@ let tempPersonData = {
     uploadedImages: [],        // מערך של public_id של תמונות שהועלו
     imageUrls: []             // מערך של URL-ים לתצוגה
 };
+
+// ==================== HELPER FUNCTIONS FOR SCHOOL INDEX ====================
+
+/**
+ * קבלת מזהה בית הספר הנוכחי
+ * @returns {number} מזהה בית הספר
+ */
+function getCurrentSchoolIndex() {
+    return window.currentUser?.schoolInfo?.school_index ?? 0;
+}
 
 // ==================== INITIALIZATION ====================
 
@@ -163,8 +175,8 @@ async function loadPeopleData() {
     console.log('🔄 מתחיל לטעון נתוני אנשים...');
 
     try {
-        const username = getCurrentUsername();
-        const url = `/api/get_loaded_people?username=${username}`;
+        const schoolIndex = getCurrentSchoolIndex();
+        const url = `/api/get_loaded_people?school_index=${schoolIndex}`;
 
         const response = await fetch(url);
         console.log('📡 תגובת שרת:', response.status);
@@ -391,12 +403,12 @@ async function handleDeleteClick(event) {
 
     if (confirm(`האם אתה בטוח שברצונך למחוק את ${person.first_name} ${person.last_name}?`)) {
         try {
-            const username = getCurrentUsername();
+            const schoolIndex = getCurrentSchoolIndex();
 
             const response = await fetch(`/api/people/${personId}`, {
                 method: 'DELETE',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username: username })
+                body: JSON.stringify({ school_index: schoolIndex })
             });
 
             const data = await response.json();
@@ -484,14 +496,14 @@ async function finishNewPersonCreation() {
         return;
     }
 
-    const username = getCurrentUsername();
+    const schoolIndex = getCurrentSchoolIndex();
 
     try {
         const response = await fetch('/api/people/create_person', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                username: username,
+                school_index: schoolIndex,
                 person_details: tempPersonData.personDetails,
                 image_urls: tempPersonData.imageUrls
             })
