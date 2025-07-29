@@ -6,7 +6,6 @@
     <title>{% block title %}AttendMe - מערכת רישום נוכחות באמצעות זיהוי פנים{% endblock %}</title>
 
     <!-- ========== CSS FILES ========== -->
-    <!-- קבצים חובה - תמיד ראשונים -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
 
@@ -47,7 +46,7 @@
                     <!-- תפריט כללי -->
                     <ul class="nav-links general-nav">
                         <li><a href="{{ url_for('about') }}"{% if current_page == 'about' %} class="active"{% endif %}>אודותינו</a></li>
-                        <li><a href="{{ url_for('contact') }}"{% if current_page == 'contact' %} class="active"{% endif %}>יצירת קשר</a></li>
+                        <li><a href="{{ url_for('contact') }}"{% if current_page == 'contact' %} class="active"{% endif %}>צרו קשר</a></li>
                     </ul>
                 </div>
 
@@ -76,23 +75,24 @@
     <!-- תוכן ראשי - ייחודי לכל דף -->
     <main>
         <!-- הודעות Flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="notification {{ category }} active" style="position: fixed; top: 80px; right: 20px; z-index: 1001;">
-                        <span class="notification-message">{{ message }}</span>
-                        <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
+        <!-- הודעות Flash עם מערכת התראות מתקדמת -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="notification-container" class="notification-container">
+            {% for category, message in messages %}
+                <div class="notification {{ category }}">
+                    <span class="notification-message">{{ message }}</span>
+                    <button class="notification-close" onclick="removeNotification(this.parentElement)">&times;</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
         <!-- תוכן הדף -->
         {% block content %}{% endblock %}
     </main>
 
     <!-- ========== FOOTER ========== -->
-    <!-- כותרת תחתונה -->
     <footer>
         <div class="container">
             <p class="copyright">© 2025 AttendMe - כל הזכויות שמורות</p>

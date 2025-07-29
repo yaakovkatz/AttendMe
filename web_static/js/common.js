@@ -266,67 +266,6 @@ function initializeModalListeners() {
 window.showModal = showModal;
 window.closeModal = closeModal;
 
-// ==================== NOTIFICATION SYSTEM ====================
-// מערכת הודעות התראה מתקדמת
-
-/**
- * הצגת הודעת התראה למשתמש
- * יוצר הודעה צפה עם כפתור סגירה וסגירה אוטומטית
- * @param {string} message - תוכן ההודעה
- * @param {string} type - סוג ההודעה (info/success/warning/error)
- * @param {number} duration - זמן הצגה במילישניות (ברירת מחדל 5000)
- */
-function showNotification(message, type = 'info', duration = 5000) {
-    // יצירה/חיפוש מיכל הודעות
-    let container = document.querySelector('.notification-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'notification-container';
-        document.body.appendChild(container);
-    }
-
-    // יצירת הודעה חדשה
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <span class="notification-message">${message}</span>
-        <button class="notification-close">&times;</button>
-    `;
-
-    container.appendChild(notification);
-
-    // מאזין לכפתור סגירה
-    const closeBtn = notification.querySelector('.notification-close');
-
-    // טיימר לסגירה אוטומטית
-    const autoClose = setTimeout(() => closeNotification(), duration);
-
-    /**
-     * פונקציית סגירת הודעה
-     */
-    function closeNotification() {
-        notification.classList.add('closing');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-            clearTimeout(autoClose);
-        }, 300);
-    }
-
-    // הוספת מאזין לכפתור סגירה
-    closeBtn.addEventListener('click', closeNotification);
-
-    // הצגת ההודעה
-    setTimeout(() => notification.classList.add('active'), 10);
-
-    console.log(`🔔 הודעה: [${type}] ${message}`);
-
-    return notification;
-}
-
-// הוספת פונקציה לחלון הגלובלי
-window.showNotification = showNotification;
 
 // ==================== SERVER CONNECTION ====================
 // בדיקות חיבור לשרת ו-API
@@ -665,6 +604,181 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCommon();
 });
 
+// ==================== NOTIFICATION SYSTEM - UPGRADED ====================
+// מערכת הודעות התראה מתקדמת עם פס התקדמות ואנימציות
+
+// החלף את החלק הזה בקובץ common.js (שורות 165-208 בערך)
+// מחק את הפונקציה showNotification הקיימת והחלף בזה:
+
+/**
+ * יצירת מיכל התראות אם לא קיים
+ * @returns {HTMLElement} מיכל ההתראות
+ */
+function createNotificationContainer() {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+/**
+ * הצגת הודעת התראה מתקדמת עם פס התקדמות
+ * @param {string} message - תוכן ההודעה
+ * @param {string} type - סוג ההודעה (info/success/warning/error)
+ * @param {number} duration - זמן הצגה במילישניות (ברירת מחדל 5000)
+ * @returns {HTMLElement} אלמנט ההתראה
+ */
+function showNotification(message, type = 'info', duration = 5000) {
+    const container = createNotificationContainer();
+
+    // יצירת אלמנט ההתראה
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+
+    // הוספת תוכן ההתראה
+    notification.innerHTML = `
+        <span class="notification-message">${message}</span>
+        <button class="notification-close" onclick="removeNotification(this.parentElement)">&times;</button>
+    `;
+
+    // הוספת ההתראה למיכל
+    container.appendChild(notification);
+
+    // הסרה אוטומטית אחרי הזמן שנקבע
+    const autoCloseTimer = setTimeout(() => {
+        removeNotification(notification);
+    }, duration);
+
+    // שמירת הטיימר על האלמנט למקרה שצריך לבטל
+    notification._autoCloseTimer = autoCloseTimer;
+
+    console.log(`🔔 הודעה מתקדמת: [${type}] ${message}`);
+
+    // החזרת אלמנט ההתראה למקרה שצריך לבצע פעולות נוספות
+    return notification;
+}
+
+/**
+ * הסרת התראה עם אנימציה
+ * @param {HTMLElement} notification - אלמנט ההתראה להסרה
+ */
+function removeNotification(notification) {
+    if (notification && notification.parentElement) {
+        // ביטול הטיימר האוטומטי אם קיים
+        if (notification._autoCloseTimer) {
+            clearTimeout(notification._autoCloseTimer);
+        }
+
+        notification.classList.add('closing');
+
+        // הסרה סופית אחרי סיום האנימציה
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.parentElement.removeChild(notification);
+            }
+        }, 300); // זמן האנימציה
+    }
+}
+
+/**
+ * הסרת כל ההתראות
+ */
+function clearAllNotifications() {
+    const container = document.getElementById('notification-container');
+    if (container) {
+        const notifications = container.querySelectorAll('.notification');
+        notifications.forEach(notification => {
+            removeNotification(notification);
+        });
+    }
+}
+
+/**
+ * פונקציות קיצור לסוגי התראות שונים
+ */
+function showSuccessNotification(message, duration = 5000) {
+    return showNotification(message, 'success', duration);
+}
+
+function showErrorNotification(message, duration = 7000) {
+    return showNotification(message, 'error', duration);
+}
+
+function showWarningNotification(message, duration = 6000) {
+    return showNotification(message, 'warning', duration);
+}
+
+function showInfoNotification(message, duration = 5000) {
+    return showNotification(message, 'info', duration);
+}
+
+/**
+ * התראות עם אייקונים
+ * @param {string} message - ההודעה
+ * @param {string} type - סוג ההתראה
+ * @param {string} icon - קלאס האייקון (FontAwesome)
+ * @param {number} duration - זמן הצגה
+ */
+function showNotificationWithIcon(message, type = 'info', icon = '', duration = 5000) {
+    const iconHtml = icon ? `<i class="${icon}"></i> ` : '';
+    return showNotification(iconHtml + message, type, duration);
+}
+
+/**
+ * פונקציה לבדיקת מערכת ההתראות
+ */
+function testNotificationSystem() {
+    console.log('🧪 Testing enhanced notification system...');
+
+    showInfoNotification('🔵 זוהי התראת מידע לבדיקה');
+
+    setTimeout(() => {
+        showSuccessNotification('✅ פעולה הושלמה בהצלחה!');
+    }, 1000);
+
+    setTimeout(() => {
+        showWarningNotification('⚠️ אזהרה - יש לשים לב לכך');
+    }, 2000);
+
+    setTimeout(() => {
+        showErrorNotification('❌ אירעה שגיאה במערכת');
+    }, 3000);
+
+    setTimeout(() => {
+        showNotificationWithIcon('המשתמש נוסף בהצלחה', 'success', 'fas fa-user-plus');
+    }, 4000);
+}
+
+// הוספת פונקציות לחלון הגלובלי
+window.showNotification = showNotification;
+window.showSuccessNotification = showSuccessNotification;
+window.showErrorNotification = showErrorNotification;
+window.showWarningNotification = showWarningNotification;
+window.showInfoNotification = showInfoNotification;
+window.showNotificationWithIcon = showNotificationWithIcon;
+window.removeNotification = removeNotification;
+window.clearAllNotifications = clearAllNotifications;
+window.testNotificationSystem = testNotificationSystem;
+
+// עדכון חלק ההתחלה של debugCommon
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    // הוספה לכלי הדיבוג הקיימים
+    window.debugCommon = window.debugCommon || {};
+
+    // הוספת בדיקת התראות לכלי הדיבוג
+    window.debugCommon.testNotification = (type = 'info') => {
+        showNotification(`הודעת בדיקה מתקדמת: ${type}`, type);
+    };
+
+    window.debugCommon.testAllNotifications = testNotificationSystem;
+
+    window.debugCommon.clearNotifications = clearAllNotifications;
+}
+
 /**
  * ==================== END OF COMMON.JS ====================
  *
@@ -679,3 +793,4 @@ document.addEventListener('DOMContentLoaded', function() {
  *
  * כל הפונקציות זמינות גלובלית דרך window
  */
+
