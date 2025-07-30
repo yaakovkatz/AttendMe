@@ -1,3 +1,4 @@
+from datetime import datetime
 
 
 class Person:
@@ -8,6 +9,7 @@ class Person:
         self.id_number = id_number
         self.image_urls = images_url
         self.is_present = False
+        self.check_time = None
 
     # --- פונקציות חדשות לניהול URL-ים ---
     def add_image_url(self, url):
@@ -44,6 +46,13 @@ class Person:
         """מחזיר את השם המלא ומספר ת.ז."""
         return f"{self.first_name} {self.last_name} {self.id_number}"
 
+    def update_check_time(self):
+        """מעדכן את זמן הבדיקה."""
+        self.check_time = datetime.now().strftime("%d/%m/%y %H:%M")
+
+    def get_check_time_string(self):
+        return self.check_time.strftime("%d/%m/%Y %H:%M")
+
     def get_person_details(self):
         """מחזיר את כל פרטי האדם כמילון, מותאם לעבודה עם ענן."""
         return {
@@ -52,5 +61,6 @@ class Person:
             "id_number": self.id_number,
             "is_present": self.is_present,
             "image_urls": self.image_urls,
-            "image_count": len(self.image_urls)
+            "image_count": len(self.image_urls),
+            "check_time": self.check_time
         }

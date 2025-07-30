@@ -264,9 +264,7 @@ function renderAttendanceTable() {
         const statusText = person.is_present ? 'נוכח' : 'נעדר';
 
         // זמן בדיקה
-        const checkTime = person.check_time ?
-            formatHebrewTime(person.check_time) :
-            (person.is_present ? 'לא זמין' : '--');
+        const checkTime = person.check_time ?? 'לא נבדק';
 
         row.innerHTML = `
             <td>

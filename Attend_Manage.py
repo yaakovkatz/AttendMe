@@ -558,6 +558,7 @@ def check_attendance_for_all_people(school_index):
 
                     # עדכון סטטוס נוכחות
                     person.set_presence(is_present)
+                    person.update_check_time()
 
                     if is_present:
                         present_people += 1
