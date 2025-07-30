@@ -38,16 +38,6 @@ const defaultCameraSettings = {
 // טיימרים לצילום אוטומטי
 let autoCaptureTimers = {};
 
-// ==================== HELPER FUNCTIONS FOR SCHOOL INDEX ====================
-
-/**
- * קבלת מזהה בית הספר הנוכחי
- * @returns {number} מזהה בית הספר
- */
-function getCurrentSchoolIndex() {
-    return window.currentUser?.schoolInfo?.school_index ?? 0;
-}
-
 // ==================== INITIALIZATION ====================
 
 /**

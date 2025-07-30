@@ -55,7 +55,7 @@
                     {% if current_user %}
                         <!-- משתמש מחובר -->
                         <div class="user-info">
-                            <span class="user-name">👤 {{ current_user.schoolInfo.school_name or current_user.username }}</span>
+                            <span class="user-name">🏫 {{ current_user.schoolInfo.school_name or current_user.username }}</span>
                             <a href="{{ url_for('logout') }}" class="login-btn">
                                 <i class="fas fa-sign-out-alt"></i> התנתק
                             </a>

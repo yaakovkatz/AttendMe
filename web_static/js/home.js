@@ -36,10 +36,8 @@ async function loadDashboardData() {
     console.log('📊 טוען נתוני dashboard...');
 
     try {
-        const username = getCurrentUsername();
-
-        // טעינת נתוני אנשים
-        const peopleResponse = await fetch(`/api/get_loaded_people?username=${username}`);
+        const schoolIndex = getCurrentSchoolIndex();
+        const peopleResponse = await fetch(`/api/get_loaded_people?school_index=${schoolIndex}`);
         if (peopleResponse.ok) {
             const peopleData = await peopleResponse.json();
 
@@ -178,8 +176,8 @@ async function loadRecentActivity() {
     console.log('📝 טוען פעילות אחרונה...');
 
     try {
-        const username = getCurrentUsername();
-        const response = await fetch(`/api/recent-activity?username=${username}&limit=5`);
+        const schoolIndex = getCurrentSchoolIndex();
+        const response = await fetch(`/api/recent-activity?school_index=${schoolIndex}&limit=5`);
 
         if (response.ok) {
             const data = await response.json();
