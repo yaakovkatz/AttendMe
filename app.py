@@ -945,6 +945,63 @@ def check_attendance_all():
         }), 500
 
 
+@app.route('/api/attendance/check-person', methods=['POST'])
+def check_attendance_selected_people():
+    """בודק נוכחות עבור אנשים ספציפים"""
+    try:
+        data = request.json or {}
+
+        # קבלת school_index מהבקשה
+        school_index = data.get('school_index')
+        if school_index is None:
+            return jsonify({
+                'success': False,
+                'message': 'מזהה בית ספר נדרש',
+                'checked_people': 0,
+                'present_people': 0,
+                'absent_people': 0
+            }), 400
+
+        # בדיקת תקינות האינדקס
+        if school_index < 0:
+            return jsonify({
+                'success': False,
+                'message': 'מזהה בית ספר לא תקין',
+                'checked_people': 0,
+                'present_people': 0,
+                'absent_people': 0
+            }), 400
+
+        result = check_attendance_for_people(school_index)
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'checked_people': result['checked_people'],
+                'present_people': result['present_people'],
+                'absent_people': result['absent_people'],
+                'message': result['message'],
+                'school_name': result['school_name']
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': result['message'],
+                'checked_people': result['checked_people'],
+                'present_people': result['present_people'],
+                'absent_people': result['absent_people'],
+                'school_name': result.get('school_name')
+            }), 400
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'שגיאה בבדיקת נוכחות: {str(e)}',
+            'checked_people': 0,
+            'present_people': 0,
+            'absent_people': 0
+        }), 500
+
 # ===============================================================================
 #                            API - ניהול תמונות זמניות
 # ===============================================================================
@@ -1096,23 +1153,10 @@ def internal_error_api(error):
 
 
 # ===============================================================================
-#                             DEMO DATA INITIALIZATION
-# ===============================================================================
-
-def initialize_demo_data():
-    """יצירת נתוני הדגמה לבדיקה"""
-    print("🎯 מאתחל נתוני הדגמה...")
-    print_all_schools()
-
-
-# ===============================================================================
 #                                   הפעלת השרת
 # ===============================================================================
 
 if __name__ == '__main__':
-    # יצירת נתוני הדגמה
-    initialize_demo_data()
-
     # קבלת פורט מ-Render או ברירת מחדל
     port = int(os.environ.get("PORT", 5000))
 
