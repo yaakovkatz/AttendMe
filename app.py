@@ -22,9 +22,9 @@
 from Data_Manage import (add_new_person, remove_person, get_all_people, get_person,
                          update_person, toggle_presence, add_new_target, remove_target,
                          get_all_targets, clear_all_targets, login_user, register_school,
-                         add_demo_data, print_all_schools, get_school_index_by_username)
+                         add_demo_data, print_all_schools)
 
-from Attend_Manage import (extract_all_faces_from_targets, check_attendance_for_all_people)
+from Attend_Manage import (extract_faces_from_cameras, check_attendance_for_people)
 
 from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
 from flask_cors import CORS
@@ -862,9 +862,7 @@ def extract_faces_from_targets():
                 'faces_extracted': 0
             }), 400
 
-        # קריאה לפונקציה המעודכנת מ-Attend_Manage
-        from Attend_Manage import extract_all_faces_from_targets
-        result = extract_all_faces_from_targets(school_index)
+        result = extract_faces_from_cameras(school_index)
 
         if result['success']:
             return jsonify({
@@ -916,9 +914,7 @@ def check_attendance_all():
                 'absent_people': 0
             }), 400
 
-        # קריאה לפונקציה המעודכנת מ-Attend_Manage
-        from Attend_Manage import check_attendance_for_all_people
-        result = check_attendance_for_all_people(school_index)
+        result = check_attendance_for_people(school_index)
 
         if result['success']:
             return jsonify({
@@ -1106,7 +1102,6 @@ def internal_error_api(error):
 def initialize_demo_data():
     """יצירת נתוני הדגמה לבדיקה"""
     print("🎯 מאתחל נתוני הדגמה...")
-    add_demo_data()
     print_all_schools()
 
 

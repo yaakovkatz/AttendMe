@@ -141,7 +141,7 @@ async function loadAttendanceData() {
             params.append('date', selectedDate);
         }
 
-        const response = await fetch(`/api/get_loaded_people?${params}`);
+        const response = await fetch(`/api/get_loaded_people?school_index=${schoolIndex}`);
         const data = await response.json();
 
         if (!handleApiResponse(response, data)) {
@@ -613,7 +613,7 @@ function displayPersonCheckResult(person, result) {
                 <span class="result-text">${statusText}</span>
             </div>
             ${result.confidence ? `<div class="result-confidence">רמת ודאות: ${Math.round(result.confidence * 100)}%</div>` : ''}
-            ${result.check_time ? `<div class="result-time">זמן בדיקה: ${formatHebrewTime(result.check_time)}</div>` : ''}
+            ${result.check_time ? `<div class="result-time">זמן בדיקה: ${result.check_time}</div>` : ''}
         </div>
     `;
 }
@@ -692,7 +692,7 @@ function handleExportAttendance() {
             'שם משפחה': person.last_name,
             'תעודת זהות': person.id_number,
             'סטטוס נוכחות': person.is_present ? 'נוכח' : 'נעדר',
-            'זמן בדיקה': person.check_time ? formatHebrewTime(person.check_time) : 'לא זמין'
+            'זמן בדיקה': person.check_time || 'לא זמין'
         }));
 
         // יצירת CSV

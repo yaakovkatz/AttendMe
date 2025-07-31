@@ -50,9 +50,6 @@ class Person:
         """מעדכן את זמן הבדיקה."""
         self.check_time = datetime.now().strftime("%d/%m/%y %H:%M")
 
-    def get_check_time_string(self):
-        return self.check_time.strftime("%d/%m/%Y %H:%M")
-
     def get_person_details(self):
         """מחזיר את כל פרטי האדם כמילון, מותאם לעבודה עם ענן."""
         return {
