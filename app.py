@@ -22,7 +22,7 @@
 from Data_Manage import (add_new_person, remove_person, get_all_people, get_person,
                          update_person, toggle_presence, add_new_target, remove_target,
                          get_all_targets, clear_all_targets, login_user, register_school,
-                         add_new_image_url, add_demo_data, print_all_schools)
+                         add_new_image_url)
 
 from Attend_Manage import (extract_faces_from_cameras, check_attendance_for_people,
                            check_attendance_for_selected_people)
@@ -65,8 +65,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # הגדרת CORS
 CORS(app)
-
-print("🚀 Starting Flask server on port 5000")
 
 logging.basicConfig(level=logging.INFO)
 app.logger.setLevel(logging.INFO)
@@ -1335,8 +1333,6 @@ if __name__ == '__main__':
 
             # מידע לדיבוג
             print("🔍 Debug information:")
-            print(f"  - Python version: {sys.version}")
-            print(f"  - Flask version: {flask.__version__}")
             print(f"  - Working directory: {os.getcwd()}")
             print(f"  - Environment variables: PORT={os.environ.get('PORT')}")
 
