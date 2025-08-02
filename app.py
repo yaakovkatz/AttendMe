@@ -1293,24 +1293,52 @@ def internal_error_api(error):
 
 
 # ===============================================================================
-#                                   הפעלת השרת
+#                                   הפעלת השרת - תיקון ל-Render
 # ===============================================================================
 
 if __name__ == '__main__':
-    # קבלת פורט מ-Render או ברירת מחדל
-    port = int(os.environ.get("PORT", 5000))
+    # קבלת פורט מ-Render - חשוב מאוד!
+    port = int(os.environ.get("PORT", 10000))  # 🔧 שונה מ-5000 ל-10000
 
     print(f"🚀 Starting Flask server on port {port}")
+    print(f"🌍 Environment: {'Render' if os.environ.get('RENDER') else 'Local'}")
+    print(f"🔗 Host: 0.0.0.0 (required for Render)")
+
+    # הדפסת מידע לדיבוג
+    print(f"📊 PORT environment variable: {os.environ.get('PORT', 'Not set')}")
+    print(f"📊 App debug mode: {app.debug}")
 
     try:
+        # ✅ הגדרות נכונות ל-Render
         app.run(
-            debug=False,
-            host='0.0.0.0',
-            port=port,
-            threaded=True
+            debug=False,  # ❌ חובה False בפרודקשן
+            host='0.0.0.0',  # ✅ חובה 0.0.0.0 ל-Render
+            port=port,  # ✅ חובה להשתמש ב-PORT environment variable
+            threaded=True,  # ✅ ביצועים טובים יותר
+            use_reloader=False  # ❌ למנוע בעיות ב-Render
         )
+        print("✅ Server started successfully!")
+
     except Exception as e:
-        print(f"Error starting server: {e}")
+        print(f"❌ Error starting server: {e}")
+
+        # ניסיון חלופי עם הגדרות בסיסיות יותר
+        try:
+            print("🔄 Trying alternative configuration...")
+            app.run(
+                host='0.0.0.0',
+                port=port,
+                debug=False
+            )
+        except Exception as e2:
+            print(f"❌ Alternative configuration also failed: {e2}")
+
+            # מידע לדיבוג
+            print("🔍 Debug information:")
+            print(f"  - Python version: {sys.version}")
+            print(f"  - Flask version: {flask.__version__}")
+            print(f"  - Working directory: {os.getcwd()}")
+            print(f"  - Environment variables: PORT={os.environ.get('PORT')}")
 
 # ===============================================================================
 #                                    הערות למימוש
