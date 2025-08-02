@@ -34,6 +34,18 @@ let tempPersonData = {
     imageUrls: []             // מערך של URL-ים לתצוגה
 };
 
+/**
+ * משתנה לאחסון נתונים זמניים גם עבור אדם קיים
+ * משמש לשמירת תמונות זמנית עד לאישור סופי
+ * @type {Object}
+ */
+let tempUploadData = {
+    isActive: false,           // האם יש תהליך העלאה זמני פעיל
+    personId: null,           // מזהה האדם
+    uploadedImages: [],       // מערך של public_id של תמונות שהועלו זמנית
+    imageUrls: []            // מערך של URL-ים לתצוגה זמנית
+};
+
 
 // ==================== INITIALIZATION ====================
 
@@ -97,13 +109,71 @@ function initializePeopleEventListeners() {
     // טיפול מיוחד בסגירת מודל העלאת תמונות
     setupUploadModalHandlers();
 
-    // תצוגה מקדימה של תמונה
-    const personImageInput = document.getElementById('person-image');
-    if (personImageInput) {
-        personImageInput.addEventListener('change', handleImagePreview);
-    }
+    // בדיקת תקינות שדה בחירת קבצים
+    setupFileInputValidation();
 
     console.log('🎯 מאזיני אירועים לניהול אנשים הוגדרו');
+}
+
+/**
+ * הוספת מאזין אירועים לשדה בחירת הקבצים - בדיקה דינמית
+ */
+function setupFileInputValidation() {
+    const personImageInput = document.getElementById('person-image');
+    if (personImageInput) {
+        personImageInput.addEventListener('change', function(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            // בדיקת מגבלה בזמן אמת
+            let maxAllowed = 5;
+            let currentImages = 0;
+            let warningMessage = '';
+
+            if (tempPersonData.isActive) {
+                // אדם חדש
+                currentImages = tempPersonData.imageUrls.length;
+                maxAllowed = 5 - currentImages;
+
+                if (files.length > maxAllowed) {
+                    warningMessage = `⚠️ ניתן להעלות עוד ${maxAllowed} תמונות בלבד מתוך 5. בחרת ${files.length} תמונות.`;
+                }
+            } else if (tempUploadData.isActive) {
+                // אדם קיים
+                const existingImages = getPersonImageCount(tempUploadData.personId);
+                const tempImages = tempUploadData.imageUrls.length;
+                currentImages = existingImages + tempImages;
+                maxAllowed = 5 - currentImages;
+
+                if (files.length > maxAllowed) {
+                    if (maxAllowed <= 0) {
+                        warningMessage = `⚠️ האדם כבר מגיע למקסימום של 5 תמונות. לא ניתן להוסיף עוד תמונות.`;
+                    } else {
+                        warningMessage = `⚠️ ניתן להעלות עוד ${maxAllowed} תמונות בלבד. בחרת ${files.length} תמונות.`;
+                    }
+                }
+            }
+
+            // הצגת אזהרה אם צריך
+            if (warningMessage) {
+                showNotification(warningMessage, 'warning');
+
+                // איפוס השדה
+                event.target.value = '';
+
+                // הצגת הודעה מפורטת
+                setTimeout(() => {
+                    if (maxAllowed > 0) {
+                        showNotification(`אנא בחר עד ${maxAllowed} תמונות בלבד.`, 'info');
+                    }
+                }, 1500);
+            } else if (files.length > 0) {
+                // הצגת הודעת אישור
+                const totalAfter = currentImages + files.length;
+                showNotification(`נבחרו ${files.length} תמונות. סה"כ יהיו ${totalAfter} תמונות.`, 'success');
+            }
+        });
+    }
 }
 
 /**
@@ -128,15 +198,17 @@ function setupUploadModalHandlers() {
         }
     });
 
-    // כפתור "צור" בחלון העלאת תמונות
+    // כפתור "צור/הוסף" בחלון העלאת תמונות
     const finishBtn = document.getElementById('finish-upload-button');
     if (finishBtn) {
         finishBtn.addEventListener('click', function() {
             if (tempPersonData.isActive) {
                 finishNewPersonCreation();
+            } else if (tempUploadData.isActive) {
+                finishExistingPersonUpload();
             } else {
-                closeUploadModal();
-                loadPeopleData(); // רענון הרשימה
+                // מצב שגיאה
+                showNotification('שגיאה: אין נתונים זמניים פעילים', 'error');
             }
         });
     }
@@ -154,6 +226,16 @@ function handleUploadModalClose(event) {
         }
         return;
     }
+
+    // אם זה אדם קיים ויש תמונות זמניות
+    if (tempUploadData.isActive && tempUploadData.uploadedImages.length > 0) {
+        const confirmed = confirm('האם אתה בטוח שברצונך לבטל? התמונות שהועלו לא יישמרו.');
+        if (confirmed) {
+            cancelExistingPersonUpload();
+        }
+        return;
+    }
+
     closeUploadModal();
 }
 
@@ -496,7 +578,7 @@ async function finishNewPersonCreation() {
             body: JSON.stringify({
                 school_index: schoolIndex,
                 person_details: tempPersonData.personDetails,
-                image_urls: tempPersonData.imageUrls
+                image_urls: tempPersonData.imageUrls // התמונות בסדר הנכון כפי שהועלו
             })
         });
 
@@ -553,6 +635,81 @@ function clearTempPersonData() {
     };
 }
 
+/**
+ * ניקוי הנתונים הזמניים של העלאה
+ */
+function clearTempUploadData() {
+    console.log('🧹 מנקה נתונים זמניים של העלאה');
+    tempUploadData = {
+        isActive: false,
+        personId: null,
+        uploadedImages: [],
+        imageUrls: []
+    };
+}
+
+/**
+ * ביטול העלאת תמונות לאדם קיים
+ */
+async function cancelExistingPersonUpload() {
+    console.log('❌ מבטל העלאת תמונות לאדם קיים');
+
+    // מחיקת תמונות זמניות
+    if (tempUploadData.uploadedImages.length > 0) {
+        try {
+            for (const public_id of tempUploadData.uploadedImages) {
+                await fetch('/api/delete_temp_image', {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ public_id: public_id })
+                });
+            }
+            console.log('🗑️ נמחקו תמונות זמניות:', tempUploadData.uploadedImages);
+        } catch (error) {
+            console.error('שגיאה במחיקת תמונות זמניות:', error);
+        }
+    }
+
+    clearTempUploadData();
+    closeUploadModal();
+}
+
+/**
+ * הוספת התמונות הזמניות לאדם קיים
+ */
+async function finishExistingPersonUpload() {
+    console.log('🏁 מסיים העלאת תמונות לאדם קיים');
+
+    if (!requireLogin('הוספת תמונות')) return;
+
+    if (!tempUploadData.isActive || !tempUploadData.personId) {
+        showNotification('שגיאה: נתונים זמניים לא תקינים', 'error');
+        return;
+    }
+
+    if (tempUploadData.imageUrls.length === 0) {
+        showNotification('נא להעלות לפחות תמונה אחת', 'error');
+        return;
+    }
+
+    const schoolIndex = getCurrentSchoolIndex();
+
+    try {
+        // הוספת כל התמונות לאדם
+        for (const imageUrl of tempUploadData.imageUrls) {
+            await addImageToExistingPerson(tempUploadData.personId, imageUrl, schoolIndex);
+        }
+
+        showNotification(`הוספו ${tempUploadData.imageUrls.length} תמונות בהצלחה!`, 'success');
+        clearTempUploadData();
+        closeUploadModal();
+        await loadPeopleData();
+    } catch (error) {
+        console.error('❌ שגיאה בהוספת תמונות:', error);
+        showNotification('שגיאה בהוספת התמונות', 'error');
+    }
+}
+
 // ==================== UPLOAD MODAL MANAGEMENT ====================
 
 /**
@@ -579,7 +736,12 @@ function openUploadModalForNewPerson(personData) {
         btn.style.visibility = 'hidden';
     });
 
-    updateUploadProgress(0);
+    // אתחול מד ההתקדמות
+    setTimeout(() => {
+        initializeProgressElements();
+        updateUploadProgress(0);
+    }, 100);
+
     showModal('upload-image-modal');
 }
 
@@ -590,6 +752,14 @@ function openUploadModal(personId, personName) {
     console.log(`📂 פותח חלון העלאה עבור ${personName}`);
 
     resetUploadModal();
+
+    // אתחול נתונים זמניים עבור אדם קיים
+    tempUploadData = {
+        isActive: true,
+        personId: personId,
+        uploadedImages: [],
+        imageUrls: []
+    };
 
     document.getElementById('upload-person-id').value = personId;
 
@@ -604,8 +774,19 @@ function openUploadModal(personId, personName) {
         btn.style.visibility = 'visible';
     });
 
-    const currentImageCount = getPersonImageCount(personId);
-    updateUploadProgress(currentImageCount);
+    // שינוי הכפתור ל"הוסף" עבור אדם קיים
+    const finishBtn = document.getElementById('finish-upload-button');
+    if (finishBtn) {
+        finishBtn.textContent = 'הוסף תמונות';
+        finishBtn.style.display = 'none'; // נסתיר אותו בהתחלה
+    }
+
+    // אתחול מד ההתקדמות
+    setTimeout(() => {
+        initializeProgressElements();
+        const currentImageCount = getPersonImageCount(personId);
+        updateUploadProgress(currentImageCount);
+    }, 100);
 
     showModal('upload-image-modal');
 }
@@ -614,19 +795,31 @@ function openUploadModal(personId, personName) {
  * איפוס חלון העלאת תמונות
  */
 function resetUploadModal() {
+    console.log('🔄 מאפס חלון העלאת תמונות...');
+
     const form = document.getElementById('upload-image-form');
     if (form) form.reset();
 
     const fileInput = document.getElementById('person-image');
     if (fileInput) fileInput.value = '';
 
-    // הסרת progress containers קודמים
+    // הסרת progress containers קודמים מהעלאות קודמות
     const existingProgress = document.querySelector('.upload-progress-container');
     if (existingProgress) {
         existingProgress.remove();
     }
 
-    updateUploadProgress(tempPersonData.isActive ? tempPersonData.uploadedImages.length : 0);
+    // ניקוי אנימציות קודמות
+    setTimeout(() => {
+        for (let i = 1; i <= 5; i++) {
+            const step = document.getElementById(`progress-step-${i}`);
+            if (step) {
+                step.style.animation = 'none';
+            }
+        }
+    }, 50);
+
+    console.log('✅ איפוס חלון הושלם');
 }
 
 /**
@@ -643,15 +836,49 @@ function closeUploadModal() {
 
     resetUploadModal();
 
+    // ניקוי נתונים זמניים
     if (tempPersonData.isActive) {
         clearTempPersonData();
+    }
+
+    if (tempUploadData.isActive) {
+        clearTempUploadData();
     }
 }
 
 // ==================== IMAGE UPLOAD ====================
 
 /**
- * טיפול בהעלאת תמונות
+ * הוספת תמונה לאדם קיים
+ */
+async function addImageToExistingPerson(personId, imageUrl, schoolIndex) {
+    try {
+        const response = await fetch('/api/upload_person_image', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                school_index: schoolIndex,
+                person_id: personId,
+                image_url: imageUrl
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            console.error('שגיאה בהוספת תמונה לאדם קיים:', data.error);
+            throw new Error(data.error);
+        }
+
+        return data;
+    } catch (error) {
+        console.error('שגיאה בהוספת תמונה לאדם קיים:', error);
+        throw error;
+    }
+}
+
+/**
+ * טיפול בהעלאת תמונות - עם בדיקת מגבלת 5 תמונות
  */
 async function handleUploadImage(event) {
     event.preventDefault();
@@ -668,34 +895,64 @@ async function handleUploadImage(event) {
 
     const files = Array.from(fileInput.files);
 
-    if (files.length > 5) {
-        showNotification('ניתן להעלות עד 5 תמונות בלבד', 'error');
-        return;
+    // בדיקת מגבלה עבור אדם חדש
+    if (tempPersonData.isActive) {
+        const currentImages = tempPersonData.imageUrls.length;
+        const totalAfterUpload = currentImages + files.length;
+
+        if (totalAfterUpload > 5) {
+            const maxAllowed = 5 - currentImages;
+            showNotification(`ניתן להעלות עוד ${maxAllowed} תמונות בלבד. בחרת ${files.length} תמונות.`, 'error');
+            return;
+        }
+    }
+    // בדיקת מגבלה עבור אדם קיים
+    else if (tempUploadData.isActive) {
+        const existingImages = getPersonImageCount(personId);
+        const currentTempImages = tempUploadData.imageUrls.length;
+        const totalAfterUpload = existingImages + currentTempImages + files.length;
+
+        if (totalAfterUpload > 5) {
+            const maxAllowed = 5 - existingImages - currentTempImages;
+            if (maxAllowed <= 0) {
+                showNotification(`האדם כבר מגיע למקסימום של 5 תמונות. לא ניתן להוסיף עוד תמונות.`, 'error');
+            } else {
+                showNotification(`ניתן להעלות עוד ${maxAllowed} תמונות בלבד. בחרת ${files.length} תמונות.`, 'error');
+            }
+            return;
+        }
     }
 
     console.log(`מתחיל להעלות ${files.length} תמונות...`);
 
-    // יצירת progress container
+    // יצירת progress container להעלאה
     const form = event.target;
     let progressContainer = createProgressContainer(form);
 
     let successCount = 0;
     let errorCount = 0;
+    let uploadedImageUrls = [];
 
-    // העלאת קבצים
+    // העלאת קבצים (כולם זמני עכשיו)
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
         try {
-            updateProgressDisplay(progressContainer, `מעלה תמונה ${i + 1} מתוך ${files.length}: ${file.name.substring(0, 20)}...`);
+            updateProgressDisplay(progressContainer, `📤 מעלה תמונה ${i + 1} מתוך ${files.length}: ${file.name.substring(0, 20)}...`);
 
             const formData = new FormData();
             formData.append('image', file);
 
             if (tempPersonData.isActive) {
+                // אדם חדש
                 formData.append('first_name', tempPersonData.personDetails.id_number);
                 formData.append('last_name', 'person');
                 formData.append('id_number', tempPersonData.personDetails.id_number);
+            } else {
+                // אדם קיים - גם זה זמני עכשיו
+                formData.append('first_name', personId);
+                formData.append('last_name', 'temp');
+                formData.append('id_number', personId);
             }
 
             const response = await fetch('/api/upload_temp_image', {
@@ -707,11 +964,20 @@ async function handleUploadImage(event) {
 
             if (data.success) {
                 successCount++;
+                uploadedImageUrls.push(data.image_url);
 
                 if (tempPersonData.isActive) {
+                    // אדם חדש
                     tempPersonData.uploadedImages.push(data.public_id);
                     tempPersonData.imageUrls.push(data.image_url);
                     updateUploadProgress(tempPersonData.imageUrls.length);
+                } else {
+                    // אדם קיים - שמירה זמנית
+                    tempUploadData.uploadedImages.push(data.public_id);
+                    tempUploadData.imageUrls.push(data.image_url);
+                    const currentImageCount = getPersonImageCount(personId);
+                    const totalImages = currentImageCount + tempUploadData.imageUrls.length;
+                    updateUploadProgress(totalImages);
                 }
 
                 console.log(`✅ הועלה בהצלחה: ${file.name}`);
@@ -720,7 +986,7 @@ async function handleUploadImage(event) {
                 console.error(`❌ שגיאה בהעלאת ${file.name}:`, data.error);
             }
 
-            // עדכון progress bar
+            // עדכון progress bar של ההעלאה
             const progress = ((i + 1) / files.length) * 100;
             updateProgressBar(progressContainer, progress);
 
@@ -745,9 +1011,7 @@ async function handleUploadImage(event) {
         }
     }, 3000);
 
-    if (!tempPersonData.isActive) {
-        await loadPeopleData();
-    }
+    // לא רוענן את הנתונים - התמונות עדיין זמניות
 }
 
 /**
@@ -823,6 +1087,230 @@ function handleImagePreview() {
     // כרגע לא מוצג preview, אבל ניתן להוסיף בעתיד
 }
 
+// ==================== PROGRESS ELEMENTS MANAGEMENT ====================
+
+/**
+ * אתחול אלמנטי מד ההתקדמות
+ */
+function initializeProgressElements() {
+    console.log('🎯 מאתחל אלמנטי מד ההתקדמות...');
+
+    // וידוא שקונטיינר מד ההתקדמות מוצג
+    const progressContainer = document.querySelector('.upload-progress');
+    if (progressContainer) {
+        progressContainer.style.display = 'flex';
+        progressContainer.style.visibility = 'visible';
+        progressContainer.style.opacity = '1';
+        console.log('✅ קונטיינר מד ההתקדמות מוצג');
+    } else {
+        console.warn('⚠️ לא נמצא קונטיינר מד ההתקדמות');
+        return; // אם אין קונטיינר, אין טעם להמשיך
+    }
+
+    // אתחול פסי ההתקדמות
+    for (let i = 1; i <= 5; i++) {
+        const step = document.getElementById(`progress-step-${i}`);
+        if (step) {
+            // ניקוי קלאסים קודמים
+            step.className = 'progress-step';
+
+            // הוספת מספר
+            step.textContent = i.toString();
+
+            // עיצוב בסיסי (ה-CSS כבר אמור לטפל בזה, אבל נוודא)
+            step.style.display = 'flex';
+            step.style.visibility = 'visible';
+            step.style.opacity = '1';
+
+            // סימון פסים אופציונליים
+            if (i > 3) {
+                step.classList.add('optional');
+            }
+
+            console.log(`✅ פס ${i} אותחל`);
+        } else {
+            console.warn(`⚠️ לא נמצא progress-step-${i}`);
+        }
+    }
+
+    // וידוא שטקסט הסטטוס מוצג
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.visibility = 'visible';
+        statusEl.style.opacity = '1';
+        console.log('✅ סטטוס ההעלאה מוצג');
+    } else {
+        console.warn('⚠️ לא נמצא upload-status');
+    }
+
+    console.log('✅ אתחול מד ההתקדמות הושלם');
+}
+
+/**
+ * עדכון מד התקדמות - עם הודעות משופרות על מגבלות
+ */
+function updateUploadProgress(imageCount) {
+    console.log(`🎯 מעדכן מד התקדמות ל: ${imageCount} תמונות`);
+
+    // עדכון הפסים הגרפיים
+    for (let i = 1; i <= 5; i++) {
+        const step = document.getElementById(`progress-step-${i}`);
+        if (step) {
+            // הסרת כל הקלאסים הקודמים
+            step.classList.remove('completed', 'active', 'pending');
+
+            // הוספת המספר לפס
+            step.textContent = i.toString();
+
+            if (i <= imageCount) {
+                // פס מושלם
+                step.classList.add('completed');
+                if (tempPersonData.isActive && imageCount >= 3) {
+                    // אם זה אדם חדש והגענו למינימום - הוסף אנימציה
+                    setTimeout(() => {
+                        step.style.animation = 'completePulse 0.6s ease-out';
+                    }, (i - 1) * 100); // אנימציה מדורגת
+                }
+            } else if (i === imageCount + 1 && imageCount < 5) {
+                // הפס הבא שצריך להשלים
+                step.classList.add('active');
+            }
+
+            // סימון פסים אופציונליים (4-5)
+            if (i > 3) {
+                step.classList.add('optional');
+            }
+
+            console.log(`✅ פס ${i} עודכן: ${step.className}`);
+        } else {
+            console.warn(`⚠️ לא נמצא אלמנט progress-step-${i}`);
+        }
+    }
+
+    // עדכון הטקסט עם אייקונים ומגבלות
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) {
+        let statusText = '';
+        let statusColor = '#666';
+
+        if (tempPersonData.isActive) {
+            // אדם חדש - דרושות לפחות 3 תמונות
+            const remaining = Math.max(0, 3 - imageCount);
+
+            if (imageCount === 0) {
+                statusText = '📷 יש להעלות לפחות 3 תמונות ועד 5 תמונות בסך הכל';
+                statusColor = '#666';
+            } else if (remaining > 0) {
+                statusText = `📤 יש לך ${imageCount} תמונות. נדרשות עוד ${remaining} תמונות לפחות.`;
+                statusColor = '#ff9800';
+            } else if (imageCount < 5) {
+                statusText = `✅ יש לך ${imageCount} תמונות מוכנות! ניתן להוסיף עד ${5 - imageCount} תמונות נוספות.`;
+                statusColor = '#4caf50';
+            } else {
+                statusText = `🎉 יש לך ${imageCount} תמונות (מקסימום 5 הושג)!`;
+                statusColor = '#4caf50';
+            }
+        } else {
+            // אדם קיים - הוספת תמונות (כולל זמניות)
+            const existingImages = getPersonImageCount(tempUploadData.personId);
+            const tempImages = tempUploadData.isActive ? tempUploadData.imageUrls.length : 0;
+            const totalAfterAdd = existingImages + tempImages;
+
+            if (tempImages === 0) {
+                const canAdd = 5 - existingImages;
+                if (canAdd > 0) {
+                    statusText = `📷 יש לאדם ${existingImages} תמונות. ניתן להוסיף עד ${canAdd} תמונות נוספות.`;
+                    statusColor = '#666';
+                } else {
+                    statusText = `🔒 יש לאדם ${existingImages} תמונות (מקסימום 5 הושג).`;
+                    statusColor = '#ff9800';
+                }
+            } else if (totalAfterAdd <= 5) {
+                statusText = `📤 יש לאדם ${existingImages} תמונות + ${tempImages} חדשות = ${totalAfterAdd}/5 תמונות.`;
+                statusColor = '#4caf50';
+            } else {
+                statusText = `⚠️ חריגה ממגבלה! ${existingImages} קיימות + ${tempImages} חדשות = ${totalAfterAdd} (מעל 5).`;
+                statusColor = '#ff4444';
+            }
+        }
+
+        statusEl.textContent = statusText;
+        statusEl.style.color = statusColor;
+        statusEl.style.display = 'block';
+        statusEl.style.visibility = 'visible';
+    } else {
+        console.warn('⚠️ לא נמצא אלמנט upload-status');
+    }
+
+    // עדכון כפתור צור/הוסף
+    const finishBtn = document.getElementById('finish-upload-button');
+    if (finishBtn) {
+        if (tempPersonData.isActive) {
+            // אדם חדש - כפתור "צור"
+            if (imageCount >= 3 && imageCount <= 5) {
+                finishBtn.style.display = 'inline-block';
+                finishBtn.disabled = false;
+                finishBtn.textContent = '✨ צור אדם';
+                finishBtn.style.backgroundColor = '#4caf50';
+                finishBtn.style.color = 'white';
+                finishBtn.style.border = 'none';
+                finishBtn.style.padding = '10px 20px';
+                finishBtn.style.borderRadius = '5px';
+                finishBtn.style.cursor = 'pointer';
+
+                // אנימציה קלה לכפתור
+                finishBtn.style.animation = 'buttonReady 0.5s ease-out';
+            } else if (imageCount < 3) {
+                finishBtn.style.display = 'inline-block';
+                finishBtn.disabled = true;
+                finishBtn.textContent = `⏳ נדרשות עוד ${3 - imageCount} תמונות`;
+                finishBtn.style.backgroundColor = '#ccc';
+                finishBtn.style.color = '#666';
+                finishBtn.style.cursor = 'not-allowed';
+                finishBtn.style.animation = 'none';
+            } else {
+                // יותר מ-5 תמונות - לא אמור לקרות אבל אם כן
+                finishBtn.style.display = 'inline-block';
+                finishBtn.disabled = true;
+                finishBtn.textContent = `❌ יותר מדי תמונות (${imageCount}/5)`;
+                finishBtn.style.backgroundColor = '#ff4444';
+                finishBtn.style.color = 'white';
+                finishBtn.style.cursor = 'not-allowed';
+            }
+        } else {
+            // אדם קיים - כפתור "הוסף"
+            const tempImages = tempUploadData.isActive ? tempUploadData.imageUrls.length : 0;
+            const existingImages = getPersonImageCount(tempUploadData.personId);
+            const totalAfterAdd = existingImages + tempImages;
+
+            if (tempImages > 0 && totalAfterAdd <= 5) {
+                finishBtn.style.display = 'inline-block';
+                finishBtn.disabled = false;
+                finishBtn.textContent = `📎 הוסף ${tempImages} תמונות`;
+                finishBtn.style.backgroundColor = '#2196F3';
+                finishBtn.style.color = 'white';
+                finishBtn.style.cursor = 'pointer';
+                finishBtn.style.border = 'none';
+                finishBtn.style.padding = '10px 20px';
+                finishBtn.style.borderRadius = '5px';
+            } else if (tempImages > 0 && totalAfterAdd > 5) {
+                // יותר מדי תמונות - לא אמור לקרות אבל אם כן
+                finishBtn.style.display = 'inline-block';
+                finishBtn.disabled = true;
+                finishBtn.textContent = `❌ חריגה ממגבלה (${totalAfterAdd}/5)`;
+                finishBtn.style.backgroundColor = '#ff4444';
+                finishBtn.style.color = 'white';
+                finishBtn.style.cursor = 'not-allowed';
+            } else {
+                finishBtn.style.display = 'none';
+            }
+        }
+    }
+
+    console.log(`✅ מד ההתקדמות עודכן בהצלחה ל-${imageCount} תמונות`);
+}
+
 // ==================== HELPER FUNCTIONS ====================
 
 /**
@@ -835,68 +1323,9 @@ function getPersonImageCount(personId) {
     }
 
     const person = peopleData.find(p => p.id_number === personId);
-    return person && person.image_urls ? person.image_urls.length : 0;
-}
+    const existingCount = person && person.image_urls ? person.image_urls.length : 0;
 
-/**
- * עדכון מד התקדמות העלאת תמונות
- */
-function updateUploadProgress(imageCount) {
-    console.log(`🎯 מעדכן מד התקדמות ל: ${imageCount} תמונות`);
-
-    // עדכון הפסים הגרפיים
-    for (let i = 1; i <= 5; i++) {
-        const step = document.getElementById(`progress-step-${i}`);
-        if (step) {
-            if (i <= imageCount) {
-                step.classList.add('completed');
-                step.style.backgroundColor = '#4caf50';
-                step.style.borderColor = '#4caf50';
-            } else {
-                step.classList.remove('completed');
-                step.style.backgroundColor = '#ddd';
-                step.style.borderColor = '#ddd';
-            }
-        }
-    }
-
-    // עדכון הטקסט
-    const statusEl = document.getElementById('upload-status');
-    if (statusEl) {
-        const remaining = Math.max(0, 3 - imageCount);
-
-        if (imageCount === 0) {
-            statusEl.textContent = 'יש להעלות לפחות 3 תמונות ועד 5 תמונות בסך הכל';
-            statusEl.style.color = '#666';
-        } else if (remaining > 0) {
-            statusEl.textContent = `יש לך ${imageCount} תמונות. נדרשות עוד ${remaining} תמונות לפחות.`;
-            statusEl.style.color = '#ff9800';
-        } else if (imageCount < 5) {
-            statusEl.textContent = `יש לך ${imageCount} תמונות. ניתן להוסיף עד ${5 - imageCount} תמונות נוספות.`;
-            statusEl.style.color = '#4caf50';
-        } else {
-            statusEl.textContent = `יש לך ${imageCount} תמונות (מקסימום).`;
-            statusEl.style.color = '#4caf50';
-        }
-    }
-
-    // עדכון כפתור צור
-    const finishBtn = document.getElementById('finish-upload-button');
-    if (finishBtn) {
-        if (imageCount >= 3) {
-            finishBtn.style.display = 'inline-block';
-            finishBtn.disabled = false;
-            finishBtn.textContent = 'צור';
-        } else {
-            if (tempPersonData.isActive) {
-                finishBtn.style.display = 'inline-block';
-                finishBtn.disabled = true;
-                finishBtn.textContent = `נדרשות עוד ${3 - imageCount} תמונות`;
-            } else {
-                finishBtn.style.display = 'none';
-            }
-        }
-    }
+    return existingCount;
 }
 
 /**
@@ -924,6 +1353,44 @@ function filterPeopleTable() {
 
 // ==================== DEBUG UTILITIES ====================
 
+/**
+ * פונקצית עזר לבדיקת מצב מד ההתקדמות (לדיבוג)
+ */
+function debugProgressElements() {
+    console.log('🔍 בודק אלמנטי מד התקדמות:');
+
+    const progressContainer = document.querySelector('.upload-progress');
+    console.log('upload-progress container:', progressContainer ? 'נמצא' : 'לא נמצא', progressContainer);
+    if (progressContainer) {
+        const styles = getComputedStyle(progressContainer);
+        console.log('  - display:', styles.display);
+        console.log('  - visibility:', styles.visibility);
+        console.log('  - opacity:', styles.opacity);
+    }
+
+    for (let i = 1; i <= 5; i++) {
+        const step = document.getElementById(`progress-step-${i}`);
+        console.log(`progress-step-${i}:`, step ? 'נמצא' : 'לא נמצא');
+        if (step) {
+            console.log(`  - תוכן: "${step.textContent}"`);
+            console.log(`  - classes: ${step.className}`);
+            const styles = getComputedStyle(step);
+            console.log(`  - display: ${styles.display}`);
+            console.log(`  - visibility: ${styles.visibility}`);
+            console.log(`  - backgroundColor: ${styles.backgroundColor}`);
+        }
+    }
+
+    const statusEl = document.getElementById('upload-status');
+    console.log('upload-status:', statusEl ? 'נמצא' : 'לא נמצא');
+    if (statusEl) {
+        console.log(`  - תוכן: "${statusEl.textContent}"`);
+        const styles = getComputedStyle(statusEl);
+        console.log(`  - display: ${styles.display}`);
+        console.log(`  - visibility: ${styles.visibility}`);
+    }
+}
+
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     window.debugPeople = {
         showData: () => {
@@ -933,7 +1400,8 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 
         showTempData: () => {
             console.log('Temp Person Data:', tempPersonData);
-            return tempPersonData;
+            console.log('Temp Upload Data:', tempUploadData);
+            return { tempPersonData, tempUploadData };
         },
 
         refresh: loadPeopleData,
@@ -945,6 +1413,16 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
                 id_number: '123456789'
             });
             console.log('🧪 נוצר אדם זמני לדיבוג');
+        },
+
+        checkProgress: debugProgressElements,
+        showProgress: () => initializeProgressElements(),
+        testProgress: (count) => updateUploadProgress(count || 0),
+        forceInit: () => {
+            setTimeout(() => {
+                initializeProgressElements();
+                updateUploadProgress(0);
+            }, 100);
         }
     };
 
@@ -965,9 +1443,11 @@ document.addEventListener('DOMContentLoaded', function() {
  *
  * 👥 ניהול רשימת אנשים מלא
  * ➕ הוספת אנשים חדשים עם תמונות
- * 📷 העלאת תמונות מתקדמת
+ * 📷 העלאת תמונות מתקדמת עם מד התקדמות
  * 🗑️ מחיקת אנשים
  * 🔍 חיפוש וסינון
  * 📱 ממשק רספונסיבי
  * 🔧 כלי דיבוג מתקדמים
+ * ⏳ שמירה זמנית של תמונות עבור אדם קיים
+ * 🚫 הגבלת מקסימום 5 תמונות עם בדיקות מקדימות
  */

@@ -12,7 +12,7 @@
 <section id="people-management" class="section">
     <div class="container">
         <h2 class="section-title">ניהול אנשים</h2>
-        
+
         <!-- Controls -->
         <div class="people-controls">
             <button id="add-person-btn" class="action-button">
@@ -73,12 +73,12 @@
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <h3>העלאת תמונה</h3>
-            
+
             <!-- Upload Status -->
             <div id="upload-status" class="upload-status">
                 יש להעלות לפחות 3 תמונות ועד 5 תמונות בסך הכל
             </div>
-            
+
             <!-- Progress Steps -->
             <div class="upload-progress">
                 <div class="progress-step" id="progress-step-1"></div>
@@ -87,16 +87,16 @@
                 <div class="progress-step optional" id="progress-step-4"></div>
                 <div class="progress-step optional" id="progress-step-5"></div>
             </div>
-            
+
             <form id="upload-image-form">
                 <input type="hidden" id="upload-person-id" name="id_number">
                 <div class="form-group">
-                    <label for="person-image">בחר תמונה:</label>
+                    <label for="person-image">בחר תמונות:</label>
                     <input type="file" id="person-image" name="file" accept="image/*" multiple required>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="action-button">העלה</button>
-                    <button type="button" id="finish-upload-button" style="display: none;" class="action-button secondary">צור</button>
+                    <button type="button" id="finish-upload-button" style="display: none;" class="action-button secondary">הוסף</button>
                     <button type="button" class="action-button secondary close-modal-btn">ביטול</button>
                 </div>
             </form>

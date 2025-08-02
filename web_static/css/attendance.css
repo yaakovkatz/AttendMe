@@ -31,9 +31,27 @@
 /* שדה קלט תאריך */
 .date-filter input {
     padding: 10px 15px;              /* מרווח פנימי */
-    border: 1px solid #ddd;          /* גבול אפור */
+    border: 1px solid #ddd;          /* גبול אפור */
     border-radius: var(--border-radius); /* פינות עגולות */
     font-size: 1rem;                 /* גודל טקסט */
+}
+
+/* ==================== ADVANCED CONTROLS ==================== */
+/* בקרים מתקדמים - כפתורי בדיקת נוכחות */
+
+.advanced-controls {
+    display: flex;                   /* פריסה גמישה */
+    justify-content: center;         /* יישור למרכז */
+    gap: 20px;                       /* מרווח בין הכפתורים */
+    margin-bottom: 30px;             /* מרווח תחתון */
+    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+}
+
+/* כפתורים במרכז */
+.advanced-controls .action-button {
+    min-width: 200px;                /* רוחב מינימלי */
+    padding: 15px 25px;              /* מרווח פנימי גדול יותר */
+    font-size: 1.1rem;               /* גודל טקסט גדול יותר */
 }
 
 /* ==================== ATTENDANCE STATISTICS ==================== */
@@ -69,66 +87,21 @@
     color: var(--dark-color);        /* צבע כהה */
 }
 
-/* ==================== ADVANCED CONTROLS ==================== */
-/* בקרים מתקדמים - כפתורי בדיקת נוכחות */
+/* ==================== ATTENDANCE TABLE ==================== */
+/* טבלת נוכחות עם checkbox-ים לבחירה */
 
-.advanced-controls {
-    display: flex;                   /* פריסה גמישה */
-    justify-content: center;         /* יישור למרכז */
-    gap: 20px;                       /* מרווח בין הכפתורים */
-    margin-bottom: 30px;             /* מרווח תחתון */
-    flex-wrap: wrap;                 /* מעבר לשורה חדשה */
+/* checkbox בטבלה */
+.person-checkbox {
+    width: 18px;                     /* רוחב */
+    height: 18px;                    /* גובה */
+    cursor: pointer;                 /* סמן יד */
 }
 
-/* כפתורים במרכז */
-.advanced-controls .action-button {
-    min-width: 200px;                /* רוחב מינימלי */
-    padding: 15px 25px;              /* מרווח פנימי גדול יותר */
-    font-size: 1.1rem;               /* גודל טקסט גדול יותר */
-}
-
-/* ==================== ATTENDANCE CHECKER ==================== */
-/* מערכת בדיקת נוכחות מתקדמת */
-
-/* סקציית בדיקת נוכחות - אזור מיוחד למתקדמים */
-.attendance-checker-section {
-    background: white;               /* רקע לבן */
-    padding: 30px;                   /* מרווח פנימי */
-    border-radius: 15px;             /* פינות עגולות */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* צל */
-    margin: 30px 0;                  /* מרווח עליון ותחתון */
-    border-right: 4px solid var(--primary-color); /* גבול ימני כחול */
-}
-
-/* כותרת בדיקת נוכחות */
-.attendance-checker-section h3 {
-    color: var(--primary-color);     /* צבע כחול */
-    margin-bottom: 25px;             /* מרווח תחתון */
-    font-size: 1.3rem;               /* גודל בינוני */
-    font-weight: 600;                /* משקל טקסט בולט */
-}
-
-/* בקרי בדיקת נוכחות - תפעול הבדיקה */
-.attendance-checker-controls {
-    display: flex;                   /* פריסה גמישה */
-    flex-direction: column;          /* סידור אנכי */
-    gap: 20px;                       /* מרווח בין האלמנטים */
-    align-items: flex-start;         /* יישור לתחילת הציר */
-}
-
-/* קבוצת שדות בבדיקת נוכחות */
-.attendance-checker-controls .form-group {
-    width: 100%;                     /* רוחב מלא */
-    max-width: 300px;                /* רוחב מקסימלי */
-}
-
-/* עזרה לשדה קלט - הסבר קטן */
-.input-help {
-    color: #666;                     /* צבע אפור */
-    font-size: 14px;                 /* גודל קטן */
-    margin-top: 8px;                 /* מרווח עליון */
-    display: block;                  /* תצוגה בלוק */
-    font-style: italic;              /* טקסט נטוי */
+/* עמודת בחירה */
+.attendance-list th:first-child,
+.attendance-list td:first-child {
+    text-align: center;              /* יישור למרכז */
+    width: 60px;                     /* רוחב קבוע */
 }
 
 /* ==================== IMAGE STYLES ==================== */
@@ -143,15 +116,6 @@
     border: 2px solid #e9ecef;       /* גבול אפור */
 }
 
-/* תמונה בכרטיס אדם */
-.person-card img {
-    width: 40px;                     /* רוחב קטן יותר */
-    height: 40px;                    /* גובה קטן יותר */
-    object-fit: cover;               /* חיתוך פרופורציונלי */
-    border-radius: 50%;              /* עיגול מלא */
-    margin-left: 10px;               /* מרווח משמאל */
-}
-
 /* תמונה בתוצאת בדיקה */
 .result-person-image {
     width: 60px;                     /* רוחב בינוני */
@@ -159,33 +123,6 @@
     object-fit: cover;               /* חיתוך פרופורציונלי */
     border-radius: 50%;              /* עיגול מלא */
     border: 3px solid var(--primary-color); /* גבול כחול */
-}
-
-/* מיכל תמונה בכרטיס אדם */
-.person-image-container {
-    position: relative;              /* מיקום יחסי */
-    display: inline-block;           /* תצוגה בשורה */
-}
-
-/* שכבת overlay בתמונה */
-.person-overlay {
-    position: absolute;              /* מיקום מוחלט */
-    top: 0;                          /* דבוק לעליון */
-    left: 0;                         /* דבוק לשמאל */
-    width: 100%;                     /* רוחב מלא */
-    height: 100%;                    /* גובה מלא */
-    background: rgba(0,123,255,0.8); /* רקע כחול שקוף */
-    border-radius: 50%;              /* עיגול מלא */
-    display: none;                   /* מוסתר בברירת מחדל */
-    align-items: center;             /* יישור אנכי במרכז */
-    justify-content: center;         /* יישור אופקי במרכז */
-    color: white;                    /* צבע לבן */
-    font-size: 16px;                 /* גודל טקסט */
-}
-
-/* הצגת overlay בבחירה */
-.person-card.selected .person-overlay {
-    display: flex;                   /* הצגת overlay */
 }
 
 /* ==================== ATTENDANCE RESULTS ==================== */
@@ -307,154 +244,6 @@
     font-size: 16px;                 /* גודל בינוני */
 }
 
-/* כפתור ביטול בדיקת נוכחות */
-#cancel-attendance-check {
-    background-color: #dc3545;       /* רקע אדום */
-    border-color: #dc3545;           /* גבול אדום */
-}
-
-/* אפקט hover לכפתור ביטול */
-#cancel-attendance-check:hover {
-    background-color: #c82333;       /* אדום כהה יותר */
-    border-color: #bd2130;           /* גבול אדום כהה יותר */
-}
-
-/* ==================== PERSON SELECTOR COMPONENT ==================== */
-/* רכיב בחירת אנשים לבדיקת נוכחות */
-
-/* מיכל בורר אנשים */
-.person-selector-container {
-    background: #f8f9fa;             /* רקע אפור בהיר */
-    border-radius: 8px;              /* פינות עגולות */
-    padding: 20px;                   /* מרווח פנימי */
-    margin-bottom: 20px;             /* מרווח תחתון */
-    border: 1px solid #e9ecef;       /* גבול אפור */
-}
-
-/* כותרת בורר אנשים */
-.person-selector-header {
-    display: flex;                   /* פריסה גמישה */
-    justify-content: space-between;  /* פיזור תוכן */
-    align-items: center;             /* יישור אנכי במרכז */
-    margin-bottom: 15px;             /* מרווח תחתון */
-}
-
-/* כותרת בבורר */
-.person-selector-header h4 {
-    margin: 0;                       /* ביטול מרווח */
-    color: #495057;                  /* צבע אפור כהה */
-}
-
-/* סטטוס טעינה */
-.loading-status {
-    display: flex;                   /* פריסה גמישה */
-    align-items: center;             /* יישור אנכי במרכז */
-    gap: 8px;                        /* מרווח בין האלמנטים */
-    color: #6c757d;                  /* צבע אפור */
-    font-size: 14px;                 /* גודל קטן */
-}
-
-/* ספינר טעינה */
-.loading-spinner {
-    animation: spin 1s linear infinite; /* אנימציית סיבוב */
-}
-
-/* גריד אנשים - רשת בחירת אנשים */
-.people-grid {
-    display: grid;                   /* פריסת גריד */
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* עמודות גמישות */
-    gap: 12px;                       /* מרווח בין האלמנטים */
-    max-height: 400px;               /* גובה מקסימלי */
-    overflow-y: auto;                /* גלילה אנכית */
-    border: 1px solid #dee2e6;       /* גבול אפור */
-    border-radius: 6px;              /* פינות עגולות */
-    padding: 15px;                   /* מרווח פנימי */
-    background: white;               /* רקע לבן */
-}
-
-/* כרטיס אדם - רכיב בחירה בודד */
-.person-card {
-    display: flex;                   /* פריסה גמישה */
-    align-items: center;             /* יישור אנכי במרכז */
-    padding: 12px;                   /* מרווח פנימי */
-    border: 2px solid #e9ecef;       /* גבול אפור */
-    border-radius: 6px;              /* פינות עגולות */
-    cursor: pointer;                 /* סמן יד */
-    transition: all 0.2s ease;       /* מעבר חלק */
-    background: white;               /* רקע לבן */
-}
-
-/* אפקט hover לכרטיס אדם */
-.person-card:hover {
-    border-color: #007bff;           /* גבול כחול */
-    background: #f8f9ff;             /* רקע כחול בהיר */
-    transform: translateY(-1px);     /* הרמה קלה */
-    box-shadow: 0 2px 4px rgba(0,123,255,0.1); /* צל כחול */
-}
-
-/* כרטיס אדם נבחר */
-.person-card.selected {
-    border-color: #007bff;           /* גבול כחול */
-    background: #e7f3ff;             /* רקע כחול בהיר */
-    box-shadow: 0 0 0 2px rgba(0,123,255,0.2); /* צל כחול חיצוני */
-}
-
-/* מידע אדם בכרטיס */
-.person-card .person-info {
-    flex: 1;                         /* גמישות */
-}
-
-/* שם אדם בכרטיס */
-.person-card .person-name {
-    font-weight: 600;                /* משקל טקסט בולט */
-    color: #212529;                  /* צבע כהה */
-    margin-bottom: 4px;              /* מרווח תחתון */
-}
-
-/* מספר זהות בכרטיס */
-.person-card .person-id {
-    font-size: 12px;                 /* גודל קטן */
-    color: #6c757d;                  /* צבע אפור */
-}
-
-/* מספר אדם בכרטיס - תג עגול */
-.person-card .person-number {
-    background: #007bff;             /* רקע כחול */
-    color: white;                    /* טקסט לבן */
-    border-radius: 50%;              /* עיגול מלא */
-    width: 24px;                     /* רוחב */
-    height: 24px;                    /* גובה */
-    display: flex;                   /* פריסה גמישה */
-    align-items: center;             /* יישור אנכי במרכז */
-    justify-content: center;         /* יישור אופקי במרכז */
-    font-size: 12px;                 /* גודל קטן */
-    font-weight: bold;               /* טקסט בולט */
-    margin-left: 10px;               /* מרווח משמאל */
-}
-
-/* כפתור נסה שוב */
-.retry-button {
-    background: #dc3545;             /* רקע אדום */
-    color: white;                    /* טקסט לבן */
-    border: none;                    /* ביטול גבול */
-    padding: 6px 12px;               /* מרווח פנימי */
-    border-radius: 4px;              /* פינות עגולות */
-    cursor: pointer;                 /* סמן יד */
-    margin-top: 10px;                /* מרווח עליון */
-}
-
-/* אפקט hover לכפתור נסה שוב */
-.retry-button:hover {
-    background: #c82333;             /* אדום כהה יותר */
-}
-
-/* הודעת שגיאה בבורר אנשים */
-.error-message {
-    text-align: center;              /* יישור למרכז */
-    padding: 20px;                   /* מרווח פנימי */
-    color: #e74c3c;                  /* צבע אדום */
-}
-
 /* ==================== PERSON CHECK RESULT ==================== */
 /* תוצאת בדיקה לאדם ספציפי */
 
@@ -481,7 +270,7 @@
 
 /* מידע אדם בתוצאה */
 .result-person-info {
-    display: flex;                   /* פريسה גמישה */
+    display: flex;                   /* פριסה גמישה */
     align-items: center;             /* יישור אנכי במרכז */
     gap: 15px;                       /* מרווח בין האלמנטים */
     flex: 1;                         /* גמישות */
@@ -546,12 +335,6 @@
         opacity: 1;                  /* גלוי בסוף */
         transform: translateY(0);    /* מיקום רגיל */
     }
-}
-
-/* אנימציית סיבוב לספינר */
-@keyframes spin {
-    0% { transform: rotate(0deg); }   /* תחילה */
-    100% { transform: rotate(360deg); } /* סיבוב מלא */
 }
 
 /* ==================== RESPONSIVE STYLES FOR ATTENDANCE ==================== */
@@ -622,27 +405,6 @@
         font-size: 1rem;             /* גודל מופחת */
     }
 
-    /* סקציית בדיקת נוכחות */
-    .attendance-checker-section {
-        padding: 20px;               /* מרווח פנימי מופחת */
-        margin: 20px 0;              /* מרווח חיצוני מופחת */
-    }
-
-    /* בקרי בדיקת נוכחות */
-    .attendance-checker-controls {
-        align-items: stretch;        /* מתיחה לרוחב מלא */
-    }
-
-    /* קבוצת שדות */
-    .attendance-checker-controls .form-group {
-        max-width: none;             /* ביטול רוחב מקסימלי */
-    }
-
-    /* כותרת בדיקת נוכחות */
-    .attendance-checker-section h3 {
-        font-size: 1.1rem;           /* גודל מופחת */
-    }
-
     /* אינדיקטור התקדמות במובייל */
     .progress-indicator {
         flex-direction: column;      /* סידור אנכי */
@@ -658,17 +420,6 @@
     /* טקסט סטטוס במובייל */
     #attendance-status-text {
         text-align: center;          /* יישור למרכז */
-    }
-
-    /* גריד אנשים במובייל */
-    .people-grid {
-        grid-template-columns: 1fr;  /* עמודה אחת */
-        gap: 8px;                    /* מרווח מופחת */
-    }
-
-    /* כרטיס אדם במובייל */
-    .person-card {
-        padding: 10px;               /* מרווח פנימי מופחת */
     }
 
     /* תוצאת בדיקה במובייל */

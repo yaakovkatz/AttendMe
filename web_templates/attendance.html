@@ -27,6 +27,16 @@
             </button>
         </div>
 
+        <!-- Advanced Controls - moved here -->
+        <div class="advanced-controls">
+            <button id="check-all-people" class="action-button primary">
+                <i class="fas fa-users-cog"></i> בדיקת נוכחות כללית
+            </button>
+            <button id="check-specific-person" class="action-button">
+                <i class="fas fa-user-check"></i> בדיקת נוכחות לנבחרים
+            </button>
+        </div>
+
         <!-- Statistics -->
         <div class="attendance-stats">
             <div class="stat-card">
@@ -48,6 +58,7 @@
             <table id="attendance-table">
                 <thead>
                     <tr>
+                        <th>בחירה</th>
                         <th>תמונה</th>
                         <th>שם מלא</th>
                         <th>ת.ז.</th>
@@ -63,80 +74,11 @@
     </div>
 </section>
 
-<!-- Advanced Functions Section -->
-<section id="advanced-functions" class="section">
+<!-- Face Recognition Results Section -->
+<section id="face-recognition-results" class="section">
     <div class="container">
-        <h2 class="section-title">פונקציות מתקדמות</h2>
-
-        <!-- כפתורים במרכז בלי כפתור "טעינת אנשים" -->
-        <div class="advanced-controls">
-            <button id="check-all-people" class="action-button primary">
-                <i class="fas fa-users-cog"></i> בדיקת נוכחות כללית
-            </button>
-            <button id="check-specific-person" class="action-button">
-                <i class="fas fa-user-check"></i> בדיקת נוכחות לאדם ספציפי
-            </button>
-        </div>
-
-        <!-- Person Selector for Specific Check -->
-        <div class="attendance-checker-section" id="person-selector-section" style="display: none;">
-            <h3>בדיקת נוכחות לפי מספר אדם</h3>
-            <div class="attendance-checker-controls">
-
-                <!-- Person Selector -->
-                <div class="person-selector-container">
-                    <div class="person-selector-header">
-                        <h4>👥 בחר אדם לבדיקת נוכחות:</h4>
-                        <div class="loading-status" id="people-loading-status">
-                            <span class="loading-spinner">⏳</span>
-                            <span id="loading-message">טוען רשימת אנשים...</span>
-                        </div>
-                    </div>
-
-                    <!-- People Grid -->
-                    <div class="people-grid" id="people-grid" style="display: none;">
-                        <!-- הרשימה תתמלא דינמית ע"י JavaScript -->
-                    </div>
-
-                    <!-- Error Message -->
-                    <div class="error-message" id="people-error" style="display: none;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>שגיאה בטעינת רשימת אנשים</span>
-                        <button id="retry-load-people" class="retry-button">נסה שוב</button>
-                    </div>
-                </div>
-
-                <button id="check-person-attendance" class="action-button primary" disabled>
-                    <i class="fas fa-user-check"></i> בדוק נוכחות
-                </button>
-                <button id="cancel-attendance-check" class="action-button secondary" style="display: none;">
-                    <i class="fas fa-times"></i> בטל בדיקה
-                </button>
-            </div>
-
-            <!-- Results Area -->
-            <div id="attendance-result-area" class="attendance-result" style="display: none;">
-                <div class="result-header">
-                    <h4 id="attendance-result-title">תוצאת בדיקה</h4>
-                    <div id="attendance-progress" class="progress-indicator">
-                        <div class="progress-bar"></div>
-                        <span id="attendance-status-text">מתחיל בדיקה...</span>
-                    </div>
-                </div>
-                <div id="attendance-result-content" class="result-content">
-                    <!-- התוצאות יוצגו כאן -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Results Panel -->
-        <div class="results-panel" id="results-panel" style="display: none;">
-            <div class="results-header">
-                <h3 id="results-title">תוצאות</h3>
-                <button id="close-results" class="close-button">&times;</button>
-            </div>
-            <div class="results-content" id="results-content"></div>
-        </div>
+        <h2 class="section-title">תוצאות זיהוי פנים מהמצלמות</h2>
+        <!-- תוכן יתווסף בעתיד -->
     </div>
 </section>
 

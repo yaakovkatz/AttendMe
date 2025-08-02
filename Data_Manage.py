@@ -403,6 +403,74 @@ def update_person(school_index, person_id, new_first_name, new_last_name):
     }
 
 
+def add_new_image_url(school_index, person_id, image_url):
+    """מוסיפה URL של תמונה חדשה לאדם קיים"""
+    print(f"🔍 מחפש אדם: school_index={school_index}, person_id={person_id}")
+
+    try:
+        # בדיקה שמזהה בית הספר תקין
+        is_valid, error_msg = validate_school_index(school_index)
+        if not is_valid:
+            return {
+                'success': False,
+                'error': f'מזהה בית ספר לא תקין: {error_msg}'
+            }
+
+        # קבלת בית הספר
+        school = schools_database[school_index]
+        print(f"📚 בית ספר נמצא: {school.school_name}")
+
+        # חיפוש האדם - תיקון: people_vector במקום people
+        person = None
+        for p in school.people_vector:  # 🔧 זה התיקון העיקרי!
+            if p.id_number == person_id:
+                person = p
+                break
+
+        if not person:
+            return {
+                'success': False,
+                'error': f'לא נמצא אדם עם ת.ז. {person_id}'
+            }
+
+        print(f"👤 אדם נמצא: {person.first_name} {person.last_name}")
+
+        # בדיקה שהתמונה לא קיימת כבר
+        if image_url in person.image_urls:
+            return {
+                'success': False,
+                'error': 'התמונה כבר קיימת'
+            }
+
+        # הוספת התמונה באמצעות הפונקציה של Person
+        success = person.add_image_url(image_url)
+        if not success:
+            return {
+                'success': False,
+                'error': 'שגיאה בהוספת התמונה'
+            }
+
+        print(f"📷 התמונה נוספה. סה״כ תמונות: {len(person.image_urls)}")
+
+        # כאן אין צורך בשמירת קובץ כי הנתונים נשמרים בזיכרון
+        # אם יש לך פונקציה לשמירה, תוסיף אותה כאן
+
+        return {
+            'success': True,
+            'message': 'התמונה נוספה בהצלחה',
+            'total_images': len(person.image_urls)
+        }
+
+    except Exception as e:
+        print(f"💥 שגיאה ב-add_new_image_url: {e}")
+        import traceback
+        traceback.print_exc()
+        return {
+            'success': False,
+            'error': f'שגיאה פנימית: {str(e)}'
+        }
+
+
 def toggle_presence(school_index, person_id, new_presence_status):
     """מעדכן סטטוס נוכחות של אדם לפי תעודת זהות בבית ספר ספציפי"""
 

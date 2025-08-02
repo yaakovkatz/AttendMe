@@ -101,6 +101,7 @@ def verify_face_secondary(img1_path, img2_path):
         print_status(f"שגיאה בהשוואת פנים שנייה: {str(e)}", level=1, emoji="⚠️")
         return 0
 
+
 def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_name, last_name):
     """
     גרסה מתקדמת של בדיקת תמונה בודדת עם ניתוח מפורט וטבלאות
@@ -239,13 +240,15 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
         return False
 
 
-def check_attendance_for_all_people(school_index):
+def check_attendance_unified(school_index, is_specific_check=False, person_ids=None):
     """
-    בודקת נוכחות עבור כל האנשים של בית ספר ספציפי
+    פונקציה מאוחדת לבדיקת נוכחות - כללית או ספציפית
     משווה את התמונה הראשית של כל אדם מול פנים ב-EnviroFaces
 
     Args:
         school_index (int): מספר בית הספר במערכת
+        is_specific_check (bool): True = בדיקה ספציפית, False = בדיקה כללית
+        person_ids (list, optional): רשימת תעודות זהות (נדרש רק אם is_specific_check=True)
 
     Returns:
         dict: {'success': bool, 'checked_people': int, 'present_people': int, 'absent_people': int, 'message': str, 'school_name': str}
@@ -263,11 +266,28 @@ def check_attendance_for_all_people(school_index):
                 'school_name': None
             }
 
+        # בדיקת תקינות פרמטרים לבדיקה ספציפית
+        if is_specific_check:
+            if not person_ids or not isinstance(person_ids, list) or len(person_ids) == 0:
+                return {
+                    'success': False,
+                    'checked_people': 0,
+                    'present_people': 0,
+                    'absent_people': 0,
+                    'message': 'רשימת תעודות זהות ריקה או לא תקינה לבדיקה ספציפית',
+                    'school_name': None
+                }
+
         # קבלת בית הספר הספציפי
         school = schools_database[school_index]
         people_vector = school.people_vector
 
-        print_status(f"מתחיל בדיקת נוכחות כללית עבור בית הספר: {school.school_name}", emoji="🚀")
+        # הדפסת הודעת התחלה לפי סוג הבדיקה
+        if is_specific_check:
+            print_status(f"מתחיל בדיקת נוכחות ספציפית עבור בית הספר: {school.school_name}", emoji="🚀")
+            print_status(f"תעודות זהות לבדיקה: {', '.join(person_ids)}", emoji="🎯", level=1)
+        else:
+            print_status(f"מתחיל בדיקת נוכחות כללית עבור בית הספר: {school.school_name}", emoji="🚀")
 
         # בדיקה שיש אנשים בבית הספר
         if not people_vector:
@@ -279,6 +299,31 @@ def check_attendance_for_all_people(school_index):
                 'message': f'אין אנשים רשומים בבית הספר {school.school_name}',
                 'school_name': school.school_name
             }
+
+        # קביעת רשימת האנשים לבדיקה
+        if is_specific_check:
+            # סינון האנשים לפי תעודות הזהות הנבחרות
+            people_to_check = []
+            for person in people_vector:
+                if person.id_number in person_ids:
+                    people_to_check.append(person)
+
+            # בדיקה שנמצאו אנשים תואמים
+            if not people_to_check:
+                return {
+                    'success': False,
+                    'checked_people': 0,
+                    'present_people': 0,
+                    'absent_people': 0,
+                    'message': f'לא נמצאו אנשים עם תעודות הזהות שנבחרו בבית הספר {school.school_name}',
+                    'school_name': school.school_name
+                }
+
+            print_status(f"נמצאו {len(people_to_check)} אנשים תואמים מתוך {len(person_ids)} שנבחרו", emoji="👥", level=1)
+        else:
+            # בדיקה כללית - כל האנשים
+            people_to_check = people_vector
+            print_status(f"בודק נוכחות עבור {len(people_to_check)} אנשים", emoji="👥", level=1)
 
         # בדיקה שתיקיית EnviroFaces ספציפית לבית הספר קיימת ויש בה תמונות
         enviro_faces_dir = f"EnviroFaces_school_{school_index}_{school.admin_username}"
@@ -304,18 +349,20 @@ def check_attendance_for_all_people(school_index):
             }
 
         print_status(f"נמצאו {len(faces_in_db)} פנים במאגר של {school.school_name}", emoji="📊", level=1)
-        print_status(f"בודק נוכחות עבור {len(people_vector)} אנשים", emoji="👥", level=1)
 
         # מונים
         checked_people = 0
         present_people = 0
 
-        # מעבר על כל האנשים של בית הספר הספציפי
-        for person_index, person in enumerate(people_vector):
+        # מעבר על האנשים לבדיקה
+        for person_index, person in enumerate(people_to_check):
             try:
-                print_status(
-                    f"בודק נוכחות: {person.first_name} {person.last_name} ({person_index + 1}/{len(people_vector)})",
-                    emoji="🔍", level=1)
+                display_text = f"בודק נוכחות: {person.first_name} {person.last_name}"
+                if is_specific_check:
+                    display_text += f" - {person.id_number}"
+                display_text += f" ({person_index + 1}/{len(people_to_check)})"
+
+                print_status(display_text, emoji="🔍", level=1)
 
                 # בדיקה שיש לאדם תמונות
                 if not person.image_urls or len(person.image_urls) == 0:
@@ -359,7 +406,7 @@ def check_attendance_for_all_people(school_index):
 
                     print_status(f"תמונה זמנית נשמרה בהצלחה: {temp_image_path}", emoji="💾", level=3)
 
-                    # בדיקת נוכחות באמצעות הפונקציה המתקדמת החדשה
+                    # בדיקת נוכחות באמצעות הפונקציה המתקדמת
                     is_present = check_single_image_with_detailed_analysis(temp_image_path, faces_in_db,
                                                                            person.first_name, person.last_name)
 
@@ -396,10 +443,12 @@ def check_attendance_for_all_people(school_index):
 
         # סיכום כולל
         absent_people = checked_people - present_people
-        success_message = f"בדיקת נוכחות הושלמה עבור {school.school_name}: {present_people} נוכחים, {absent_people} נעדרים מתוך {checked_people} אנשים"
+        check_type = "ספציפית" if is_specific_check else "כללית"
+        additional_text = "נבחרים" if is_specific_check else "אנשים"
+        success_message = f"בדיקת נוכחות {check_type} הושלמה עבור {school.school_name}: {present_people} נוכחים, {absent_people} נעדרים מתוך {checked_people} {additional_text}"
 
         print_status("=" * 50, level=0)
-        print_status(f"סיכום בדיקת נוכחות - {school.school_name}:", emoji="📋", level=0)
+        print_status(f"סיכום בדיקת נוכחות {check_type} - {school.school_name}:", emoji="📋", level=0)
         print_status(f"סה\"כ אנשים נבדקו: {checked_people}", emoji="👥", level=1)
         print_status(f"נוכחים: {present_people}", emoji="✅", level=1)
         print_status(f"נעדרים: {absent_people}", emoji="❌", level=1)
@@ -415,7 +464,8 @@ def check_attendance_for_all_people(school_index):
         }
 
     except Exception as e:
-        error_message = f"שגיאה כללית בבדיקת נוכחות: {str(e)}"
+        check_type = "ספציפית" if is_specific_check else "כללית"
+        error_message = f"שגיאה כללית בבדיקת נוכחות {check_type}: {str(e)}"
         print_status(error_message, emoji="❌")
         return {
             'success': False,

@@ -22,9 +22,10 @@
 from Data_Manage import (add_new_person, remove_person, get_all_people, get_person,
                          update_person, toggle_presence, add_new_target, remove_target,
                          get_all_targets, clear_all_targets, login_user, register_school,
-                         add_demo_data, print_all_schools)
+                         add_new_image_url, add_demo_data, print_all_schools)
 
-from Attend_Manage import (extract_faces_from_cameras, check_attendance_for_people)
+from Attend_Manage import (extract_faces_from_cameras, check_attendance_for_people,
+                           check_attendance_for_selected_people)
 
 from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
 from flask_cors import CORS
@@ -814,25 +815,142 @@ def clear_all_target_images():
 #                          API - ניהול תמונות אנשים
 # ===============================================================================
 
+@app.route('/api/upload_person_image', methods=['POST'])
+def upload_person_image():
+    print("🎯 הגענו לפונקציה upload_person_image!")
+    try:
+        data = request.json
+        print(f"📥 קיבלנו נתונים: {data}")
+
+        # קבלת פרמטרים
+        school_index = data.get('school_index')
+        person_id = data.get('person_id')
+        image_url = data.get('image_url')
+
+        # בדיקת פרמטרים נדרשים
+        if not all([school_index is not None, person_id, image_url]):
+            error_msg = 'חסרים פרמטרים נדרשים'
+            print(f"❌ שגיאה: {error_msg}")
+            print(f"school_index: {school_index}, person_id: {person_id}, image_url: {image_url}")
+            return jsonify({
+                'success': False,
+                'error': error_msg
+            }), 400
+
+        print(f"📝 מנסה להוסיף תמונה: school_index={school_index}, person_id={person_id}")
+        result = add_new_image_url(school_index, person_id, image_url)
+        print(f"📊 תוצאת add_new_image_url: {result}")
+
+        if result.get('success'):
+            print("✅ התמונה נוספה בהצלחה!")
+            return jsonify({
+                'success': True,
+                'message': 'התמונה נוספה בהצלחה',
+                'image_url': image_url
+            }), 200
+        else:
+            error_msg = result.get('error', 'שגיאה בהוספת התמונה')
+            print(f"❌ שגיאה מ-add_new_image_url: {error_msg}")
+            return jsonify({
+                'success': False,
+                'error': error_msg
+            }), 400
+
+    except Exception as e:
+        print(f"💥 שגיאה כללית: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'שגיאת שרת: {str(e)}'
+        }), 500
+
+
 @app.route('/api/people/<person_id>/images', methods=['GET'])
 def get_person_images(person_id):
-    """מחזיר את כל התמונות של אדם ספציפי"""
-    # TODO: מלא את הפונקציה
-    pass
+    print(f"🎯 הגענו לפונקציה get_person_images עבור: {person_id}")
+    """קבלת כל התמונות של אדם ספציפי"""
+    try:
+        # קבלת school_index מהפרמטרים
+        school_index = request.args.get('school_index', type=int)
+
+        if school_index is None:
+            return jsonify({
+                'success': False,
+                'error': 'מזהה בית ספר נדרש'
+            }), 400
+
+        print(f"📊 School index: {school_index}")
+
+        # בדיקת תקינות בית הספר
+        from Data_Manage import validate_school_index, schools_database
+        is_valid, error_msg = validate_school_index(school_index)
+        if not is_valid:
+            return jsonify({
+                'success': False,
+                'error': f'בית ספר לא תקין: {error_msg}'
+            }), 400
+
+        # חיפוש האדם
+        school = schools_database[school_index]
+        person = None
+
+        for p in school.people_vector:
+            if p.id_number == person_id:
+                person = p
+                break
+
+        if not person:
+            return jsonify({
+                'success': False,
+                'error': 'אדם לא נמצא במערכת'
+            }), 404
+
+        # החזרת התמונות
+        image_urls = person.image_urls if hasattr(person, 'image_urls') and person.image_urls else []
+        print(f"📸 נמצאו {len(image_urls)} תמונות")
+
+        return jsonify({
+            'success': True,
+            'person': {
+                'id_number': person.id_number,
+                'first_name': person.first_name,
+                'last_name': person.last_name,
+                'image_urls': image_urls,
+                'image_count': len(image_urls)
+            }
+        }), 200
+
+    except Exception as e:
+        print(f"💥 שגיאה: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
-@app.route('/api/people/<person_id>/images', methods=['POST'])
-def add_person_image(person_id):
-    """מוסיף תמונה נוספת לאדם קיים (עד 5 תמונות סה"כ)"""
-    # TODO: מלא את הפונקציה
-    pass
+@app.route('/api/delete__image', methods=['DELETE'])
+def delete__image():
+    print("🎯 הגענו לפונקציה delete_cloudinary_image!")
+    """מחיקת תמונה מ-Cloudinary"""
+    try:
+        data = request.json
+        print(f"📥 קיבלנו נתונים: {data}")
 
+        public_id = data.get('public_id')
 
-@app.route('/api/people/<person_id>/images/<image_id>', methods=['DELETE'])
-def delete_person_image(person_id, image_id):
-    """מוחק תמונה ספציפית של אדם"""
-    # TODO: מלא את הפונקציה
-    pass
+        if not public_id:
+            return jsonify({
+                'success': False,
+                'error': 'Public ID נדרש'
+            }), 400
+
+    except Exception as e:
+        print(f"💥 שגיאה: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'שגיאת שרת: {str(e)}'
+        }), 500
 
 
 # ===============================================================================
@@ -945,7 +1063,7 @@ def check_attendance_all():
         }), 500
 
 
-@app.route('/api/attendance/check-person', methods=['POST'])
+@app.route('/api/attendance/check-specific', methods=['POST'])
 def check_attendance_selected_people():
     """בודק נוכחות עבור אנשים ספציפים"""
     try:
@@ -972,7 +1090,29 @@ def check_attendance_selected_people():
                 'absent_people': 0
             }), 400
 
-        result = check_attendance_for_people(school_index)
+        # קבלת רשימת תעודות זהות של האנשים הנבחרים
+        person_ids = data.get('person_ids')
+        if not person_ids or not isinstance(person_ids, list):
+            return jsonify({
+                'success': False,
+                'message': 'רשימת תעודות זהות נדרשת',
+                'checked_people': 0,
+                'present_people': 0,
+                'absent_people': 0
+            }), 400
+
+        # בדיקה שהרשימה לא ריקה
+        if len(person_ids) == 0:
+            return jsonify({
+                'success': False,
+                'message': 'נדרש לבחור לפחות אדם אחד',
+                'checked_people': 0,
+                'present_people': 0,
+                'absent_people': 0
+            }), 400
+
+        # קריאה לפונקציה עם מערך התעודות זהות
+        result = check_attendance_for_selected_people(school_index, person_ids)
 
         if result['success']:
             return jsonify({

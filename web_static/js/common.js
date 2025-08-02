@@ -65,7 +65,6 @@ function getCurrentSchoolIndex() {
     return window.currentUser?.schoolInfo?.school_index ?? 0;
 }
 
-
 /**
  * בדיקה שהמשתמש מחובר
  * בדיקה בסיסית שקיים currentUser עם username

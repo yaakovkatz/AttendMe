@@ -68,6 +68,18 @@
     justify-content: center;         /* יישור למרכז */
 }
 
+/* יישור תא הפעולות */
+#people-table th:last-child,
+#people-table td:last-child {
+    text-align: center;              /* יישור התוכן למרכז */
+}
+
+/* יישור תא הפעולות */
+#people-table th:last-child,
+#people-table td:last-child {
+    text-align: center;              /* יישור התוכן למרכז */
+}
+
 /* כפתורי פעולה על אדם - עריכה, העלאה, מחיקה */
 .person-actions button {
     background: none;                /* ביטול רקע */
@@ -103,8 +115,8 @@
     transform: scale(1.2);           /* הגדלה קלה */
 }
 
-/* ==================== UPLOAD PROGRESS COMPONENTS ==================== */
-/* רכיבים להצגת התקדמות העלאת תמונות */
+/* ==================== UPLOAD PROGRESS COMPONENTS - מתוקן ==================== */
+/* רכיבים להצגת התקדמות העלאת תמונות - גרסה מתוקנת ללא קונפליקטים */
 
 /* מד התקדמות העלאת תמונות - סרגל פסים עגולים */
 .upload-progress {
@@ -129,7 +141,7 @@
     color: #999;                     /* צבע אפור */
     transition: all 0.3s ease;       /* מעבר חלק */
     position: relative;              /* מיקום יחסי */
-    font-size: 12px;                 /* גודל טקסט */
+    font-size: 14px;                 /* גודל טקסט */
 }
 
 /* פס התקדמות מושלם - צבע ירוק */
@@ -140,30 +152,44 @@
     box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); /* זוהר ירוק */
 }
 
+/* פס התקדמות ממתין - צבע כתום */
+.progress-step.pending {
+    background: #ff9800 !important;  /* רקע כתום */
+    border-color: #ff9800 !important; /* גבול כתום */
+    color: white !important;         /* טקסט לבן */
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.3); /* זוהר כתום */
+}
+
 /* פס התקדמות אופציונלי - עיצוב מקווקו */
 .progress-step.optional {
     opacity: 0.6;                    /* שקיפות חלקית */
     border-style: dashed;            /* גבול מקווקו */
 }
 
-/* אפקט אנימציה לפס מושלם - סימן וי */
-.progress-step.completed::after {
-    content: '✓';                    /* סימן וי */
-    position: absolute;              /* מיקום מוחלט */
-    font-size: 16px;                 /* גודל גדול */
-    font-weight: bold;               /* טקסט בולט */
+/* סטטוס פעיל - כשהפס נמצא בתהליך */
+.progress-step.active {
+    border-color: #2196F3 !important;
+    color: #2196F3 !important;
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
+    animation: activePulse 1.5s infinite;
 }
 
-/* מספרים בפסי ההתקדמות */
-.progress-step:nth-child(1)::before { content: '1'; }
-.progress-step:nth-child(2)::before { content: '2'; }
-.progress-step:nth-child(3)::before { content: '3'; }
-.progress-step:nth-child(4)::before { content: '4'; }
-.progress-step:nth-child(5)::before { content: '5'; }
+/* הוספת אנימציה כשפס מושלם */
+.progress-step.completed {
+    animation: completePulse 0.6s ease-out;
+}
 
-/* הסתרת מספרים כשהפס מושלם */
-.progress-step.completed::before {
-    display: none;                   /* הסתרה */
+/* עיצוב משופר לפסים אופציונליים */
+.progress-step.optional:not(.completed) {
+    opacity: 0.5;
+    border-style: dashed;
+    border-width: 2px;
+}
+
+.progress-step.optional.completed {
+    opacity: 1;
+    border-style: solid;
+    border-width: 3px;
 }
 
 /* סטטוס העלאה - הודעת מצב */
@@ -190,7 +216,7 @@
 }
 
 /* פס התקדמות מפורט - אנימציה מתקדמת */
-#upload-progress-bar {
+.upload-progress-bar {
     background: linear-gradient(90deg, #4CAF50, #45a049); /* רקע ירוק גרדיינט */
     height: 100%;                    /* גובה מלא */
     width: 0%;                       /* התחלה מ-0 */
@@ -201,7 +227,7 @@
 }
 
 /* אפקט נוצץ בפס התקדמות */
-#upload-progress-bar::after {
+.upload-progress-bar::after {
     content: '';                     /* תוכן ריק */
     position: absolute;              /* מיקום מוחלט */
     top: 0;                          /* דבוק לעליון */
@@ -219,6 +245,50 @@
 @keyframes shimmer {
     0% { left: -100%; }              /* התחלה */
     100% { left: 100%; }             /* סוף */
+}
+
+/* אנימציית דופק לפס פעיל */
+@keyframes activePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+/* אנימציה לפס מושלם */
+@keyframes completePulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+    }
+}
+
+/* אנימציה לכפתור מוכן */
+@keyframes buttonReady {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+    }
 }
 
 /* ==================== PERSON IMAGES MODAL ==================== */

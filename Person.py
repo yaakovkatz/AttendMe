@@ -16,6 +16,8 @@ class Person:
         """מוסיפה URL של תמונה חדשה לרשימה של האדם."""
         if url and url not in self.image_urls:
             self.image_urls.append(url)
+            return True
+        return False
 
     def get_primary_image_url(self):
         """מחזירה את ה-URL של התמונה הראשונה, או None אם אין תמונות."""

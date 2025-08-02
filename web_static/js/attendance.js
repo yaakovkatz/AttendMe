@@ -16,12 +16,6 @@
 // נתוני נוכחות
 let attendanceData = [];
 
-// נתוני אנשים לבחירה
-let peopleForSelection = [];
-
-// אדם נבחר לבדיקה ספציפית
-let selectedPersonId = null;
-
 // מצב בדיקה פעילה
 let isCheckingAttendance = false;
 
@@ -51,7 +45,6 @@ async function initializeAttendance() {
     const serverOk = await checkServerConnection();
     if (serverOk) {
         await loadAttendanceData();
-        await loadPeopleForSelection();
     }
 
     console.log('✅ דף נוכחות אותחל בהצלחה');
@@ -88,33 +81,7 @@ function initializeAttendanceEventListeners() {
     // כפתור בדיקת נוכחות ספציפית
     const checkSpecificBtn = document.getElementById('check-specific-person');
     if (checkSpecificBtn) {
-        checkSpecificBtn.addEventListener('click', handleCheckSpecificPerson);
-    }
-
-    // כפתור בדיקת נוכחות לאדם נבחר
-    const checkPersonBtn = document.getElementById('check-person-attendance');
-    if (checkPersonBtn) {
-        checkPersonBtn.addEventListener('click', handleCheckSelectedPerson);
-    }
-
-    // כפתור ביטול בדיקה
-    const cancelBtn = document.getElementById('cancel-attendance-check');
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', handleCancelCheck);
-    }
-
-    // כפתור סגירת תוצאות
-    const closeResultsBtn = document.getElementById('close-results');
-    if (closeResultsBtn) {
-        closeResultsBtn.addEventListener('click', () => {
-            document.getElementById('results-panel').style.display = 'none';
-        });
-    }
-
-    // כפתור נסה שוב בטעינת אנשים
-    const retryBtn = document.getElementById('retry-load-people');
-    if (retryBtn) {
-        retryBtn.addEventListener('click', loadPeopleForSelection);
+        checkSpecificBtn.addEventListener('click', handleCheckSpecificPeople);
     }
 
     console.log('🎯 מאזיני אירועים לנוכחות הוגדרו');
@@ -173,61 +140,6 @@ async function loadAttendanceData() {
     }
 }
 
-/**
- * טעינת אנשים לבחירה בבדיקה ספציפית
- */
-async function loadPeopleForSelection() {
-    console.log('👥 טוען אנשים לבחירה...');
-
-    const loadingStatus = document.getElementById('people-loading-status');
-    const peopleGrid = document.getElementById('people-grid');
-    const errorDiv = document.getElementById('people-error');
-
-    // הצגת loading
-    if (loadingStatus) loadingStatus.style.display = 'block';
-    if (peopleGrid) peopleGrid.style.display = 'none';
-    if (errorDiv) errorDiv.style.display = 'none';
-
-    try {
-        const schoolIndex = getCurrentSchoolIndex();
-        const response = await fetch(`/api/get_loaded_people?school_index=${schoolIndex}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.success && data.people) {
-            peopleForSelection = data.people;
-            renderPeopleGrid();
-
-            // הסתרת loading והצגת grid
-            if (loadingStatus) loadingStatus.style.display = 'none';
-            if (peopleGrid) peopleGrid.style.display = 'grid';
-
-            console.log(`✅ נטענו ${peopleForSelection.length} אנשים לבחירה`);
-        } else {
-            throw new Error(data.error || 'אין אנשים במערכת');
-        }
-
-    } catch (error) {
-        console.error('❌ שגיאה בטעינת אנשים:', error);
-
-        // הצגת שגיאה
-        if (loadingStatus) loadingStatus.style.display = 'none';
-        if (errorDiv) {
-            errorDiv.style.display = 'block';
-            const errorText = errorDiv.querySelector('span');
-            if (errorText) {
-                errorText.textContent = `שגיאה: ${error.message}`;
-            }
-        }
-
-        showNotification('שגיאה בטעינת רשימת אנשים', 'error');
-    }
-}
-
 // ==================== RENDERING ====================
 
 /**
@@ -242,7 +154,7 @@ function renderAttendanceTable() {
     if (attendanceData.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; padding: 20px; color: #666;">
+                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
                     אין נתוני נוכחות זמינים
                 </td>
             </tr>
@@ -268,6 +180,9 @@ function renderAttendanceTable() {
 
         row.innerHTML = `
             <td>
+                <input type="checkbox" class="person-checkbox" value="${person.id_number}">
+            </td>
+            <td>
                 <img src="${imageUrl}" alt="${person.first_name}" class="person-image">
             </td>
             <td>${person.first_name} ${person.last_name}</td>
@@ -280,48 +195,6 @@ function renderAttendanceTable() {
     });
 
     console.log(`✅ הוצגו ${attendanceData.length} רשומות נוכחות`);
-}
-
-/**
- * רינדור רשת אנשים לבחירה
- */
-function renderPeopleGrid() {
-    const grid = document.getElementById('people-grid');
-    if (!grid) return;
-
-    grid.innerHTML = '';
-
-    peopleForSelection.forEach(person => {
-        const personCard = document.createElement('div');
-        personCard.className = 'person-card';
-        personCard.setAttribute('data-id', person.id_number);
-
-        // תמונה
-        let imageUrl = '/web_static/img/person-placeholder.jpg';
-        if (person.image_urls && person.image_urls.length > 0) {
-            imageUrl = person.image_urls[0];
-        }
-
-        personCard.innerHTML = `
-            <div class="person-image-container">
-                <img src="${imageUrl}" alt="${person.first_name}">
-                <div class="person-overlay">
-                    <i class="fas fa-check"></i>
-                </div>
-            </div>
-            <div class="person-info">
-                <div class="person-name">${person.first_name} ${person.last_name}</div>
-                <div class="person-id">ת.ז: ${person.id_number}</div>
-            </div>
-        `;
-
-        // הוספת מאזין לחיצה
-        personCard.addEventListener('click', () => selectPerson(person.id_number));
-
-        grid.appendChild(personCard);
-    });
-
-    console.log(`✅ הוצגו ${peopleForSelection.length} אנשים לבחירה`);
 }
 
 // ==================== ATTENDANCE CHECKING ====================
@@ -410,76 +283,37 @@ async function handleCheckAllPeople() {
 /**
  * טיפול בבדיקת נוכחות ספציפית
  */
-function handleCheckSpecificPerson() {
+async function handleCheckSpecificPeople() {
     if (!requireLogin('בדיקת נוכחות ספציפית')) return;
 
-    const selectorSection = document.getElementById('person-selector-section');
-    if (selectorSection) {
-        selectorSection.style.display = selectorSection.style.display === 'none' ? 'block' : 'none';
-
-        if (selectorSection.style.display === 'block') {
-            loadPeopleForSelection();
-        }
-    }
-}
-
-/**
- * בחירת אדם לבדיקה ספציפית
- */
-function selectPerson(personId) {
-    // הסרת בחירה קודמת
-    document.querySelectorAll('.person-card.selected').forEach(card => {
-        card.classList.remove('selected');
-    });
-
-    // הוספת בחירה חדשה
-    const selectedCard = document.querySelector(`[data-id="${personId}"]`);
-    if (selectedCard) {
-        selectedCard.classList.add('selected');
-        selectedPersonId = personId;
-
-        // הפעלת כפתור בדיקה
-        const checkBtn = document.getElementById('check-person-attendance');
-        if (checkBtn) {
-            checkBtn.disabled = false;
-        }
-
-        console.log('👤 נבחר אדם:', personId);
-    }
-}
-
-/**
- * בדיקת נוכחות לאדם נבחר
- */
-async function handleCheckSelectedPerson() {
-    if (!selectedPersonId) {
-        showNotification('נא לבחור אדם תחילה', 'warning');
-        return;
-    }
-
     if (isCheckingAttendance) {
-        showNotification('בדיקה כבר פעילה', 'warning');
+        showNotification('בדיקת נוכחות כבר פעילה', 'warning');
         return;
     }
 
-    const person = peopleForSelection.find(p => p.id_number === selectedPersonId);
-    if (!person) return;
+    // אסיפת תעודות זהות של האנשים הנבחרים
+    const selectedCheckboxes = document.querySelectorAll('.person-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
 
-    console.log('🔍 מתחיל בדיקת נוכחות לאדם:', person.first_name, person.last_name);
+    if (selectedIds.length === 0) {
+        showNotification('נא לבחור לפחות אדם אחד לבדיקה', 'warning');
+        return;
+    }
+
+    console.log('🔍 מתחיל בדיקת נוכחות לאנשים נבחרים:', selectedIds);
 
     // בדיקה שיש תמונות מטרה
     const hasTargets = await checkTargetImages();
     if (!hasTargets) return;
 
     isCheckingAttendance = true;
-    showResultsArea(true);
-    updateResultsProgress('מתחיל בדיקה...', 0);
+    showNotification(`מתחיל בדיקת נוכחות עבור ${selectedIds.length} אנשים נבחרים...`, 'info');
 
     try {
         const schoolIndex = getCurrentSchoolIndex();
 
         // שלב 1: חילוץ פנים
-        updateResultsProgress('מחלץ פנים מתמונות מטרה...', 25);
+        showNotification('שלב 1: מחלץ פנים מתמונות מטרה...', 'info');
 
         const extractResponse = await fetch('/api/face-recognition/extract-faces', {
             method: 'POST',
@@ -493,25 +327,34 @@ async function handleCheckSelectedPerson() {
         }
 
         // שלב 2: בדיקת נוכחות ספציפית
-        updateResultsProgress(`בודק נוכחות עבור ${person.first_name} ${person.last_name}...`, 75);
+        showNotification('שלב 2: בודק נוכחות עבור האנשים הנבחרים...', 'info');
 
-        const attendanceResponse = await fetch('/api/attendance/check-person', {
+        const attendanceResponse = await fetch('/api/attendance/check-specific', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 school_index: schoolIndex,
-                person_id: selectedPersonId
+                person_ids: selectedIds
             })
         });
 
         const result = await attendanceResponse.json();
 
         if (result.success) {
-            updateResultsProgress('בדיקה הושלמה!', 100);
-            displayPersonCheckResult(person, result);
+            const message = `🎉 בדיקת נוכחות הושלמה!\n` +
+                           `✅ נוכחים: ${result.present_people}\n` +
+                           `❌ נעדרים: ${result.absent_people}\n` +
+                           `📊 סה"כ נבדקו: ${selectedIds.length} אנשים`;
+
+            showNotification(message, 'success');
 
             // רענון נתונים
+            showNotification('מעדכן נתונים...', 'info');
+            await new Promise(resolve => setTimeout(resolve, 1000));
             await loadAttendanceData();
+
+            // איפוס בחירות
+            selectedCheckboxes.forEach(cb => cb.checked = false);
 
         } else {
             throw new Error(result.error || 'שגיאה בבדיקת נוכחות');
@@ -519,103 +362,10 @@ async function handleCheckSelectedPerson() {
 
     } catch (error) {
         console.error('❌ שגיאה בבדיקת נוכחות ספציפית:', error);
-        updateResultsProgress(`שגיאה: ${error.message}`, 100);
         showNotification(`שגיאה: ${error.message}`, 'error');
     } finally {
         isCheckingAttendance = false;
     }
-}
-
-/**
- * ביטול בדיקת נוכחות
- */
-function handleCancelCheck() {
-    if (isCheckingAttendance) {
-        isCheckingAttendance = false;
-        showNotification('בדיקה בוטלה', 'info');
-    }
-
-    showResultsArea(false);
-    selectedPersonId = null;
-
-    // איפוס בחירת אדם
-    document.querySelectorAll('.person-card.selected').forEach(card => {
-        card.classList.remove('selected');
-    });
-
-    const checkBtn = document.getElementById('check-person-attendance');
-    if (checkBtn) {
-        checkBtn.disabled = true;
-    }
-}
-
-// ==================== RESULTS MANAGEMENT ====================
-
-/**
- * הצגת/הסתרת אזור תוצאות
- */
-function showResultsArea(show) {
-    const resultArea = document.getElementById('attendance-result-area');
-    if (resultArea) {
-        resultArea.style.display = show ? 'block' : 'none';
-    }
-
-    const cancelBtn = document.getElementById('cancel-attendance-check');
-    if (cancelBtn) {
-        cancelBtn.style.display = show ? 'inline-block' : 'none';
-    }
-}
-
-/**
- * עדכון progress של תוצאות
- */
-function updateResultsProgress(text, percentage) {
-    const statusText = document.getElementById('attendance-status-text');
-    const progressBar = document.querySelector('#attendance-progress .progress-bar');
-
-    if (statusText) {
-        statusText.textContent = text;
-    }
-
-    if (progressBar) {
-        progressBar.style.width = `${percentage}%`;
-    }
-}
-
-/**
- * הצגת תוצאת בדיקה לאדם ספציפי
- */
-function displayPersonCheckResult(person, result) {
-    const resultContent = document.getElementById('attendance-result-content');
-    if (!resultContent) return;
-
-    const isPresent = result.is_present;
-    const statusClass = isPresent ? 'result-present' : 'result-absent';
-    const statusIcon = isPresent ? '✅' : '❌';
-    const statusText = isPresent ? 'נוכח' : 'נעדר';
-
-    let imageUrl = '/web_static/img/person-placeholder.jpg';
-    if (person.image_urls && person.image_urls.length > 0) {
-        imageUrl = person.image_urls[0];
-    }
-
-    resultContent.innerHTML = `
-        <div class="person-check-result ${statusClass}">
-            <div class="result-person-info">
-                <img src="${imageUrl}" alt="${person.first_name}" class="result-person-image">
-                <div class="result-person-details">
-                    <h4>${person.first_name} ${person.last_name}</h4>
-                    <p>ת.ז: ${person.id_number}</p>
-                </div>
-            </div>
-            <div class="result-status">
-                <span class="result-icon">${statusIcon}</span>
-                <span class="result-text">${statusText}</span>
-            </div>
-            ${result.confidence ? `<div class="result-confidence">רמת ודאות: ${Math.round(result.confidence * 100)}%</div>` : ''}
-            ${result.check_time ? `<div class="result-time">זמן בדיקה: ${result.check_time}</div>` : ''}
-        </div>
-    `;
 }
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -765,18 +515,12 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     window.debugAttendance = {
         showData: () => {
             console.log('Attendance Data:', attendanceData);
-            console.log('People for Selection:', peopleForSelection);
-            console.log('Selected Person:', selectedPersonId);
-            return { attendanceData, peopleForSelection, selectedPersonId };
+            const selectedIds = Array.from(document.querySelectorAll('.person-checkbox:checked')).map(cb => cb.value);
+            console.log('Selected IDs:', selectedIds);
+            return { attendanceData, selectedIds };
         },
 
         refresh: loadAttendanceData,
-
-        simulateCheck: () => {
-            showResultsArea(true);
-            updateResultsProgress('בדיקה מדומה...', 50);
-            setTimeout(() => updateResultsProgress('הושלם!', 100), 2000);
-        },
 
         testExport: () => {
             const mockData = [
@@ -803,10 +547,10 @@ document.addEventListener('DOMContentLoaded', function() {
  * קובץ זה מכיל את כל הפונקציונליות לנוכחות ודוחות:
  *
  * 📊 ניהול נתוני נוכחות מלא
- * ✅ בדיקת נוכחות כללית וספציפית
+ * ✅ בדיקת נוכחות כללית וספציפית עם checkbox
  * 📈 סטטיסטיקות ודוחות
  * 📋 ייצוא נתונים ל-CSV
- * 🎯 בחירת אנשים לבדיקה
+ * 🎯 בחירת אנשים באמצעות checkbox-ים
  * 📱 ממשק רספונסיבי
  * 🔧 כלי דיבוג מתקדמים
  */
