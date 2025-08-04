@@ -4,93 +4,116 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+<!-- הוסף גם Font Awesome ו-Animate.css אם אין -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 {% endblock %}
 
 {% block content %}
-<!-- ========== SETTINGS PAGE ========== -->
+<!-- ========== MODERN SETTINGS PAGE ========== -->
 
 <section id="settings" class="section">
     <div class="container">
-        <h2 class="section-title">⚙️ הגדרות מערכת</h2>
-        
-        <!-- Settings Navigation -->
-        <div class="settings-nav">
+        <h2 class="section-title animate__animated animate__fadeInDown">
+            ⚙️ הגדרות מערכת
+        </h2>
+
+        <!-- Settings Navigation with Modern Design -->
+        <div class="settings-nav animate__animated animate__fadeInUp">
             <button class="settings-tab active" data-tab="general">
-                <i class="fas fa-cog"></i> כללי
+                <i class="fas fa-cog"></i>
+                <span>כללי</span>
             </button>
             <button class="settings-tab" data-tab="account">
-                <i class="fas fa-user"></i> חשבון
+                <i class="fas fa-user-circle"></i>
+                <span>חשבון</span>
             </button>
             <button class="settings-tab" data-tab="recognition">
-                <i class="fas fa-eye"></i> זיהוי פנים
+                <i class="fas fa-eye"></i>
+                <span>זיהוי פנים</span>
             </button>
             <button class="settings-tab" data-tab="notifications">
-                <i class="fas fa-bell"></i> התראות
+                <i class="fas fa-bell"></i>
+                <span>התראות</span>
             </button>
             <button class="settings-tab" data-tab="security">
-                <i class="fas fa-shield-alt"></i> אבטחה
+                <i class="fas fa-shield-alt"></i>
+                <span>אבטחה</span>
             </button>
             <button class="settings-tab" data-tab="backup">
-                <i class="fas fa-download"></i> גיבוי
+                <i class="fas fa-cloud-download-alt"></i>
+                <span>גיבוי</span>
             </button>
         </div>
 
         <!-- Settings Content -->
         <div class="settings-content">
-            
+
             <!-- General Settings -->
             <div id="general-settings" class="settings-panel active">
-                <h3>הגדרות כלליות</h3>
-                
+                <h3>🏫 הגדרות כלליות</h3>
+
                 <div class="settings-group">
-                    <h4>מידע בית ספר</h4>
+                    <h4><i class="fas fa-school"></i> מידע בית ספר</h4>
                     <div class="setting-item">
-                        <label for="school-name">שם בית הספר:</label>
+                        <label for="school-name">
+                            <i class="fas fa-graduation-cap"></i> שם בית הספר:
+                        </label>
                         <input type="text" id="school-name" placeholder="הזן שם בית הספר">
                     </div>
                     <div class="setting-item">
-                        <label for="school-email">אימייל בית הספר:</label>
+                        <label for="school-email">
+                            <i class="fas fa-envelope"></i> אימייל בית הספר:
+                        </label>
                         <input type="email" id="school-email" placeholder="school@example.com">
                     </div>
                     <div class="setting-item">
-                        <label for="school-phone">טלפון בית הספר:</label>
+                        <label for="school-phone">
+                            <i class="fas fa-phone"></i> טלפון בית הספר:
+                        </label>
                         <input type="tel" id="school-phone" placeholder="03-1234567">
                     </div>
                     <div class="setting-item">
-                        <label for="school-address">כתובת בית הספר:</label>
+                        <label for="school-address">
+                            <i class="fas fa-map-marker-alt"></i> כתובת בית הספר:
+                        </label>
                         <textarea id="school-address" placeholder="הזן כתובת מלאה"></textarea>
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>הגדרות מערכת</h4>
+                    <h4><i class="fas fa-tools"></i> הגדרות מערכת</h4>
                     <div class="setting-item">
-                        <label for="system-language">שפת מערכת:</label>
+                        <label for="system-language">
+                            <i class="fas fa-language"></i> שפת מערכת:
+                        </label>
                         <select id="system-language">
-                            <option value="he" selected>עברית</option>
-                            <option value="en">English</option>
-                            <option value="ar">عربية</option>
+                            <option value="he" selected>🇮🇱 עברית</option>
+                            <option value="en">🇺🇸 English</option>
+                            <option value="ar">🇸🇦 عربية</option>
                         </select>
                     </div>
                     <div class="setting-item">
-                        <label for="timezone">אזור זמן:</label>
+                        <label for="timezone">
+                            <i class="fas fa-clock"></i> אזור זמן:
+                        </label>
                         <select id="timezone">
-                            <option value="Asia/Jerusalem" selected>ישראל (GMT+2/+3)</option>
-                            <option value="UTC">UTC</option>
-                            <option value="Europe/London">לונדון</option>
-                            <option value="America/New_York">ניו יורק</option>
+                            <option value="Asia/Jerusalem" selected>🇮🇱 ישראל (GMT+2/+3)</option>
+                            <option value="UTC">🌍 UTC</option>
+                            <option value="Europe/London">🇬🇧 לונדון</option>
+                            <option value="America/New_York">🇺🇸 ניו יורק</option>
                         </select>
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="auto-backup">
                             <input type="checkbox" id="auto-backup" checked>
-                            גיבוי אוטומטי יומי
+                            <i class="fas fa-save"></i> גיבוי אוטומטי יומי
                         </label>
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="debug-mode">
                             <input type="checkbox" id="debug-mode">
-                            מצב דיבוג (למפתחים)
+                            <i class="fas fa-bug"></i> מצב דיבוג (למפתחים)
                         </label>
                     </div>
                 </div>
@@ -107,40 +130,52 @@
 
             <!-- Account Settings -->
             <div id="account-settings" class="settings-panel">
-                <h3>הגדרות חשבון</h3>
-                
+                <h3>👤 הגדרות חשבון</h3>
+
                 <div class="settings-group">
-                    <h4>פרטי משתמש</h4>
+                    <h4><i class="fas fa-id-card"></i> פרטי משתמש</h4>
                     <div class="setting-item">
-                        <label for="username">שם משתמש:</label>
+                        <label for="username">
+                            <i class="fas fa-user"></i> שם משתמש:
+                        </label>
                         <input type="text" id="username" readonly>
-                        <small>שם המשתמש לא ניתן לשינוי</small>
+                        <small><i class="fas fa-lock"></i> שם המשתמש לא ניתן לשינוי</small>
                     </div>
                     <div class="setting-item">
-                        <label for="display-name">שם תצוגה:</label>
+                        <label for="display-name">
+                            <i class="fas fa-signature"></i> שם תצוגה:
+                        </label>
                         <input type="text" id="display-name" placeholder="שם לתצוגה במערכת">
                     </div>
                     <div class="setting-item">
-                        <label for="user-email">אימייל אישי:</label>
+                        <label for="user-email">
+                            <i class="fas fa-envelope-open"></i> אימייל אישי:
+                        </label>
                         <input type="email" id="user-email" placeholder="your@email.com">
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>שינוי סיסמה</h4>
+                    <h4><i class="fas fa-key"></i> שינוי סיסמה</h4>
                     <div class="setting-item">
-                        <label for="current-password">סיסמה נוכחית:</label>
-                        <input type="password" id="current-password">
+                        <label for="current-password">
+                            <i class="fas fa-lock"></i> סיסמה נוכחית:
+                        </label>
+                        <input type="password" id="current-password" placeholder="הזן סיסמה נוכחית">
                     </div>
                     <div class="setting-item">
-                        <label for="new-password">סיסמה חדשה:</label>
-                        <input type="password" id="new-password">
+                        <label for="new-password">
+                            <i class="fas fa-unlock"></i> סיסמה חדשה:
+                        </label>
+                        <input type="password" id="new-password" placeholder="הזן סיסמה חדשה">
                     </div>
                     <div class="setting-item">
-                        <label for="confirm-password">אישור סיסמה חדשה:</label>
-                        <input type="password" id="confirm-password">
+                        <label for="confirm-password">
+                            <i class="fas fa-check-double"></i> אישור סיסמה חדשה:
+                        </label>
+                        <input type="password" id="confirm-password" placeholder="הזן שוב את הסיסמה החדשה">
                     </div>
-                    <div class="password-strength" id="password-strength">
+                    <div class="password-strength" id="password-strength" style="display: none;">
                         <div class="strength-bar">
                             <div class="strength-fill"></div>
                         </div>
@@ -160,56 +195,60 @@
 
             <!-- Face Recognition Settings -->
             <div id="recognition-settings" class="settings-panel">
-                <h3>הגדרות זיהוי פנים</h3>
-                
+                <h3>👁️ הגדרות זיהוי פנים</h3>
+
                 <div class="settings-group">
-                    <h4>דיוק זיהוי</h4>
+                    <h4><i class="fas fa-crosshairs"></i> דיוק זיהוי</h4>
                     <div class="setting-item">
-                        <label for="recognition-threshold">רגישות זיהוי:</label>
+                        <label for="recognition-threshold">
+                            <i class="fas fa-sliders-h"></i> רגישות זיהוי:
+                        </label>
                         <input type="range" id="recognition-threshold" min="0.3" max="0.9" step="0.05" value="0.6">
                         <div class="range-labels">
-                            <span>נמוכה (0.3)</span>
+                            <span><i class="fas fa-arrow-down"></i> נמוכה (0.3)</span>
                             <span id="threshold-value">0.6</span>
-                            <span>גבוהה (0.9)</span>
+                            <span>גבוהה (0.9) <i class="fas fa-arrow-up"></i></span>
                         </div>
-                        <small>רגישות נמוכה = זיהוי יותר גמיש, רגישות גבוהה = זיהוי מדויק יותר</small>
+                        <small><i class="fas fa-info-circle"></i> רגישות נמוכה = זיהוי יותר גמיש, רגישות גבוהה = זיהוי מדויק יותר</small>
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>הגדרות מתקדמות</h4>
+                    <h4><i class="fas fa-cogs"></i> הגדרות מתקדמות</h4>
                     <div class="setting-item checkbox-item">
                         <label for="multi-face-detection">
                             <input type="checkbox" id="multi-face-detection" checked>
-                            זיהוי מספר פנים בתמונה אחת
+                            <i class="fas fa-users"></i> זיהוי מספר פנים בתמונה אחת
                         </label>
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="save-detection-images">
                             <input type="checkbox" id="save-detection-images">
-                            שמור תמונות של זיהוי פנים
+                            <i class="fas fa-camera"></i> שמור תמונות של זיהוי פנים
                         </label>
                     </div>
                     <div class="setting-item">
-                        <label for="detection-interval">מרווח בדיקה (שניות):</label>
-                        <input type="number" id="detection-interval" min="1" max="60" value="5">
+                        <label for="detection-interval">
+                            <i class="fas fa-stopwatch"></i> מרווח בדיקה (שניות):
+                        </label>
+                        <input type="number" id="detection-interval" min="1" max="60" value="5" placeholder="5">
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>סטטיסטיקות זיהוי</h4>
+                    <h4><i class="fas fa-chart-bar"></i> סטטיסטיקות זיהוי</h4>
                     <div class="stats-grid">
                         <div class="stat-item">
                             <div class="stat-value" id="total-recognitions">0</div>
-                            <div class="stat-label">זיהויים כולל</div>
+                            <div class="stat-label"><i class="fas fa-eye"></i> זיהויים כולל</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="successful-recognitions">0</div>
-                            <div class="stat-label">זיהויים מוצלחים</div>
+                            <div class="stat-label"><i class="fas fa-check-circle"></i> זיהויים מוצלחים</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="recognition-accuracy">0%</div>
-                            <div class="stat-label">דיוק ממוצע</div>
+                            <div class="stat-label"><i class="fas fa-bullseye"></i> דיוק ממוצע</div>
                         </div>
                     </div>
                 </div>
@@ -226,47 +265,49 @@
 
             <!-- Notifications Settings -->
             <div id="notifications-settings" class="settings-panel">
-                <h3>הגדרות התראות</h3>
-                
+                <h3>🔔 הגדרות התראות</h3>
+
                 <div class="settings-group">
-                    <h4>התראות דוא"ל</h4>
+                    <h4><i class="fas fa-envelope"></i> התראות דוא"ל</h4>
                     <div class="setting-item checkbox-item">
                         <label for="email-daily-report">
                             <input type="checkbox" id="email-daily-report" checked>
-                            דוח נוכחות יומי
+                            <i class="fas fa-calendar-day"></i> דוח נוכחות יומי
                         </label>
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="email-system-alerts">
                             <input type="checkbox" id="email-system-alerts" checked>
-                            התראות מערכת
+                            <i class="fas fa-exclamation-triangle"></i> התראות מערכת
                         </label>
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="email-new-person">
                             <input type="checkbox" id="email-new-person">
-                            הוספת אדם חדש
+                            <i class="fas fa-user-plus"></i> הוספת אדם חדש
                         </label>
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>התראות במערכת</h4>
+                    <h4><i class="fas fa-desktop"></i> התראות במערכת</h4>
                     <div class="setting-item checkbox-item">
                         <label for="browser-notifications">
                             <input type="checkbox" id="browser-notifications" checked>
-                            התראות דפדפן
+                            <i class="fas fa-window-maximize"></i> התראות דפדפן
                         </label>
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="sound-notifications">
                             <input type="checkbox" id="sound-notifications">
-                            התראות קוליות
+                            <i class="fas fa-volume-up"></i> התראות קוליות
                         </label>
                     </div>
                     <div class="setting-item">
-                        <label for="notification-duration">משך הצגת התראה (שניות):</label>
-                        <input type="number" id="notification-duration" min="3" max="15" value="5">
+                        <label for="notification-duration">
+                            <i class="fas fa-hourglass-half"></i> משך הצגת התראה (שניות):
+                        </label>
+                        <input type="number" id="notification-duration" min="3" max="15" value="5" placeholder="5">
                     </div>
                 </div>
 
@@ -275,60 +316,57 @@
                         <i class="fas fa-bell"></i> שמור הגדרות התראות
                     </button>
                     <button id="test-notification" class="action-button secondary">
-                        <i class="fas fa-test-tube"></i> בדוק התראה
+                        <i class="fas fa-bell-slash"></i> בדוק התראה
                     </button>
                 </div>
             </div>
 
             <!-- Security Settings -->
             <div id="security-settings" class="settings-panel">
-                <h3>הגדרות אבטחה</h3>
-                
+                <h3>🔒 הגדרות אבטחה</h3>
+
                 <div class="settings-group">
-                    <h4>התחברות ואבטחה</h4>
+                    <h4><i class="fas fa-sign-in-alt"></i> התחברות ואבטחה</h4>
                     <div class="setting-item checkbox-item">
                         <label for="auto-logout">
                             <input type="checkbox" id="auto-logout" checked>
-                            התנתקות אוטומטית לאחר חוסר פעילות
+                            <i class="fas fa-sign-out-alt"></i> התנתקות אוטומטית לאחר חוסר פעילות
                         </label>
                     </div>
                     <div class="setting-item">
-                        <label for="logout-timeout">זמן חוסר פעילות (דקות):</label>
-                        <input type="number" id="logout-timeout" min="5" max="120" value="30">
+                        <label for="logout-timeout">
+                            <i class="fas fa-clock"></i> זמן חוסר פעילות (דקות):
+                        </label>
+                        <input type="number" id="logout-timeout" min="5" max="120" value="30" placeholder="30">
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="login-alerts">
                             <input type="checkbox" id="login-alerts" checked>
-                            התראה על התחברויות חדשות
+                            <i class="fas fa-bell"></i> התראה על התחברויות חדשות
                         </label>
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>הגדרות מתקדמות</h4>
+                    <h4><i class="fas fa-shield-virus"></i> הגדרות מתקדמות</h4>
                     <div class="setting-item checkbox-item">
                         <label for="require-https">
                             <input type="checkbox" id="require-https" checked>
-                            חייב חיבור מאובטח (HTTPS)
+                            <i class="fas fa-lock"></i> חייב חיבור מאובטח (HTTPS)
                         </label>
                     </div>
                     <div class="setting-item checkbox-item">
                         <label for="data-encryption">
                             <input type="checkbox" id="data-encryption" checked>
-                            הצפנת נתונים במסד הנתונים
+                            <i class="fas fa-user-secret"></i> הצפנת נתונים במסד הנתונים
                         </label>
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>היסטוריית התחברויות</h4>
+                    <h4><i class="fas fa-history"></i> היסטוריית התחברויות</h4>
                     <div class="login-history" id="login-history">
-                        <div class="history-item">
-                            <div class="history-time">היום 14:30</div>
-                            <div class="history-device">Chrome על Windows</div>
-                            <div class="history-ip">192.168.1.100</div>
-                        </div>
-                        <!-- יתמלא דינמית -->
+                        <div class="no-history">טוען היסטוריית התחברויות...</div>
                     </div>
                 </div>
 
@@ -344,52 +382,38 @@
 
             <!-- Backup Settings -->
             <div id="backup-settings" class="settings-panel">
-                <h3>גיבוי ושחזור</h3>
-                
+                <h3>💾 גיבוי ושחזור</h3>
+
                 <div class="settings-group">
-                    <h4>גיבוי אוטומטי</h4>
+                    <h4><i class="fas fa-robot"></i> גיבוי אוטומטי</h4>
                     <div class="setting-item checkbox-item">
                         <label for="enable-auto-backup">
                             <input type="checkbox" id="enable-auto-backup" checked>
-                            הפעל גיבוי אוטומטי
+                            <i class="fas fa-magic"></i> הפעל גיבוי אוטומטי
                         </label>
                     </div>
                     <div class="setting-item">
-                        <label for="backup-frequency">תדירות גיבוי:</label>
+                        <label for="backup-frequency">
+                            <i class="fas fa-calendar-alt"></i> תדירות גיבוי:
+                        </label>
                         <select id="backup-frequency">
-                            <option value="daily" selected>יומי</option>
-                            <option value="weekly">שבועי</option>
-                            <option value="monthly">חודשי</option>
+                            <option value="daily" selected>📅 יומי</option>
+                            <option value="weekly">📆 שבועי</option>
+                            <option value="monthly">🗓️ חודשי</option>
                         </select>
                     </div>
                     <div class="setting-item">
-                        <label for="backup-time">שעת גיבוי:</label>
+                        <label for="backup-time">
+                            <i class="fas fa-clock"></i> שעת גיבוי:
+                        </label>
                         <input type="time" id="backup-time" value="02:00">
                     </div>
                 </div>
 
                 <div class="settings-group">
-                    <h4>ניהול גיבויים</h4>
+                    <h4><i class="fas fa-archive"></i> ניהול גיבויים</h4>
                     <div class="backup-list" id="backup-list">
-                        <div class="backup-item">
-                            <div class="backup-info">
-                                <div class="backup-date">27/07/2025 02:00</div>
-                                <div class="backup-size">15.3 MB</div>
-                                <div class="backup-type">אוטומטי</div>
-                            </div>
-                            <div class="backup-actions">
-                                <button class="backup-btn download" title="הורד">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                                <button class="backup-btn restore" title="שחזר">
-                                    <i class="fas fa-upload"></i>
-                                </button>
-                                <button class="backup-btn delete" title="מחק">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <!-- יתמלא דינמית -->
+                        <div class="no-backups">טוען רשימת גיבויים...</div>
                     </div>
                 </div>
 

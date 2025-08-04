@@ -1,14 +1,14 @@
 /**
- * ==================== CONTACT PAGE JAVASCRIPT ====================
- * קובץ JavaScript ספציפי לדף יצירת קשר
+ * ==================== MODERN CONTACT PAGE JAVASCRIPT ====================
+ * קובץ JavaScript מעודכן לדף יצירת קשר עם עיצוב מודרני
  *
  * מכיל:
- * - ניהול טופס יצירת קשר
+ * - ניהול טופס יצירת קשר מתקדם
  * - ולידציית שדות בזמן אמת
  * - שליחת הודעות ל-API
  * - ניהול שאלות נפוצות (FAQ)
- * - אנימציות ואפקטי UI
- * - אינטגרציה עם מפות (אופציונלי)
+ * - אנימציות ואפקטי UI מתקדמים
+ * - חוויית משתמש משופרת
  */
 
 // ==================== GLOBAL VARIABLES ====================
@@ -17,36 +17,44 @@
 let formState = {
     isSubmitting: false,
     isValid: false,
-    validatedFields: new Set()
+    validatedFields: new Set(),
+    touchedFields: new Set()
 };
 
-// כללי ולידציה
+// כללי ולידציה מעודכנים
 const validationRules = {
-    firstName: {
+    first_name: {
         required: true,
         minLength: 2,
-        pattern: /^[א-ת\u0590-\u05FFa-zA-Z\s]+$/
+        maxLength: 50,
+        pattern: /^[א-ת\u0590-\u05FFa-zA-Z\s\-']+$/
     },
-    lastName: {
+    last_name: {
         required: true,
         minLength: 2,
-        pattern: /^[א-ת\u0590-\u05FFa-zA-Z\s]+$/
+        maxLength: 50,
+        pattern: /^[א-ת\u0590-\u05FFa-zA-Z\s\-']+$/
     },
     email: {
         required: true,
-        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        maxLength: 100
     },
     phone: {
         required: false,
-        pattern: /^[0-9\-\+\s\(\)]+$/
+        pattern: /^[0-9\-\+\s\(\)]{9,15}$/
+    },
+    school_name: {
+        required: false,
+        maxLength: 100
     },
     subject: {
         required: true
     },
     message: {
         required: true,
-        minLength: 10,
-        maxLength: 1000
+        minLength: 20,
+        maxLength: 2000
     },
     privacy: {
         required: true,
@@ -54,13 +62,24 @@ const validationRules = {
     }
 };
 
+// הודעות שגיאה מותאמות
+const errorMessages = {
+    required: 'שדה זה הוא חובה',
+    minLength: (min) => `נדרש לפחות ${min} תווים`,
+    maxLength: (max) => `מקסימום ${max} תווים`,
+    email: 'כתובת אימייל לא תקינה',
+    phone: 'מספר טלפון לא תקין (9-15 ספרות)',
+    name: 'השם יכול להכיל רק אותיות, רווחים, מקפים וגרשים',
+    privacy: 'יש לאשר את תנאי השימוש ומדיניות הפרטיות'
+};
+
 // ==================== INITIALIZATION ====================
 
 /**
- * אתחול דף יצירת קשר
+ * אתחול דף יצירת קשר מודרני
  */
 function initializeContact() {
-    console.log('📞 מאתחל דף יצירת קשר...');
+    console.log('📞 מאתחל דף יצירת קשר מודרני...');
 
     // הגדרת מאזיני אירועים
     initializeContactEventListeners();
@@ -68,20 +87,26 @@ function initializeContact() {
     // הגדרת ולידציה בזמן אמת
     setupRealTimeValidation();
 
-    // הגדרת FAQ
+    // הגדרת FAQ עם אנימציות
     setupFAQInteractions();
 
-    // אנימציות ראשוניות
+    // אנימציות ראשוניות מתקדמות
     initializeAnimations();
 
     // מילוי אוטומטי אם המשתמש מחובר
     populateUserInfo();
 
-    console.log('✅ דף יצירת קשר אותחל בהצלחה');
+    // הגדרת אובזרברים לביצועים
+    setupIntersectionObservers();
+
+    // הגדרת מאזיני מקלדת
+    setupKeyboardShortcuts();
+
+    console.log('✅ דף יצירת קשר מודרני אותחל בהצלחה');
 }
 
 /**
- * הגדרת מאזיני אירועים לדף יצירת קשר
+ * הגדרת מאזיני אירועים מתקדמים
  */
 function initializeContactEventListeners() {
     // טופס יצירת קשר
@@ -89,6 +114,14 @@ function initializeContactEventListeners() {
     if (contactForm) {
         contactForm.addEventListener('submit', handleFormSubmit);
         contactForm.addEventListener('reset', handleFormReset);
+
+        // מניעת שליחה על Enter בשדות שאינם textarea
+        contactForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.type !== 'submit') {
+                e.preventDefault();
+                focusNextField(e.target);
+            }
+        });
     }
 
     // כפתורי מדיה חברתית
@@ -97,37 +130,51 @@ function initializeContactEventListeners() {
     // קישורי התקשרות
     setupContactMethodHandlers();
 
-    console.log('🎯 מאזיני אירועים ליצירת קשר הוגדרו');
+    console.log('🎯 מאזיני אירועים מתקדמים הוגדרו');
 }
 
-// ==================== FORM VALIDATION ====================
+// ==================== ADVANCED FORM VALIDATION ====================
 
 /**
- * הגדרת ולידציה בזמן אמת
+ * הגדרת ולידציה בזמן אמת מתקדמת
  */
 function setupRealTimeValidation() {
     const form = document.getElementById('contact-form');
     if (!form) return;
 
-    // מאזינים לכל השדות
     const fields = form.querySelectorAll('input, select, textarea');
 
     fields.forEach(field => {
         // ולידציה במעבר בין שדות
-        field.addEventListener('blur', () => validateField(field));
+        field.addEventListener('blur', () => {
+            formState.touchedFields.add(field.name);
+            validateField(field);
+            updateFormProgress();
+        });
 
-        // ולידציה בזמן הקלדה (עם debounce)
-        field.addEventListener('input', debounce(() => validateField(field), 300));
+        // ולידציה בזמן הקלדה (עם debounce חכם)
+        if (field.type !== 'checkbox' && field.tagName !== 'SELECT') {
+            field.addEventListener('input', debounce(() => {
+                if (formState.touchedFields.has(field.name)) {
+                    validateField(field);
+                    updateFormProgress();
+                }
+            }, 300));
+        }
 
         // מעקב אחר שינויים
-        field.addEventListener('change', () => validateField(field));
+        field.addEventListener('change', () => {
+            formState.touchedFields.add(field.name);
+            validateField(field);
+            updateFormProgress();
+        });
     });
 
-    console.log('✅ ולידציה בזמן אמת הוגדרה');
+    console.log('✅ ולידציה בזמן אמת מתקדמת הוגדרה');
 }
 
 /**
- * ולידציה של שדה בודד
+ * ולידציה מתקדמת של שדה בודד
  */
 function validateField(field) {
     const fieldName = field.name;
@@ -140,25 +187,32 @@ function validateField(field) {
     clearFieldError(field);
 
     // בדיקת חובה
-    if (rules.required && !value) {
+    if (rules.required) {
         if (field.type === 'checkbox' && rules.mustBeChecked && !field.checked) {
-            showFieldError(field, 'שדה זה הוא חובה');
+            showFieldError(field, errorMessages.privacy);
             return false;
-        } else if (field.type !== 'checkbox') {
-            showFieldError(field, 'שדה זה הוא חובה');
+        } else if (field.type !== 'checkbox' && !value) {
+            showFieldError(field, errorMessages.required);
             return false;
         }
     }
 
+    // אם השדה ריק ולא חובה, הוא תקין
+    if (!value && !rules.required) {
+        showFieldSuccess(field);
+        formState.validatedFields.add(fieldName);
+        return true;
+    }
+
     // בדיקת אורך מינימלי
     if (rules.minLength && value.length < rules.minLength) {
-        showFieldError(field, `נדרש לפחות ${rules.minLength} תווים`);
+        showFieldError(field, errorMessages.minLength(rules.minLength));
         return false;
     }
 
     // בדיקת אורך מקסימלי
     if (rules.maxLength && value.length > rules.maxLength) {
-        showFieldError(field, `מקסימום ${rules.maxLength} תווים`);
+        showFieldError(field, errorMessages.maxLength(rules.maxLength));
         return false;
     }
 
@@ -167,11 +221,11 @@ function validateField(field) {
         let errorMessage = 'פורמט לא תקין';
 
         if (fieldName === 'email') {
-            errorMessage = 'כתובת אימייל לא תקינה';
+            errorMessage = errorMessages.email;
         } else if (fieldName === 'phone') {
-            errorMessage = 'מספר טלפון לא תקין';
-        } else if (fieldName === 'firstName' || fieldName === 'lastName') {
-            errorMessage = 'השם יכול להכיל רק אותיות ורווחים';
+            errorMessage = errorMessages.phone;
+        } else if (fieldName === 'first_name' || fieldName === 'last_name') {
+            errorMessage = errorMessages.name;
         }
 
         showFieldError(field, errorMessage);
@@ -181,28 +235,36 @@ function validateField(field) {
     // שדה תקין
     showFieldSuccess(field);
     formState.validatedFields.add(fieldName);
-    updateFormValidState();
-
     return true;
 }
 
 /**
- * הצגת שגיאה בשדה
+ * הצגת שגיאה בשדה עם אנימציה
  */
 function showFieldError(field, message) {
-    field.classList.add('error');
-    field.classList.remove('success');
+    const formGroup = field.closest('.form-group');
+    formGroup.classList.add('error');
+    formGroup.classList.remove('success');
 
     // מציאת או יצירת אלמנט שגיאה
-    let errorElement = field.parentNode.querySelector('.field-error');
+    let errorElement = formGroup.querySelector('.field-error');
     if (!errorElement) {
         errorElement = document.createElement('div');
         errorElement.className = 'field-error';
-        field.parentNode.appendChild(errorElement);
+        formGroup.appendChild(errorElement);
     }
 
     errorElement.textContent = message;
-    errorElement.style.display = 'block';
+    errorElement.style.display = 'flex';
+
+    // אנימציית הופעה
+    errorElement.style.opacity = '0';
+    errorElement.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        errorElement.style.transition = 'all 0.3s ease';
+        errorElement.style.opacity = '1';
+        errorElement.style.transform = 'translateY(0)';
+    }, 10);
 
     // הסרה מרשימת שדות תקינים
     formState.validatedFields.delete(field.name);
@@ -210,15 +272,19 @@ function showFieldError(field, message) {
 }
 
 /**
- * הצגת הצלחה בשדה
+ * הצגת הצלחה בשדה עם אנימציה
  */
 function showFieldSuccess(field) {
-    field.classList.remove('error');
-    field.classList.add('success');
+    const formGroup = field.closest('.form-group');
+    formGroup.classList.remove('error');
+    formGroup.classList.add('success');
 
-    const errorElement = field.parentNode.querySelector('.field-error');
+    const errorElement = formGroup.querySelector('.field-error');
     if (errorElement) {
-        errorElement.style.display = 'none';
+        errorElement.style.opacity = '0';
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+        }, 300);
     }
 }
 
@@ -226,19 +292,20 @@ function showFieldSuccess(field) {
  * ניקוי שגיאה משדה
  */
 function clearFieldError(field) {
-    field.classList.remove('error', 'success');
+    const formGroup = field.closest('.form-group');
+    formGroup.classList.remove('error', 'success');
 
-    const errorElement = field.parentNode.querySelector('.field-error');
+    const errorElement = formGroup.querySelector('.field-error');
     if (errorElement) {
         errorElement.style.display = 'none';
     }
 }
 
 /**
- * עדכון מצב תקינות הטופס
+ * עדכון מצב תקינות הטופס עם אינדיקטור התקדמות
  */
 function updateFormValidState() {
-    const requiredFields = ['firstName', 'lastName', 'email', 'subject', 'message', 'privacy'];
+    const requiredFields = ['first_name', 'last_name', 'email', 'subject', 'message', 'privacy'];
     const validCount = requiredFields.filter(field => formState.validatedFields.has(field)).length;
 
     formState.isValid = validCount === requiredFields.length;
@@ -256,19 +323,57 @@ function updateFormValidState() {
     }
 }
 
+/**
+ * עדכון התקדמות הטופס
+ */
+function updateFormProgress() {
+    const requiredFields = ['first_name', 'last_name', 'email', 'subject', 'message', 'privacy'];
+    const validCount = requiredFields.filter(field => formState.validatedFields.has(field)).length;
+    const progress = (validCount / requiredFields.length) * 100;
+
+    // הוספת אינדיקטור התקדמות אם לא קיים
+    let progressBar = document.querySelector('.form-progress');
+    if (!progressBar) {
+        progressBar = document.createElement('div');
+        progressBar.className = 'form-progress';
+        progressBar.innerHTML = `
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <span class="progress-text">${Math.round(progress)}% הושלם</span>
+        `;
+
+        const form = document.getElementById('contact-form');
+        form.insertBefore(progressBar, form.firstChild);
+    }
+
+    const progressFill = progressBar.querySelector('.progress-fill');
+    const progressText = progressBar.querySelector('.progress-text');
+
+    if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+    }
+
+    if (progressText) {
+        progressText.textContent = `${Math.round(progress)}% הושלם`;
+    }
+}
+
 // ==================== FORM SUBMISSION ====================
 
 /**
- * טיפול בשליחת הטופס
+ * טיפול מתקדם בשליחת הטופס
  */
 async function handleFormSubmit(event) {
     event.preventDefault();
 
-    console.log('📤 מתחיל שליחת טופס יצירת קשר...');
+    console.log('📤 מתחיל שליחת טופס יצירת קשר מתקדמת...');
 
     // בדיקת תקינות מלאה
     if (!validateForm()) {
-        showFormMessage('אנא תקנו את השגיאות בטופס', 'error');
+        showFormMessage('אנא תקנו את השגיאות בטופס ונסו שוב', 'error');
+        // גלילה לשגיאה הראשונה
+        scrollToFirstError();
         return;
     }
 
@@ -284,10 +389,10 @@ async function handleFormSubmit(event) {
         // איסוף נתוני הטופס
         const formData = collectFormData();
 
-        console.log('📊 נתוני טופס:', formData);
+        console.log('📊 נתוני טופס מתקדמים:', formData);
 
-        // שליחה לשרת
-        const response = await submitContactForm(formData);
+        // שליחה לשרת עם retry mechanism
+        const response = await submitContactFormWithRetry(formData);
 
         if (response.success) {
             handleSubmissionSuccess(response);
@@ -297,7 +402,7 @@ async function handleFormSubmit(event) {
 
     } catch (error) {
         console.error('❌ שגיאה בשליחת טופס:', error);
-        handleSubmissionError('שגיאה בשליחת ההודעה. אנא נסו שוב.');
+        handleSubmissionError('שגיאה בשליחת ההודעה. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
     } finally {
         formState.isSubmitting = false;
         updateSubmitButton(false);
@@ -305,193 +410,140 @@ async function handleFormSubmit(event) {
 }
 
 /**
- * ולידציה מלאה של הטופס
+ * ולידציה מלאה של הטופס עם הדגשת שגיאות
  */
 function validateForm() {
     const form = document.getElementById('contact-form');
     const fields = form.querySelectorAll('input, select, textarea');
     let isValid = true;
+    let firstErrorField = null;
 
     fields.forEach(field => {
         if (!validateField(field)) {
             isValid = false;
+            if (!firstErrorField) {
+                firstErrorField = field;
+            }
         }
     });
+
+    // פוקוס על השגיאה הראשונה
+    if (firstErrorField) {
+        firstErrorField.focus();
+    }
 
     return isValid;
 }
 
 /**
- * איסוף נתוני הטופס
+ * איסוף נתוני הטופס המתקדם
  */
 function collectFormData() {
     const form = document.getElementById('contact-form');
     const formData = new FormData(form);
 
     return {
-        first_name: formData.get('first_name'),
-        last_name: formData.get('last_name'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        school_name: formData.get('school_name'),
+        first_name: formData.get('first_name')?.trim(),
+        last_name: formData.get('last_name')?.trim(),
+        email: formData.get('email')?.trim().toLowerCase(),
+        phone: formData.get('phone')?.trim(),
+        school_name: formData.get('school_name')?.trim(),
         subject: formData.get('subject'),
-        message: formData.get('message'),
+        message: formData.get('message')?.trim(),
         newsletter: formData.get('newsletter') === 'on',
         privacy_accepted: formData.get('privacy') === 'on',
-        source: 'contact_form',
-        timestamp: new Date().toISOString()
+        source: 'contact_form_modern',
+        timestamp: new Date().toISOString(),
+        user_agent: navigator.userAgent,
+        page_url: window.location.href,
+        referrer: document.referrer || 'direct'
     };
 }
 
 /**
- * שליחת הטופס לשרת
+ * שליחת הטופס עם מנגנון retry
  */
-async function submitContactForm(formData) {
-    const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-    });
+async function submitContactFormWithRetry(formData, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(formData)
+            });
 
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.warn(`Attempt ${i + 1} failed:`, error);
+            if (i === retries - 1) throw error;
+
+            // המתנה קצרה לפני ניסיון חוזר
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
     }
-
-    return await response.json();
 }
 
 /**
- * טיפול בהצלחת שליחה
+ * טיפול מתקדם בהצלחת שליחה
  */
 function handleSubmissionSuccess(response) {
     console.log('✅ הודעה נשלחה בהצלחה');
 
-    // הצגת הודעת הצלחה
-    showFormMessage('הודעתכם נשלחה בהצלחה! נחזור אליכם בהקדם.', 'success');
+    // הצגת הודעת הצלחה מעוצבת
+    showFormMessage('🎉 הודעתכם נשלחה בהצלחה! נחזור אליכם תוך 24 שעות.', 'success');
 
-    // איפוס הטופס
-    document.getElementById('contact-form').reset();
-    formState.validatedFields.clear();
-    updateFormValidState();
+    // איפוס הטופס עם אנימציה
+    resetFormWithAnimation();
 
-    // ניקוי כל השגיאות
-    document.querySelectorAll('.field-error').forEach(error => {
-        error.style.display = 'none';
-    });
-
-    document.querySelectorAll('.error, .success').forEach(field => {
-        field.classList.remove('error', 'success');
-    });
-
-    // אנליטיקס (אם יש)
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'contact_form_submit', {
-            'event_category': 'Contact',
-            'event_label': response.submission_id || 'unknown'
-        });
+    // הסתרת אינדיקטור התקדמות
+    const progressBar = document.querySelector('.form-progress');
+    if (progressBar) {
+        progressBar.style.opacity = '0';
+        setTimeout(() => progressBar.remove(), 500);
     }
+
+    // אנליטיקס מתקדם
+    trackFormSubmission(response);
+
+    // הוספת קונפטי או אפקט חזותי
+    showSuccessAnimation();
 }
 
 /**
- * טיפול בשגיאת שליחה
+ * טיפול מתקדם בשגיאת שליחה
  */
 function handleSubmissionError(errorMessage) {
     console.error('❌ שגיאה בשליחת הודעה:', errorMessage);
-    showFormMessage(errorMessage, 'error');
+
+    // הודעת שגיאה מפורטת יותר
+    const detailedMessage = `
+        ${errorMessage}
+        <br><br>
+        💡 טיפים לפתרון:
+        <br>• בדקו את החיבור לאינטרנט
+        <br>• נסו לרענן את הדף ולשלוח שוב
+        <br>• צרו איתנו קשר בטלפון: 03-1234567
+    `;
+
+    showFormMessage(detailedMessage, 'error');
 }
 
-/**
- * עדכון כפתור השליחה
- */
-function updateSubmitButton(isSubmitting) {
-    const submitButton = document.querySelector('.submit-button');
-    if (!submitButton) return;
-
-    if (isSubmitting) {
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> שולח...';
-        submitButton.classList.add('submitting');
-    } else {
-        submitButton.disabled = !formState.isValid;
-        submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> שלח הודעה';
-        submitButton.classList.remove('submitting');
-    }
-}
+// ==================== ENHANCED FAQ INTERACTIONS ====================
 
 /**
- * הצגת הודעות טופס
- */
-function showFormMessage(message, type) {
-    const messagesContainer = document.getElementById('form-messages');
-    const successMessage = document.getElementById('success-message');
-    const errorMessage = document.getElementById('error-message');
-
-    // הסתרת כל ההודעות
-    messagesContainer.style.display = 'none';
-    successMessage.style.display = 'none';
-    errorMessage.style.display = 'none';
-
-    // הצגת ההודעה המתאימה
-    if (type === 'success') {
-        successMessage.querySelector('span').textContent = message;
-        successMessage.style.display = 'block';
-    } else {
-        errorMessage.querySelector('span').textContent = message;
-        errorMessage.style.display = 'block';
-    }
-
-    messagesContainer.style.display = 'block';
-
-    // גלילה להודעה
-    messagesContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    // הסתרה אוטומטית אחרי 10 שניות
-    setTimeout(() => {
-        messagesContainer.style.display = 'none';
-    }, 10000);
-}
-
-// ==================== FORM RESET ====================
-
-/**
- * טיפול באיפוס הטופס
- */
-function handleFormReset() {
-    console.log('🔄 מאפס טופס יצירת קשר');
-
-    // איפוס מצב הטופס
-    formState.validatedFields.clear();
-    formState.isValid = false;
-
-    // ניקוי כל השגיאות והסגנונות
-    document.querySelectorAll('.field-error').forEach(error => {
-        error.style.display = 'none';
-    });
-
-    document.querySelectorAll('.error, .success').forEach(field => {
-        field.classList.remove('error', 'success');
-    });
-
-    // הסתרת הודעות
-    document.getElementById('form-messages').style.display = 'none';
-
-    // עדכון כפתור השליחה
-    updateFormValidState();
-
-    showNotification('הטופס אופס', 'info');
-}
-
-// ==================== FAQ INTERACTIONS ====================
-
-/**
- * הגדרת אינטראקציות לשאלות נפוצות
+ * הגדרת אינטראקציות FAQ מתקדמות
  */
 function setupFAQInteractions() {
     const faqItems = document.querySelectorAll('.faq-item');
 
-    faqItems.forEach(item => {
+    faqItems.forEach((item, index) => {
         const question = item.querySelector('.faq-question');
         const answer = item.querySelector('.faq-answer');
         const toggle = item.querySelector('.faq-toggle');
@@ -500,216 +552,230 @@ function setupFAQInteractions() {
             question.addEventListener('click', () => {
                 toggleFAQItem(item, answer, toggle);
             });
+
+            // הוספת מאזיני מקלדת
+            question.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleFAQItem(item, answer, toggle);
+                }
+            });
+
+            // הגדרת ARIA
+            question.setAttribute('tabindex', '0');
+            question.setAttribute('aria-expanded', 'false');
+            question.setAttribute('aria-controls', `faq-answer-${index}`);
+            answer.setAttribute('id', `faq-answer-${index}`);
         }
     });
 
-    console.log(`📋 הוגדרו ${faqItems.length} שאלות נפוצות`);
+    // הוספת חיפוש בFAQ
+    addFAQSearch();
+
+    console.log(`📋 הוגדרו ${faqItems.length} שאלות נפוצות עם אינטראקציות מתקדמות`);
 }
 
 /**
- * פתיחה/סגירה של שאלה נפוצה
+ * פתיחה/סגירה מתקדמת של שאלה נפוצה
  */
 function toggleFAQItem(item, answer, toggle) {
     const isOpen = item.classList.contains('open');
+    const question = item.querySelector('.faq-question');
 
     if (isOpen) {
-        // סגירה
+        // סגירה עם אנימציה
         item.classList.remove('open');
         answer.style.maxHeight = '0';
         toggle.textContent = '+';
         toggle.style.transform = 'rotate(0deg)';
+        question.setAttribute('aria-expanded', 'false');
     } else {
-        // פתיחה
+        // סגירת כל השאר אם רוצים accordion
+        // closeAllFAQItems();
+
+        // פתיחה עם אנימציה
         item.classList.add('open');
         answer.style.maxHeight = answer.scrollHeight + 'px';
         toggle.textContent = '−';
         toggle.style.transform = 'rotate(180deg)';
+        question.setAttribute('aria-expanded', 'true');
+
+        // גלילה חלקה לשאלה
+        item.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    console.log(`❓ FAQ פתוח/סגור: ${isOpen ? 'נסגר' : 'נפתח'}`);
-}
-
-// ==================== SOCIAL MEDIA & CONTACT METHODS ====================
-
-/**
- * הגדרת מאזיני מדיה חברתית
- */
-function setupSocialMediaHandlers() {
-    const socialLinks = document.querySelectorAll('.social-link');
-
-    socialLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            // אם אין href אמיתי, מנע ניווט
-            if (link.getAttribute('href') === '#') {
-                e.preventDefault();
-                showNotification('קישור זה יהיה זמין בקרוב', 'info');
-            }
-
-            // אפקט ויזואלי
-            link.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                link.style.transform = '';
-            }, 150);
-        });
-
-        // אפקט hover
-        link.addEventListener('mouseenter', () => {
-            link.style.transform = 'translateY(-3px) scale(1.1)';
-        });
-
-        link.addEventListener('mouseleave', () => {
-            link.style.transform = '';
-        });
-    });
-}
-
-/**
- * הגדרת מאזיני דרכי התקשרות
- */
-function setupContactMethodHandlers() {
-    // קישורי טלפון
-    const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
-    phoneLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            console.log('📞 התקשר לטלפון:', link.href);
-            showNotification('פותח אפליקציית טלפון...', 'info');
-        });
-    });
-
-    // קישורי אימייל
-    const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
-    emailLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            console.log('📧 פותח אימייל:', link.href);
-            showNotification('פותח אפליקציית מייל...', 'info');
-        });
-    });
-
-    // כפתורי מפות
-    const mapButtons = document.querySelectorAll('.map-button');
-    mapButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            if (button.getAttribute('href') === 'https://goo.gl/maps' || button.getAttribute('href') === 'https://maps.google.com') {
-                e.preventDefault();
-                showNotification('קישור למפה יהיה זמין בקרוב', 'info');
-            }
-        });
-    });
-}
-
-// ==================== USER INFO POPULATION ====================
-
-/**
- * מילוי אוטומטי של מידע משתמש
- */
-function populateUserInfo() {
-    if (!isUserLoggedIn()) {
-        return;
-    }
-
-    const user = window.currentUser;
-    if (!user) return;
-
-    console.log('👤 ממלא מידע משתמש בטופס יצירת קשר');
-
-    // מילוי שדות קיימים
-    if (user.schoolInfo?.school_name) {
-        setValue('school-name', user.schoolInfo.school_name);
-    }
-
-    if (user.schoolInfo?.school_email) {
-        setValue('email', user.schoolInfo.school_email);
-    }
-
-    // ולידציה של השדות שמולאו
-    document.querySelectorAll('#contact-form input').forEach(field => {
-        if (field.value) {
-            validateField(field);
-        }
-    });
-}
-
-// ==================== ANIMATIONS ====================
-
-/**
- * אנימציות ראשוניות
- */
-function initializeAnimations() {
-    // אנימציית כניסה לטופס
-    const form = document.querySelector('.contact-form-section');
-    if (form) {
-        form.style.opacity = '0';
-        form.style.transform = 'translateY(30px)';
-
-        setTimeout(() => {
-            form.style.transition = 'all 0.8s ease';
-            form.style.opacity = '1';
-            form.style.transform = 'translateY(0)';
-        }, 200);
-    }
-
-    // אנימציית כניסה למידע התקשרות
-    const contactInfo = document.querySelector('.contact-info-section');
-    if (contactInfo) {
-        contactInfo.style.opacity = '0';
-        contactInfo.style.transform = 'translateY(30px)';
-
-        setTimeout(() => {
-            contactInfo.style.transition = 'all 0.8s ease';
-            contactInfo.style.opacity = '1';
-            contactInfo.style.transform = 'translateY(0)';
-        }, 400);
-    }
-
-    // אנימציות לכרטיסי דרכי התקשרות
-    const contactMethods = document.querySelectorAll('.contact-method');
-    contactMethods.forEach((method, index) => {
-        method.style.opacity = '0';
-        method.style.transform = 'translateX(-20px)';
-
-        setTimeout(() => {
-            method.style.transition = 'all 0.6s ease';
-            method.style.opacity = '1';
-            method.style.transform = 'translateX(0)';
-        }, 600 + (index * 100));
-    });
+    console.log(`❓ FAQ ${isOpen ? 'נסגר' : 'נפתח'}`);
 }
 
 // ==================== UTILITY FUNCTIONS ====================
 
 /**
- * Debounce function לולידציה
+ * מעבר לשדה הבא בטופס
  */
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+function focusNextField(currentField) {
+    const form = currentField.closest('form');
+    const fields = Array.from(form.querySelectorAll('input, select, textarea, button'));
+    const currentIndex = fields.indexOf(currentField);
+    const nextField = fields[currentIndex + 1];
+
+    if (nextField) {
+        nextField.focus();
+    }
 }
 
 /**
- * הגדרת ערך לשדה
+ * גלילה לשגיאה הראשונה בטופס
  */
-function setValue(elementId, value) {
-    const element = document.getElementById(elementId);
-    if (element && value) {
-        element.value = value;
+function scrollToFirstError() {
+    const firstError = document.querySelector('.form-group.error');
+    if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const field = firstError.querySelector('input, select, textarea');
+        if (field) {
+            setTimeout(() => field.focus(), 500);
+        }
     }
+}
+
+/**
+ * איפוס הטופס עם אנימציה
+ */
+function resetFormWithAnimation() {
+    const form = document.getElementById('contact-form');
+
+    // אנימציית fade out
+    form.style.opacity = '0.5';
+    form.style.transform = 'scale(0.98)';
+
+    setTimeout(() => {
+        form.reset();
+        formState.validatedFields.clear();
+        formState.touchedFields.clear();
+        updateFormValidState();
+
+        // ניקוי כל השגיאות והסגנונות
+        document.querySelectorAll('.field-error').forEach(error => {
+            error.style.display = 'none';
+        });
+
+        document.querySelectorAll('.error, .success').forEach(field => {
+            field.classList.remove('error', 'success');
+        });
+
+        // אנימציית fade in חזרה
+        form.style.opacity = '1';
+        form.style.transform = 'scale(1)';
+    }, 300);
+}
+
+/**
+ * הצגת אנימציית הצלחה
+ */
+function showSuccessAnimation() {
+    // יצירת קונפטי או אפקט חזותי
+    const successOverlay = document.createElement('div');
+    successOverlay.className = 'success-overlay';
+    successOverlay.innerHTML = `
+        <div class="success-content">
+            <div class="success-icon">✅</div>
+            <h3>הודעה נשלחה!</h3>
+            <p>תודה שפניתם אלינו</p>
+        </div>
+    `;
+
+    document.body.appendChild(successOverlay);
+
+    setTimeout(() => {
+        successOverlay.classList.add('show');
+    }, 100);
+
+    setTimeout(() => {
+        successOverlay.classList.remove('show');
+        setTimeout(() => successOverlay.remove(), 500);
+    }, 3000);
+}
+
+/**
+ * מעקב אחר שליחת טופס
+ */
+function trackFormSubmission(response) {
+    // Google Analytics
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'form_submit', {
+            'event_category': 'Contact',
+            'event_label': response.submission_id || 'unknown',
+            'value': 1
+        });
+    }
+
+    // Facebook Pixel
+    if (typeof fbq !== 'undefined') {
+        fbq('track', 'Contact');
+    }
+
+    console.log('📊 מעקב אנליטיקס נשלח');
+}
+
+/**
+ * הגדרת צופי intersection למטען עמוד משופר
+ */
+function setupIntersectionObservers() {
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -20% 0px',
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    // צפייה בסקציות
+    document.querySelectorAll('.contact-form-section, .contact-info-section, .faq-section').forEach(section => {
+        observer.observe(section);
+    });
+}
+
+/**
+ * הגדרת קיצורי מקלדת
+ */
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + Enter לשליחת טופס
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            const form = document.getElementById('contact-form');
+            if (form && formState.isValid) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        }
+
+        // Escape לסגירת FAQ פתוח
+        if (e.key === 'Escape') {
+            const openFAQ = document.querySelector('.faq-item.open');
+            if (openFAQ) {
+                const question = openFAQ.querySelector('.faq-question');
+                question.click();
+            }
+        }
+    });
 }
 
 // ==================== DEBUG UTILITIES ====================
 
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    window.debugContact = {
+    window.debugContactModern = {
         // הצגת מצב הטופס
         showFormState: () => {
-            console.log('Form State:', formState);
-            console.log('Validated Fields:', Array.from(formState.validatedFields));
+            console.table({
+                isSubmitting: formState.isSubmitting,
+                isValid: formState.isValid,
+                validatedFields: Array.from(formState.validatedFields),
+                touchedFields: Array.from(formState.touchedFields)
+            });
             return formState;
         },
 
@@ -719,44 +785,55 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
             const fields = form.querySelectorAll('input, select, textarea');
 
             fields.forEach(field => {
-                console.log(`${field.name}:`, validateField(field));
+                const isValid = validateField(field);
+                console.log(`${field.name}: ${isValid ? '✅' : '❌'}`);
             });
         },
 
-        // מילוי טופס לבדיקה
+        // מילוי טופס מתקדם לבדיקה
         fillTestData: () => {
-            setValue('first-name', 'יוסי');
-            setValue('last-name', 'כהן');
-            setValue('email', 'yossi@example.com');
-            setValue('phone', '050-1234567');
-            setValue('school-name', 'בית ספר לדוגמה');
+            const testData = {
+                'first-name': 'יוסי',
+                'last-name': 'כהן',
+                'email': 'yossi.cohen@example.com',
+                'phone': '050-1234567',
+                'school-name': 'בית ספר חדשני לטכנולוגיה',
+                'message': 'שלום, אני מעוניין לקבל מידע נוסף על המערכת שלכם לרישום נוכחות. יש לנו כ-500 תלמידים ואנחנו מחפשים פתרון מתקדם וקל לשימוש.'
+            };
 
+            Object.entries(testData).forEach(([id, value]) => {
+                const field = document.getElementById(id);
+                if (field) {
+                    field.value = value;
+                    validateField(field);
+                }
+            });
+
+            // בחירת subject
             const subject = document.getElementById('subject');
             if (subject) subject.value = 'demo';
 
-            setValue('message', 'זוהי הודעת בדיקה למערכת יצירת הקשר.');
-
+            // סימון checkbox
             const privacy = document.getElementById('privacy');
-            if (privacy) privacy.checked = true;
+            if (privacy) {
+                privacy.checked = true;
+                validateField(privacy);
+            }
 
-            // ולידציה של כל השדות
-            document.querySelectorAll('#contact-form input, #contact-form select, #contact-form textarea').forEach(field => {
-                validateField(field);
-            });
-
-            console.log('🧪 נתוני בדיקה מולאו');
+            updateFormProgress();
+            console.log('🧪 נתוני בדיקה מתקדמים מולאו');
         },
 
-        // סימולציית שליחה
+        // סימולציית שליחה מתקדמת
         simulateSubmission: (success = true) => {
             formState.isSubmitting = true;
             updateSubmitButton(true);
 
             setTimeout(() => {
                 if (success) {
-                    handleSubmissionSuccess({ submission_id: 'test_123' });
+                    handleSubmissionSuccess({ submission_id: 'test_modern_123' });
                 } else {
-                    handleSubmissionError('זוהי שגיאת בדיקה');
+                    handleSubmissionError('זוהי שגיאת בדיקה מתקדמת');
                 }
                 formState.isSubmitting = false;
                 updateSubmitButton(false);
@@ -772,31 +849,48 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
                     toggleFAQItem(item, answer, toggle);
                 }
             });
+        },
+
+        // בדיקת נגישות
+        checkAccessibility: () => {
+            const issues = [];
+
+            // בדיקת ARIA labels
+            document.querySelectorAll('input, select, textarea').forEach(field => {
+                if (!field.getAttribute('aria-label') && !field.closest('label')) {
+                    issues.push(`Missing label for ${field.name || field.id}`);
+                }
+            });
+
+            // בדיקת contrast
+            console.log('🔍 בדיקות נגישות:', issues.length === 0 ? '✅ הכל תקין' : issues);
+            return issues;
         }
     };
 
-    console.log('🔧 כלי דיבוג זמינים: window.debugContact');
+    console.log('🔧 כלי דיבוג מתקדמים זמינים: window.debugContactModern');
 }
 
 // ==================== AUTO INITIALIZATION ====================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📞 Contact.js נטען');
+    console.log('📞 Contact.js מודרני נטען');
     initializeContact();
 });
 
 /**
- * ==================== END OF CONTACT.JS ====================
+ * ==================== END OF MODERN CONTACT.JS ====================
  *
- * קובץ זה מכיל את כל הפונקציונליות לדף יצירת קשר:
+ * קובץ זה מכיל פונקציונליות מתקדמת לדף יצירת קשר:
  *
- * 📝 ניהול טופס מתקדם עם ולידציה בזמן אמת
- * ✅ בדיקת תקינות שדות מקיפה
- * 📤 שליחת הודעות עם feedback מלא
- * ❓ ניהול שאלות נפוצות אינטראקטיבי
- * 🎨 אנימציות ואפקטי UI מתקדמים
- * 📱 ממשק רספונסיבי וידידותי
- * 🔧 כלי דיבוג מתקדמים
+ * 📝 ניהול טופס מתקדם עם ולידציה חכמה
+ * ✅ בדיקת תקינות בזמן אמת עם feedback ויזואלי
+ * 📤 שליחת הודעות עם retry mechanism ומעקב אנליטיקס
+ * ❓ ניהול FAQ אינטראקטיבי עם נגישות מלאה
+ * 🎨 אנימציות ואפקטים ויזואליים מתקדמים
+ * 📱 תמיכה מלאה במובייל ונגישות
+ * ⌨️ קיצורי מקלדת ותמיכה בכלי נגישות
+ * 🔧 כלי דיבוג מתקדמים למפתחים
  *
- * הטופס תומך בכל דרכי הקלט ומספק חוויית משתמש חלקה
+ * הטופס מספק חוויית משתמש מתקדמת ומקצועית
  */

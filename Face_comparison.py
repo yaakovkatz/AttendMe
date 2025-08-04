@@ -4,10 +4,13 @@ from deepface import DeepFace
 import requests
 import os
 import cv2
+import numpy as np
+from io import BytesIO
 
-import glob
-import shutil
 from tabulate import tabulate
+
+# ייבוא פונקציות Cloudinary
+from Yolo_modle import get_school_faces_from_cloudinary, save_detected_match_to_cloudinary
 
 # הגדרות סף
 FIRST_THRESHOLD = 0.6
@@ -38,26 +41,31 @@ def normalize_similarity_score(value):
         return value
 
 
-def verify_face_primary(img1_path, img2_path):
-    """פונקציה ראשונה להשוואת שתי תמונות פנים - משתמשת ב-VGG-Face"""
+def download_image_to_memory(image_url):
+    """מוריד תמונה מ-URL ומחזיר אותה כ-OpenCV image בזיכרון"""
     try:
-        # בדיקה שהקבצים קיימים ותקינים
-        if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-            print_status(f"קובץ לא קיים: {img1_path} או {img2_path}", level=5)
-            return 0
+        response = requests.get(image_url, timeout=10)
+        if response.status_code == 200:
+            image_array = np.frombuffer(response.content, np.uint8)
+            img = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+            return img
+        return None
+    except Exception as e:
+        print_status(f"שגיאה בהורדת תמונה: {str(e)}", emoji="❌", level=2)
+        return None
 
-        # בדיקה שניתן לטעון את התמונות
-        img1_test = cv2.imread(img1_path)
-        img2_test = cv2.imread(img2_path)
 
-        if img1_test is None or img2_test is None:
-            print_status(f"לא ניתן לטעון תמונות: {os.path.basename(img1_path)} או {os.path.basename(img2_path)}",
-                         level=5)
+def verify_face_primary(img1, img2):
+    """פונקציה ראשונה להשוואת שתי תמונות פנים - משתמשת ב-VGG-Face - עבודה בזיכרון"""
+    try:
+        # בדיקה שהתמונות תקינות
+        if img1 is None or img2 is None:
+            print_status(f"תמונה לא תקינה", level=5)
             return 0
 
         result = DeepFace.verify(
-            img1_path=img1_path,
-            img2_path=img2_path,
+            img1_path=img1,
+            img2_path=img2,
             enforce_detection=False,
             detector_backend='opencv',
             model_name='VGG-Face',
@@ -70,26 +78,17 @@ def verify_face_primary(img1_path, img2_path):
         return 0
 
 
-def verify_face_secondary(img1_path, img2_path):
-    """פונקציה שנייה להשוואת פנים - משתמשת ב-Facenet עם cosine"""
+def verify_face_secondary(img1, img2):
+    """פונקציה שנייה להשוואת פנים - משתמשת ב-Facenet עם cosine - עבודה בזיכרון"""
     try:
-        # בדיקה שהקבצים קיימים ותקינים
-        if not os.path.exists(img1_path) or not os.path.exists(img2_path):
-            print_status(f"קובץ לא קיים: {img1_path} או {img2_path}", level=5)
-            return 0
-
-        # בדיקה שניתן לטעון את התמונות
-        img1_test = cv2.imread(img1_path)
-        img2_test = cv2.imread(img2_path)
-
-        if img1_test is None or img2_test is None:
-            print_status(f"לא ניתן לטעון תמונות: {os.path.basename(img1_path)} או {os.path.basename(img2_path)}",
-                         level=5)
+        # בדיקה שהתמונות תקינות
+        if img1 is None or img2 is None:
+            print_status(f"תמונה לא תקינה", level=5)
             return 0
 
         result = DeepFace.verify(
-            img1_path=img1_path,
-            img2_path=img2_path,
+            img1_path=img1,
+            img2_path=img2,
             enforce_detection=False,
             detector_backend='opencv',
             model_name='Facenet',
@@ -102,15 +101,18 @@ def verify_face_secondary(img1_path, img2_path):
         return 0
 
 
-def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_name, last_name):
+def check_single_image_with_detailed_analysis(person_image, faces_from_cloudinary, first_name, last_name, school_index,
+                                              person_id):
     """
-    גרסה מתקדמת של בדיקת תמונה בודדת עם ניתוח מפורט וטבלאות
+    גרסה מתקדמת של בדיקת תמונה בודדת עם ניתוח מפורט וטבלאות - עבודה בזיכרון בלבד
 
     Args:
-        image_path (str): נתיב לתמונה לבדיקה
-        faces_in_db (list): רשימת נתיבי תמונות פנים במאגר
-        first_name (str): שם פרטי (לצורך לוג)
-        last_name (str): שם משפחה (לצורך לוג)
+        person_image (numpy.ndarray): תמונת האדם בזיכרון
+        faces_from_cloudinary (list): רשימת פנים מ-Cloudinary
+        first_name (str): שם פרטי
+        last_name (str): שם משפחה
+        school_index (int): מספר בית הספר
+        person_id (str): תעודת זהות
 
     Returns:
         bool: True אם נמצאה התאמה, False אחרת
@@ -118,9 +120,9 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
     try:
         print_status(f"מתחיל בדיקה מפורטת עבור {first_name} {last_name}", emoji="🔍", level=3)
 
-        # בדיקת קיום התמונה
-        if not os.path.exists(image_path):
-            print_status(f"תמונה לא קיימת: {image_path}", emoji="❌", level=3)
+        # בדיקת תקינות התמונה
+        if person_image is None:
+            print_status(f"תמונת אדם לא תקינה", emoji="❌", level=3)
             return False
 
         found_match = False
@@ -128,27 +130,30 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
         definite_matches = []  # התאמות ודאיות (מעל הסף)
         gray_zone_matches = []  # התאמות באזור האפור
 
-        # יצירת תיקיית Identified_Images אם לא קיימת
-        identified_dir = "./Identified_Images"
-        if not os.path.exists(identified_dir):
-            os.makedirs(identified_dir)
+        print_status(f"בודק התאמה מול {len(faces_from_cloudinary)} תמונות ב-Cloudinary", emoji="🔍", level=3)
 
-        print_status(f"בודק התאמה מול {len(faces_in_db)} תמונות במאגר", emoji="🔍", level=3)
-
-        # בדיקה מול כל פנים במאגר
-        for face_in_db in faces_in_db:
+        # בדיקה מול כל פנים מ-Cloudinary
+        for face_data in faces_from_cloudinary:
             try:
-                face_filename = os.path.basename(face_in_db)
+                face_filename = face_data['filename']
+                face_url = face_data['url']
+
                 print_status(f"בודק מול: {face_filename}", emoji="🔎", level=4)
 
-                # בדיקה ראשונה עם VGG-Face
-                first_similarity = verify_face_primary(image_path, face_in_db)
+                # הורדת תמונת הפנים מ-Cloudinary לזיכרון
+                face_image = download_image_to_memory(face_url)
+                if face_image is None:
+                    print_status(f"לא ניתן להוריד: {face_filename}", emoji="❌", level=4)
+                    continue
+
+                # בדיקה ראשונה עם VGG-Face - ישירות בזיכרון
+                first_similarity = verify_face_primary(person_image, face_image)
                 print_status(f"בדיקה ראשונה (VGG-Face): {first_similarity:.3f}", level=4)
 
                 # בדיקה שנייה עם Facenet (רק אם עברנו את הסף הראשון)
                 second_similarity = 0
                 if first_similarity >= FIRST_THRESHOLD:
-                    second_similarity = verify_face_secondary(image_path, face_in_db)
+                    second_similarity = verify_face_secondary(person_image, face_image)
                     print_status(f"בדיקה שנייה (Facenet): {second_similarity:.3f}", level=4)
 
                 # חישוב דמיון סופי
@@ -161,14 +166,14 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
                 if first_similarity >= FIRST_THRESHOLD and second_similarity >= SECOND_THRESHOLD:
                     # מקרה 1: התאמה ודאית (שתי הבדיקות עברו)
                     status_icon = "✅"
-                    definite_matches.append(face_in_db)
+                    definite_matches.append(face_data)
                     found_match = True
                     print_status(f"התאמה ודאית נמצאה! {face_filename}", emoji="🎯", level=4)
 
                 elif first_similarity >= GRAY_ZONE_LOWER_THRESHOLD:
                     # מקרה 2: באזור האפור, צריך בדיקה מעמיקה
                     status_icon = "🔍"
-                    gray_zone_matches.append((face_in_db, first_similarity))
+                    gray_zone_matches.append((face_data, first_similarity))
                     print_status(f"באזור אפור: {face_filename} - {first_similarity:.3f}", emoji="🔍", level=4)
 
                 else:
@@ -178,7 +183,7 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
 
                 # הוסף את הנתונים לרשימת התוצאות (בסדר הנכון - מימין לשמאל בעברית)
                 results.append([
-                    os.path.basename(image_path),
+                    f"{person_id}",
                     face_filename,
                     f"{normalize_similarity_score(first_similarity):.3f}",
                     f"{normalize_similarity_score(second_similarity):.3f}",
@@ -187,7 +192,7 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
                 ])
 
             except Exception as face_error:
-                print_status(f"שגיאה בבדיקת פנים {os.path.basename(face_in_db)}: {str(face_error)}", emoji="⚠️",
+                print_status(f"שגיאה בבדיקת פנים {face_data.get('filename', 'לא ידוע')}: {str(face_error)}", emoji="⚠️",
                              level=4)
                 continue
 
@@ -201,28 +206,37 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
         if not found_match and gray_zone_matches:
             print_status(f"נמצאו {len(gray_zone_matches)} פנים באזור האפור, מבצע הערכה נוספת...", emoji="🔍", level=3)
 
-            # כאן אפשר להוסיף לוגיקה נוספת לאזור האפור
-            # לעת עתה, פשוט נדווח על זה
-            for face_path, similarity in gray_zone_matches:
-                print_status(f"באזור אפור: {os.path.basename(face_path)} - {similarity:.3f}", level=4, emoji="🔍")
+            for face_data, similarity in gray_zone_matches:
+                print_status(f"באזור אפור: {face_data['filename']} - {similarity:.3f}", level=4, emoji="🔍")
 
-        # שמירת פנים מזוהות
+        # שמירת פנים מזוהות ב-Cloudinary
         if found_match and definite_matches:
             try:
-                print_status(f"שומר {len(definite_matches)} פנים מזוהות...", emoji="💾", level=3)
+                print_status(f"שומר {len(definite_matches)} פנים מזוהות ב-Cloudinary...", emoji="💾", level=3)
 
-                for face_in_db in definite_matches:
-                    # יצירת שם קובץ חדש עבור הפנים המזוהות
-                    original_number = os.path.basename(face_in_db).split('.')[0]
-                    new_filename = f"{first_name}_{last_name}_{original_number}.jpg"
-                    new_path = os.path.join(identified_dir, new_filename)
+                # שמירת כל הפנים מהמצלמה שהתאימו
+                saved_count = 0
+                for face_index, matched_face in enumerate(definite_matches):
+                    # הורדת הפנים מהמצלמה שהתאימו
+                    camera_face_image = download_image_to_memory(matched_face['url'])
+                    if camera_face_image is not None:
+                        success = save_detected_match_to_cloudinary(
+                            camera_face_image,  # פנים מהמצלמה
+                            school_index,
+                            first_name,
+                            last_name,
+                            f"{person_id}_{face_index + 1}"  # הוסף מספר סידורי למקרה של כמה התאמות
+                        )
 
-                    # העתקת הקובץ (לא מחיקה מהמאגר המקורי)
-                    shutil.copy2(face_in_db, new_path)
-                    print_status(f"פנים מזוהות הועתקו ל: {new_filename}", emoji="📁", level=4)
+                        if success:
+                            saved_count += 1
+                            print_status(f"פנים מהמצלמה נשמרו #{saved_count}: {first_name} {last_name}", emoji="☁️",
+                                         level=4)
+
+                print_status(f"סה״כ נשמרו {saved_count} התאמות עבור {first_name} {last_name}", emoji="📸", level=3)
 
             except Exception as file_error:
-                print_status(f"שגיאה בטיפול בקבצים: {str(file_error)}", emoji="❌", level=4)
+                print_status(f"שגיאה בשמירה ב-Cloudinary: {str(file_error)}", emoji="❌", level=4)
 
         # סיכום
         if found_match:
@@ -240,10 +254,15 @@ def check_single_image_with_detailed_analysis(image_path, faces_in_db, first_nam
         return False
 
 
+# הוסף את השורה הזו בתחילת הקובץ Face_comparison.py (עם הייבואים)
+from Yolo_modle import save_unidentified_faces_after_attendance
+
+
 def check_attendance_unified(school_index, is_specific_check=False, person_ids=None):
     """
-    פונקציה מאוחדת לבדיקת נוכחות - כללית או ספציפית
-    משווה את התמונה הראשית של כל אדם מול פנים ב-EnviroFaces
+    פונקציה מאוחדת לבדיקת נוכחות - כללית או ספציפית - עבודה בזיכרון בלבד
+    משווה את התמונה הראשית של כל אדם מול פנים ב-Cloudinary
+    *** מעקב על פנים מזוהים ושמירת לא מזוהים ***
 
     Args:
         school_index (int): מספר בית הספר במערכת
@@ -325,30 +344,25 @@ def check_attendance_unified(school_index, is_specific_check=False, person_ids=N
             people_to_check = people_vector
             print_status(f"בודק נוכחות עבור {len(people_to_check)} אנשים", emoji="👥", level=1)
 
-        # בדיקה שתיקיית EnviroFaces ספציפית לבית הספר קיימת ויש בה תמונות
-        enviro_faces_dir = f"EnviroFaces_school_{school_index}_{school.admin_username}"
-        if not os.path.exists(enviro_faces_dir):
+        # טעינת פנים מ-Cloudinary
+        print_status("טוען פנים מ-Cloudinary...", emoji="☁️", level=1)
+        faces_from_cloudinary = get_school_faces_from_cloudinary(school_index)
+
+        if not faces_from_cloudinary:
             return {
                 'success': False,
                 'checked_people': 0,
                 'present_people': 0,
                 'absent_people': 0,
-                'message': f'תיקיית EnviroFaces לא קיימת עבור {school.school_name}. נא להפעיל חילוץ פנים תחילה',
+                'message': f'לא נמצאו פנים ב-Cloudinary עבור {school.school_name}. נא להפעיל חילוץ פנים תחילה',
                 'school_name': school.school_name
             }
 
-        faces_in_db = glob.glob(f"{enviro_faces_dir}/*.jpg")
-        if not faces_in_db:
-            return {
-                'success': False,
-                'checked_people': 0,
-                'present_people': 0,
-                'absent_people': 0,
-                'message': f'לא נמצאו פנים בתיקיית EnviroFaces עבור {school.school_name}. נא להפעיל חילוץ פנים תחילה',
-                'school_name': school.school_name
-            }
+        print_status(f"נמצאו {len(faces_from_cloudinary)} פנים ב-Cloudinary של {school.school_name}", emoji="📊",
+                     level=1)
 
-        print_status(f"נמצאו {len(faces_in_db)} פנים במאגר של {school.school_name}", emoji="📊", level=1)
+        # 👈 🆕 מעקב על פנים מזוהים
+        identified_faces = set()
 
         # מונים
         checked_people = 0
@@ -374,72 +388,71 @@ def check_attendance_unified(school_index, is_specific_check=False, person_ids=N
                 # קבלת התמונה הראשית (הראשונה ברשימה)
                 primary_image_url = person.image_urls[0]
 
-                # הורדת התמונה זמנית לבדיקה
-                temp_image_path = None
-                try:
-                    print_status(f"מוריד תמונה לבדיקה: {person.first_name} {person.last_name}", emoji="📥", level=2)
+                # הורדת התמונה לזיכרון
+                print_status(f"מוריד תמונה לזיכרון: {person.first_name} {person.last_name}", emoji="📥", level=2)
 
-                    # הורדת התמונה
-                    response = requests.get(primary_image_url, timeout=10)
-                    if response.status_code != 200:
-                        print_status(f"לא ניתן להוריד תמונה עבור {person.first_name} {person.last_name}", emoji="❌",
-                                     level=2)
-                        person.set_presence(False)
-                        checked_people += 1
-                        continue
-
-                    # שמירת התמונה זמנית עם בדיקת תקינות (עם קידומת של בית הספר)
-                    temp_image_path = f"temp_school_{school_index}_{person.id_number}.jpg"
-
-                    # שמירה וודא שהתמונה תקינה
-                    with open(temp_image_path, 'wb') as f:
-                        f.write(response.content)
-
-                    # בדיקה שהתמונה נשמרה תקין
-                    test_img = cv2.imread(temp_image_path)
-                    if test_img is None:
-                        print_status(f"תמונה זמנית לא תקינה עבור {person.first_name} {person.last_name}", emoji="❌",
-                                     level=2)
-                        person.set_presence(False)
-                        checked_people += 1
-                        continue
-
-                    print_status(f"תמונה זמנית נשמרה בהצלחה: {temp_image_path}", emoji="💾", level=3)
-
-                    # בדיקת נוכחות באמצעות הפונקציה המתקדמת
-                    is_present = check_single_image_with_detailed_analysis(temp_image_path, faces_in_db,
-                                                                           person.first_name, person.last_name)
-
-                    # עדכון סטטוס נוכחות
-                    person.set_presence(is_present)
-                    person.update_check_time()
-
-                    if is_present:
-                        present_people += 1
-                        print_status(f"נוכח: {person.first_name} {person.last_name}", emoji="✅", level=2)
-                    else:
-                        print_status(f"לא נוכח: {person.first_name} {person.last_name}", emoji="❌", level=2)
-
-                    checked_people += 1
-
-                except Exception as person_error:
-                    print_status(f"שגיאה בבדיקת {person.first_name} {person.last_name}: {str(person_error)}", emoji="❌",
+                person_image = download_image_to_memory(primary_image_url)
+                if person_image is None:
+                    print_status(f"לא ניתן להוריד תמונה עבור {person.first_name} {person.last_name}", emoji="❌",
                                  level=2)
                     person.set_presence(False)
                     checked_people += 1
+                    continue
 
-                finally:
-                    # ניקוי קובץ זמני
-                    if temp_image_path and os.path.exists(temp_image_path):
-                        try:
-                            os.remove(temp_image_path)
-                            print_status(f"קובץ זמני נמחק: {temp_image_path}", emoji="🗑️", level=4)
-                        except:
-                            pass
+                print_status(f"תמונה נטענה לזיכרון בהצלחה", emoji="💾", level=3)
 
-            except Exception as person_loop_error:
-                print_status(f"שגיאה בעיבוד אדם {person_index + 1}: {str(person_loop_error)}", emoji="❌", level=1)
+                # בדיקת נוכחות באמצעות הפונקציה המתקדמת - עבודה בזיכרון
+                is_present = check_single_image_with_detailed_analysis(
+                    person_image,
+                    faces_from_cloudinary,
+                    person.first_name,
+                    person.last_name,
+                    school_index,
+                    person.id_number
+                )
+
+                # 👈 🆕 אם נמצאה התאמה - עדכן מעקב פנים מזוהים
+                if is_present:
+                    # מצא איזה פנים התאימו לאדם הזה
+                    for face_data in faces_from_cloudinary:
+                        # בדוק שוב איזה פנים התאימו (פשטות - נבדוק שוב מהר)
+                        face_image = download_image_to_memory(face_data['url'])
+                        if face_image is not None:
+                            first_similarity = verify_face_primary(person_image, face_image)
+                            if first_similarity >= FIRST_THRESHOLD:
+                                second_similarity = verify_face_secondary(person_image, face_image)
+                                if second_similarity >= SECOND_THRESHOLD:
+                                    # זה פנים שזוהה!
+                                    identified_faces.add(face_data['filename'])
+                                    print_status(f"פנים {face_data['filename']} סומן כמזוהה", emoji="✅", level=4)
+
+                # עדכון סטטוס נוכחות
+                person.set_presence(is_present)
+                person.update_check_time()
+
+                if is_present:
+                    present_people += 1
+                    print_status(f"נוכח: {person.first_name} {person.last_name}", emoji="✅", level=2)
+                else:
+                    print_status(f"לא נוכח: {person.first_name} {person.last_name}", emoji="❌", level=2)
+
+                checked_people += 1
+
+            except Exception as person_error:
+                print_status(f"שגיאה בבדיקת {person.first_name} {person.last_name}: {str(person_error)}", emoji="❌",
+                             level=2)
+                person.set_presence(False)
+                checked_people += 1
                 continue
+
+        # 👈 🆕 שמירת פנים לא מזוהים
+        print_status("=" * 30, level=0)
+        print_status(f"מעבד פנים לא מזוהים...", emoji="🔍", level=0)
+        unidentified_count = save_unidentified_faces_after_attendance(school_index, faces_from_cloudinary,
+                                                                      identified_faces)
+
+        print_status(f"נמצאו {len(identified_faces)} פנים מזוהים", emoji="✅", level=1)
+        print_status(f"נשמרו {unidentified_count} פנים לא מזוהים", emoji="❓", level=1)
 
         # סיכום כולל
         absent_people = checked_people - present_people
@@ -452,6 +465,8 @@ def check_attendance_unified(school_index, is_specific_check=False, person_ids=N
         print_status(f"סה\"כ אנשים נבדקו: {checked_people}", emoji="👥", level=1)
         print_status(f"נוכחים: {present_people}", emoji="✅", level=1)
         print_status(f"נעדרים: {absent_people}", emoji="❌", level=1)
+        print_status(f"פנים מזוהים: {len(identified_faces)}", emoji="✅", level=1)  # 👈 חדש
+        print_status(f"פנים לא מזוהים: {unidentified_count}", emoji="❓", level=1)  # 👈 חדש
         print_status("=" * 50, level=0)
 
         return {
@@ -459,6 +474,8 @@ def check_attendance_unified(school_index, is_specific_check=False, person_ids=N
             'checked_people': checked_people,
             'present_people': present_people,
             'absent_people': absent_people,
+            'identified_faces': len(identified_faces),  # 👈 חדש
+            'unidentified_faces': unidentified_count,  # 👈 חדש
             'message': success_message,
             'school_name': school.school_name
         }
@@ -472,6 +489,8 @@ def check_attendance_unified(school_index, is_specific_check=False, person_ids=N
             'checked_people': 0,
             'present_people': 0,
             'absent_people': 0,
+            'identified_faces': 0,
+            'unidentified_faces': 0,
             'message': error_message,
             'school_name': None
         }

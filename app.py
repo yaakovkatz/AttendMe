@@ -22,7 +22,7 @@
 from Data_Manage import (add_new_person, remove_person, get_all_people, get_person,
                          update_person, toggle_presence, add_new_target, remove_target,
                          get_all_targets, clear_all_targets, login_user, register_school,
-                         add_new_image_url, add_demo_data, print_all_schools)
+                         add_new_image_url)
 
 from Attend_Manage import (extract_faces_from_cameras, check_attendance_for_people,
                            check_attendance_for_selected_people)
@@ -1139,6 +1139,50 @@ def check_attendance_selected_people():
             'present_people': 0,
             'absent_people': 0
         }), 500
+
+
+@app.route('/api/all-faces/<int:school_index>', methods=['GET'])
+def get_all_faces(school_index):
+    """מחזיר את כל הפנים - מזוהות ולא מזוהות"""
+    try:
+        from Yolo_modle import get_all_matches_for_school
+
+        result = get_all_matches_for_school(school_index)
+
+        # איחוד הרשימות לרשימה אחת כמו שהקוד מצפה
+        all_faces = result['identified'] + result['unidentified']
+
+        return jsonify({
+            'success': True,
+            'faces': all_faces
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'faces': []
+        }), 500
+
+
+@app.route('/api/detected-matches/<int:school_index>', methods=['DELETE'])
+def clear_detected_matches(school_index):
+    """מוחק את כל תמונות ההתאמה של בית ספר"""
+    try:
+        from Yolo_modle import delete_all_detected_matches
+
+        result = delete_all_detected_matches(school_index)
+        return jsonify({
+            'success': True,
+            'deleted_count': result,
+            'message': f'נמחקו {result} תמונות (כולל פנים גולמיים מהמצלמה - לא נראים באתר)'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'deleted_count': 0
+        }), 500
+
 
 # ===============================================================================
 #                            API - ניהול תמונות זמניות

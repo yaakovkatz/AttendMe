@@ -439,3 +439,107 @@
         align-self: center;          /* יישור למרכז */
     }
 }
+
+/* ==================== DETECTED MATCHES ==================== */
+
+.detected-matches-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    direction: rtl;
+}
+
+.match-card {
+    width: 150px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.match-card:hover {
+    transform: translateY(-2px);
+}
+
+.match-image {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+}
+
+.match-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.match-details {
+    padding: 10px;
+    text-align: center;
+}
+
+.match-name {
+    font-weight: bold;
+    color: var(--dark-color);
+    margin-bottom: 5px;
+}
+
+.match-id {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* כפתור מחיקה */
+.action-button.danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.action-button.danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* פנים לא מזוהות */
+.match-card.unidentified .match-details {
+    background-color: #fff3cd;
+}
+
+.unidentified-text {
+    color: #856404;
+    font-style: italic;
+}
+
+/* פנים מזוהות - רקע ירוק */
+.match-card.identified .match-details {
+    background-color: #d4edda;
+}
+
+.match-card.identified .match-name {
+    color: #155724;
+}
+
+.match-card.identified .match-id {
+    color: #155724;
+}
+
+/* סימן V על פנים מזוהות */
+.identified-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #28a745;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}

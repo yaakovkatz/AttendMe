@@ -45,21 +45,15 @@ async function initializeAttendance() {
     const serverOk = await checkServerConnection();
     if (serverOk) {
         await loadAttendanceData();
+        await loadDetectedMatches(); // הוסף את זה
     }
 
     console.log('✅ דף נוכחות אותחל בהצלחה');
 }
-
 /**
  * הגדרת מאזיני אירועים לדף נוכחות
  */
 function initializeAttendanceEventListeners() {
-    // כפתור רענון נוכחות
-    const refreshBtn = document.getElementById('refresh-attendance');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', handleRefreshAttendance);
-    }
-
     // כפתור ייצוא
     const exportBtn = document.getElementById('export-attendance');
     if (exportBtn) {
@@ -82,6 +76,12 @@ function initializeAttendanceEventListeners() {
     const checkSpecificBtn = document.getElementById('check-specific-person');
     if (checkSpecificBtn) {
         checkSpecificBtn.addEventListener('click', handleCheckSpecificPeople);
+    }
+
+    // כפתור מחיקת תמונות מזוהות
+    const clearMatchesBtn = document.getElementById('clear-detected-matches');
+    if (clearMatchesBtn) {
+        clearMatchesBtn.addEventListener('click', clearDetectedMatches);
     }
 
     console.log('🎯 מאזיני אירועים לנוכחות הוגדרו');
@@ -267,6 +267,7 @@ async function handleCheckAllPeople() {
             showNotification('מעדכן נתונים...', 'info');
             await new Promise(resolve => setTimeout(resolve, 1000));
             await loadAttendanceData();
+            await loadDetectedMatches();
 
         } else {
             throw new Error(attendanceResult.error || 'שגיאה בבדיקת נוכחות');
@@ -352,6 +353,7 @@ async function handleCheckSpecificPeople() {
             showNotification('מעדכן נתונים...', 'info');
             await new Promise(resolve => setTimeout(resolve, 1000));
             await loadAttendanceData();
+            await loadDetectedMatches();
 
             // איפוס בחירות
             selectedCheckboxes.forEach(cb => cb.checked = false);
@@ -532,6 +534,88 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     };
 
     console.log('🔧 כלי דיבוג זמינים: window.debugAttendance');
+}
+
+// טעינת כל הפנים
+async function loadDetectedMatches() {
+    try {
+        const schoolIndex = getCurrentSchoolIndex();
+        const response = await fetch(`/api/all-faces/${schoolIndex}`);
+        const data = await response.json();
+
+        if (data.success && data.faces) {
+            renderDetectedMatches(data.faces);
+        }
+    } catch (error) {
+        console.error('שגיאה בטעינת פנים:', error);
+    }
+}
+
+// הצגת כל הפנים
+function renderDetectedMatches(faces) {
+    const container = document.getElementById('detected-matches-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    faces.forEach(face => {
+        const faceCard = document.createElement('div');
+        faceCard.className = face.is_identified ? 'match-card identified' : 'match-card unidentified';
+
+        if (face.is_identified) {
+            faceCard.innerHTML = `
+                <div class="match-image">
+                    <img src="${face.url}" alt="${face.first_name} ${face.last_name}">
+                    <div class="identified-badge">✓</div>
+                </div>
+                <div class="match-details">
+                    <div class="match-name">${face.first_name} ${face.last_name}</div>
+                    <div class="match-id">${face.person_id}</div>
+                </div>
+            `;
+        } else {
+            faceCard.innerHTML = `
+                <div class="match-image">
+                    <img src="${face.url}" alt="לא זוהה">
+                </div>
+                <div class="match-details">
+                    <div class="match-name unidentified-text">לא זוהה</div>
+                    <div class="match-id">---</div>
+                </div>
+            `;
+        }
+
+        container.appendChild(faceCard);
+    });
+}
+
+// מחיקת תמונות מזוהות
+async function clearDetectedMatches() {
+    if (!confirm('האם אתה בטוח שברצונך למחוק את כל התמונות המזוהות?')) {
+        return;
+    }
+
+    try {
+        showNotification('מוחק תמונות מזוהות...', 'info');
+
+        const schoolIndex = getCurrentSchoolIndex();
+        const response = await fetch(`/api/detected-matches/${schoolIndex}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification(`נמחקו ${data.deleted_count} תמונות כולל פנים גולמיים מהמצלמה - לא נראים באתר`, 'success');
+            await loadDetectedMatches(); // רענן תצוגה
+        } else {
+            throw new Error(data.error || 'שגיאה במחיקה');
+        }
+
+    } catch (error) {
+        console.error('שגיאה במחיקת תמונות:', error);
+        showNotification('שגיאה במחיקת התמונות', 'error');
+    }
 }
 
 // ==================== AUTO INITIALIZATION ====================

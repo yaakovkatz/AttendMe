@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}AttendMe - אודותינו{% endblock %}
+{% block title %}AttendMe - אודותינו | הסיפור שלנו{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
@@ -13,46 +13,50 @@
 <section class="about-hero">
     <div class="container">
         <div class="hero-content">
-            <h1>אודות AttendMe</h1>
-            <p class="hero-subtitle">חדשנות בטכנולוגיית זיהוי פנים לרישום נוכחות חכם ומדויק</p>
-        </div>
-        <div class="hero-visual">
-            <div class="logo-large">
-                <span class="logo-icon">👁️</span>
-                <span class="logo-text">AttendMe</span>
+            <h1>הסיפור שלנו</h1>
+            <p class="hero-subtitle">ממועמדים לתואר ראשון לחברה מובילה בתחום הטכנולוגיה החינוכית</p>
+            <div class="hero-visual">
+                <div class="logo-large">
+                    <span class="logo-icon">👥</span>
+                    <span class="logo-text">AttendMe</span>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Story Section -->
-<section class="our-story section">
+<!-- Origin Story Section -->
+<section class="origin-story section">
     <div class="container">
-        <div class="content-grid">
-            <div class="content-text">
-                <h2>הסיפור שלנו</h2>
-                <p>AttendMe נולדה מתוך צורך אמיתי לשפר את תהליכי רישום הנוכחות במוסדות חינוך. ראינו מורים שמבלים זמן יקר בבדיקת נוכחות ידנית, ובתי ספר שמתקשים לעקוב אחר תלמידים באופן יעיל ומדויק.</p>
-                
-                <p>החלטנו לפתח פתרון טכנולוגי מתקדם המבוסס על בינה מלאכותית וזיהוי פנים, שיחסוך זמן יקר למורים ויספק למנהלים נתונים מדויקים ובזמן אמת על נוכחות התלמידים.</p>
-                
-                <p>היום, AttendMe משרתת מאות בתי ספר וגני ילדים ברחבי הארץ, ומסייעת לאלפי מורים וקולט נתוני נוכחות של עשרות אלפי תלמידים מדי יום.</p>
+        <div class="story-grid">
+            <div class="story-content">
+                <h2>הכל התחיל בקמפוס שטראוס</h2>
+                <p>שני סטודנטים לתואר ראשון בשנה האחרונה, יהושוע קרויזר ויעקב כץ, ישבו באמפיתיאטרון והבחינו בבעיה שמטרידה כל מורה וכל מנהל בית ספר - בזבוז זמן יקר על רישום נוכחות ידני.</p>
+
+                <p>במקום לעבור על הבעיה, הם החליטו לפתור אותה. במסגרת פרויקט הגמר שלהם, הם החלו לפתח מערכת חדשנית שתשלב בינה מלאכותית וזיהוי פנים כדי להפוך את תהליך רישום הנוכחות לאוטומטי, מדויק וחכם.</p>
+
+                <p>מה שהתחיל כפרויקט אקדמי הפך במהירות למשהו גדול הרבה יותר - למהפכה אמיתית בתחום החינוך הדיגיטלי בישראל.</p>
             </div>
-            <div class="content-visual">
-                <div class="story-illustration">
+
+            <div class="story-visual">
+                <div class="campus-illustration">
                     <div class="story-step">
-                        <div class="step-icon">🎯</div>
-                        <h4>זיהוי הצורך</h4>
-                        <p>מורים מבלים זמן רב על רישום נוכחות ידני</p>
+                        <div class="step-number">01</div>
+                        <div class="step-icon">🎓</div>
+                        <h4>הבעיה בקמפוס</h4>
+                        <p>זיהוי הבעיה הטכנולוגית בזמן אמת</p>
                     </div>
                     <div class="story-step">
+                        <div class="step-number">02</div>
                         <div class="step-icon">💡</div>
-                        <h4>הפתרון החדשני</h4>
-                        <p>פיתוח מערכת זיהוי פנים מתקדמת ומדויקת</p>
+                        <h4>הרעיון הנולד</h4>
+                        <p>פיתוח הפתרון במסגרת פרויקט הגמר</p>
                     </div>
                     <div class="story-step">
+                        <div class="step-number">03</div>
                         <div class="step-icon">🚀</div>
-                        <h4>השפעה חיובית</h4>
-                        <p>חיסכון בזמן ושיפור איכות החינוך</p>
+                        <h4>המהפכה</h4>
+                        <p>הפיכת הפרויקט לחברה מובילה</p>
                     </div>
                 </div>
             </div>
@@ -60,198 +64,220 @@
     </div>
 </section>
 
-<!-- Mission & Vision -->
-<section class="mission-vision section">
+<!-- Founders Section -->
+<section class="founders-section section">
     <div class="container">
-        <div class="mv-grid">
-            <div class="mv-card mission">
-                <div class="mv-icon">🎯</div>
-                <h3>המשימה שלנו</h3>
-                <p>לספק למוסדות חינוך כלים טכנולוגיים מתקדמים שמשפרים את יעילות הניהול החינוכי, חוסכים זמן יקר למורים ומאפשרים להם להתמקד במה שחשוב באמת - החינוך והטיפוח של התלמידים.</p>
+        <h2 class="section-title">המייסדים</h2>
+        <p class="founders-intro">שני סטודנטים בעלי חזון שהפכו רעיון לחברה מובילה</p>
+
+        <div class="founders-grid">
+            <div class="founder-card">
+                <div class="founder-avatar">
+                    <div class="avatar-placeholder">
+                        <span class="avatar-initials">יק</span>
+                    </div>
+                </div>
+                <div class="founder-info">
+                    <h3>יהושוע קרויזר</h3>
+                    <p class="founder-role">מייסד שותף ומנהל טכנולוגיות</p>
+                    <div class="founder-details">
+                        <p><strong>רקע אקדמי:</strong> סטודנט שנה ד' למדעי המחשב, קמפוס שטראוס</p>
+                        <p><strong>התמחות:</strong> בינה מלאכותית וזיהוי תבניות</p>
+                        <p><strong>התפקיד:</strong> אחראי על פיתוח אלגוריתמי הזיהוי והארכיטקטורה הטכנית</p>
+                    </div>
+                    <div class="founder-vision">
+                        <blockquote>
+                            "ראיתי איך מורים מבלים 10-15 דקות כל שיעור על רישום נוכחות. הבנתי שטכנולוגיה יכולה לחסוך זמן זה ולהפנות אותו לחינוך איכותי יותר."
+                        </blockquote>
+                    </div>
+                </div>
             </div>
-            <div class="mv-card vision">
-                <div class="mv-icon">🔮</div>
+
+            <div class="founder-card">
+                <div class="founder-avatar">
+                    <div class="avatar-placeholder">
+                        <span class="avatar-initials">יכ</span>
+                    </div>
+                </div>
+                <div class="founder-info">
+                    <h3>יעקב כץ</h3>
+                    <p class="founder-role">מייסד שותף ומנהל מוצר</p>
+                    <div class="founder-details">
+                        <p><strong>רקע אקדמי:</strong> סטודנט שנה ד' למדעי המחשב, קמפוס שטראוס</p>
+                        <p><strong>התמחות:</strong> חוויית משתמש ופיתוח מוצר</p>
+                        <p><strong>התפקיד:</strong> אחראי על חוויית המשתמש, ממשק והתאמה לצרכי מוסדות החינוך</p>
+                    </div>
+                    <div class="founder-vision">
+                        <blockquote>
+                            "החלום שלנו היה ליצור טכנולוגיה שמשרתת את החינוך, לא מסבכת אותו. כל פיצ'ר שפיתחנו נבדק עם מורים אמיתיים."
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Journey Timeline -->
+<section class="journey-timeline section">
+    <div class="container">
+        <h2 class="section-title">המסע שלנו</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">ספטמבר 2023</div>
+                    <h4>תחילת הפרויקט</h4>
+                    <p>יהושוע ויעקב התחילו לעבוד על פרויקט הגמר שלהם במסגרת התואר בקמפוס שטראוס. המטרה: למצוא פתרון טכנולוגי לבעיית רישום הנוכחות.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">נובמבר 2023</div>
+                    <h4>פיתוח האלגוריתם הראשון</h4>
+                    <p>אחרי חודשיים של מחקר ופיתוח, הצליחו ליצור את האלגוריתם הראשון לזיהוי פנים עם דיוק של 85%. התוצאות עודדו אותם להמשיך.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">ינואר 2024</div>
+                    <h4>בדיקה ראשונה בבית ספר</h4>
+                    <p>הפרויקט נבדק לראשונה בבית ספר יסודי בירושלים. התגובות החיוביות של המורים שכנעו אותם שיש פה משהו גדול.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">מרץ 2024</div>
+                    <h4>זכייה בתחרות החדשנות</h4>
+                    <p>הפרויקט זכה במקום הראשון בתחרות החדשנות הטכנולוגית של המכללה. זה נתן להם את הביטחון להקים חברה אמיתית.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">מאי 2024</div>
+                    <h4>הקמת AttendMe</h4>
+                    <p>רישום החברה והתחלת השיווק הרשמי. החברה התחילה עם 5 בתי ספר כלקוחות ראשונים.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-date">דצמבר 2024</div>
+                    <h4>הצלחה מסחרית</h4>
+                    <p>היום AttendMe משרתת למעלה מ-150 מוסדות חינוך ברחבי הארץ, עם דיוק זיהוי של מעל 99% ושביעות רצון לקוחות גבוהה.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vision & Mission -->
+<section class="vision-mission section">
+    <div class="container">
+        <div class="vm-grid">
+            <div class="vm-card mission">
+                <div class="vm-icon">🎯</div>
+                <h3>המשימה שלנו</h3>
+                <p>להפוך את תהליך רישום הנוכחות מעומס יומיומי לכלי חכם ויעיל, שמאפשר למורים להתמקד במה שהם עושים הכי טוב - ללמד ולחנך. אנחנו מאמינים שטכנולוגיה צריכה לשרת את החינוך, לא להסתיר אותו.</p>
+            </div>
+            <div class="vm-card vision">
+                <div class="vm-icon">🔮</div>
                 <h3>החזון שלנו</h3>
-                <p>להיות הפתרון המוביל בעולם לרישום נוכחות חכם במוסדות חינוך, תוך יצירת סביבה טכנולוגית מתקדמת שמקדמת חדשנות וחשיבה עתידנית בחינוך.</p>
+                <p>לראות עולם שבו כל מוסד חינוך יכול להשתמש בטכנולוגיות מתקדמות כדי לשפר את החוויה החינוכית. אנחנו רוצים שהפתרון שלנו יהיה הסטנדרט העולמי לרישום נוכחות חכם ומדויק.</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Values Section -->
-<section class="our-values section">
+<section class="values-section section">
     <div class="container">
-        <h2 class="section-title">הערכים שלנו</h2>
+        <h2 class="section-title">הערכים שמנחים אותנו</h2>
         <div class="values-grid">
             <div class="value-card">
-                <div class="value-icon">🔒</div>
-                <h3>פרטיות ואבטחה</h3>
-                <p>אנו מתחייבים להגן על המידע האישי והרגיש של התלמידים והמוסדות החינוכיים ברמת אבטחה הגבוהה ביותר.</p>
+                <div class="value-icon">🎓</div>
+                <h3>חינוך קודם כל</h3>
+                <p>כל החלטה שאנחנו מקבלים נבחנת דרך פריזמה אחת: האם זה משפר את החוויה החינוכית? אנחנו תמיד נשים את טובת התלמידים והמורים לפני הכל.</p>
             </div>
             <div class="value-card">
                 <div class="value-icon">⚡</div>
-                <h3>חדשנות מתמדת</h3>
-                <p>אנו משקיעים ברציפות במחקר ופיתוח כדי להביא לכם את הטכנולוגיות החדשניות והמתקדמות ביותר.</p>
+                <h3>חדשנות נגישה</h3>
+                <p>טכנולוגיה מתקדמת לא חייבת להיות מסובכת. אנחנו מאמינים בחדשנות שכל מורה יכול להבין ולהשתמש בה, בלי קורסים ארוכים.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🔒</div>
+                <h3>פרטיות מוחלטת</h3>
+                <p>המידע של התלמידים הוא קדוש עבורנו. אנחנו משתמשים בסטנדרטי האבטחה הגבוהים ביותר ומתחייבים שלעולם לא נשתמש במידע לצרכים מסחריים.</p>
             </div>
             <div class="value-card">
                 <div class="value-icon">🤝</div>
                 <h3>שותפות אמיתית</h3>
-                <p>אנו רואים בלקוחותינו כשותפים, ועובדים יחד איתם כדי להבין את הצרכים ולספק פתרונות מותאמים אישית.</p>
-            </div>
-            <div class="value-card">
-                <div class="value-icon">🎯</div>
-                <h3>מדויקות ואמינות</h3>
-                <p>המערכת שלנו מספקת תוצאות מדויקות ואמינות, כדי שתוכלו לסמוך עליה בכל המשימות החשובות.</p>
-            </div>
-            <div class="value-card">
-                <div class="value-icon">🌱</div>
-                <h3>פשטות וידידותיות</h3>
-                <p>אנו מאמינים שטכנולוגיה מתקדמת צריכה להיות פשוטה ונגישה לכולם, ללא צורך בידע טכני מוקדם.</p>
-            </div>
-            <div class="value-card">
-                <div class="value-icon">💡</div>
-                <h3>חינוך איכותי</h3>
-                <p>המטרה העליונה שלנו היא לתרום להעלאת איכות החינוך על ידי שחרור זמן למורים ומתן כלים טובים יותר למנהלים.</p>
+                <p>אנחנו לא רק ספקים - אנחנו שותפים. אנחנו מקשיבים למשוב, משתפרים כל הזמן, ותמיד זמינים לעזור ולתמוך.</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Technology Section -->
-<section class="our-technology section">
+<section class="technology-section section">
     <div class="container">
-        <h2 class="section-title">הטכנולוגיה שלנו</h2>
+        <h2 class="section-title">הטכנולוגיה שפיתחנו</h2>
         <div class="tech-content">
             <div class="tech-overview">
-                <h3>בינה מלאכותית מתקדמת</h3>
-                <p>המערכת שלנו מבוססת על אלגוריתמים מתקדמים של למידת מכונה וזיהוי פנים, המפותחים על ידי צוות מהנדסים מומחים בתחום הבינה המלאכותית.</p>
+                <h3>מפרויקט סטודנטים לפתרון מוביל</h3>
+                <p>מה שהתחיל כפרויקט גמר בקמפוס שטראוס הפך לטכנולוגיה מתקדמת שמשנה את פני החינוך הדיגיטלי בישראל. האלגוריתמים שלנו מבוססים על מחקר מתקדם ובדיקות מעמיקות עם מוסדות חינוך אמיתיים.</p>
             </div>
-            
+
             <div class="tech-features">
                 <div class="tech-feature">
                     <div class="tech-icon">🧠</div>
-                    <h4>למידת מכונה עמוקה</h4>
-                    <p>רשתות נוירונים מתקדמות המתמחות בזיהוי דפוסים ברזולוציה גבוהה</p>
+                    <h4>AI מותאם לילדים</h4>
+                    <p>פיתחנו אלגוריתמים מיוחדים לזיהוי פנים של ילדים, שמתמודדים עם שינויי גובה, תסרוקות ואפילו משקפיים חדשים</p>
                 </div>
                 <div class="tech-feature">
                     <div class="tech-icon">⚡</div>
-                    <h4>עיבוד בזמן אמת</h4>
-                    <p>זיהוי וזיוג פנים תוך שניות ספורות עם דיוק של מעל 99%</p>
+                    <h4>זיהוי מיידי</h4>
+                    <p>המערכת מזהה תלמידים תוך פחות משניה אחת, אפילו כשמספר ילדים נכנסים יחד לכיתה</p>
+                </div>
+                <div class="tech-feature">
+                    <div class="tech-icon">📱</div>
+                    <h4>פשוט לשימוש</h4>
+                    <p>עיצבנו ממשק שכל מורה יכול להפעיל תוך דקה אחת, בלי צורך בהדרכה מורכבת</p>
                 </div>
                 <div class="tech-feature">
                     <div class="tech-icon">🔄</div>
-                    <h4>למידה מתמדת</h4>
-                    <p>המערכת משתפרת עם הזמן ולומדת מכל תמונה ובדיקה</p>
-                </div>
-                <div class="tech-feature">
-                    <div class="tech-icon">🌐</div>
-                    <h4>פריסה בענן</h4>
-                    <p>תשתית בענן מתקדמת המאפשרת גישה מכל מקום ובכל זמן</p>
+                    <h4>משוב בזמן אמת</h4>
+                    <p>מנהלים מקבלים דיווחים מיידיים ויכולים לראות נתונים עדכניים על נוכחות בכל זמן</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Statistics Section -->
-<section class="our-impact section">
-    <div class="container">
-        <h2 class="section-title">ההשפעה שלנו</h2>
-        <div class="stats-grid">
-            <div class="stat-card" data-target="500">
-                <div class="stat-number">0</div>
-                <div class="stat-label">מוסדות חינוך</div>
-                <div class="stat-description">בתי ספר וגני ילדים הסומכים עלינו</div>
-            </div>
-            <div class="stat-card" data-target="50000">
-                <div class="stat-number">0</div>
-                <div class="stat-label">תלמידים</div>
-                <div class="stat-description">נרשמת נוכחותם מדי יום</div>
-            </div>
-            <div class="stat-card" data-target="2000">
-                <div class="stat-number">0</div>
-                <div class="stat-label">מורים</div>
-                <div class="stat-description">חוסכים זמן יקר מדי יום</div>
-            </div>
-            <div class="stat-card" data-target="99">
-                <div class="stat-number">0</div>
-                <div class="stat-label">אחוז דיוק</div>
-                <div class="stat-description">בזיהוי פנים ורישום נוכחות</div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Team Section -->
-<section class="our-team section">
-    <div class="container">
-        <h2 class="section-title">הצוות שלנו</h2>
-        <p class="team-intro">צוות מקצועי ומנוסה של מהנדסים, מפתחים ומומחי חינוך</p>
-        
-        <div class="team-grid">
-            <div class="team-member">
-                <div class="member-avatar">
-                    <div class="avatar-placeholder">👨‍💼</div>
-                </div>
-                <h3>דר' מיכאל כהן</h3>
-                <p class="member-role">מנכ"ל ומייסד</p>
-                <p class="member-bio">דוקטור למדעי המחשב עם התמחות בבינה מלאכותית. 15 שנות ניסיון בפיתוח מערכות מתקדמות.</p>
-            </div>
-            
-            <div class="team-member">
-                <div class="member-avatar">
-                    <div class="avatar-placeholder">👩‍💻</div>
-                </div>
-                <h3>רחל לוי</h3>
-                <p class="member-role">מנהלת פיתוח</p>
-                <p class="member-bio">מומחית בפיתוח תוכנה ולמידת מכונה עם ניסיון של 12 שנה בחברות הטכנולוגיה המובילות.</p>
-            </div>
-            
-            <div class="team-member">
-                <div class="member-avatar">
-                    <div class="avatar-placeholder">👨‍🔬</div>
-                </div>
-                <h3>אלכס פטרוב</h3>
-                <p class="member-role">ראש צוות AI</p>
-                <p class="member-bio">מומחה בזיהוי תבניות וחזון מחשב. מוביל את הפיתוח של אלגוריתמי הזיהוי המתקדמים שלנו.</p>
-            </div>
-            
-            <div class="team-member">
-                <div class="member-avatar">
-                    <div class="avatar-placeholder">👩‍🎓</div>
-                </div>
-                <h3>שרה גולדברג</h3>
-                <p class="member-role">יועצת חינוכית</p>
-                <p class="member-bio">מחנכת בכירה עם 20 שנות ניסיון, מוודאת שהמוצר עונה על הצרכים האמיתיים של מוסדות החינוך.</p>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Awards & Recognition -->
-<section class="recognition section">
+<!-- Future Plans -->
+<section class="future-plans section">
     <div class="container">
-        <h2 class="section-title">הכרה והישגים</h2>
-        <div class="awards-grid">
-            <div class="award-card">
-                <div class="award-icon">🏆</div>
-                <h3>פרס החדשנות בחינוך 2024</h3>
-                <p>זכינו בפרס החדשנות הטכנולוגית בחינוך על המוצר AttendMe</p>
+        <h2 class="section-title">התוכניות שלנו לעתיד</h2>
+        <div class="plans-grid">
+            <div class="plan-card">
+                <div class="plan-icon">🌍</div>
+                <h3>הרחבה בינלאומית</h3>
+                <p>אנחנו עובדים על הרחבה למדינות נוספות, החל ממדינות דוברות אנגלית ועד למדינות מתפתחות שזקוקות לפתרונות טכנולוגיים במחיר נגיש.</p>
             </div>
-            <div class="award-card">
-                <div class="award-icon">⭐</div>
-                <h3>תעודת ISO 27001</h3>
-                <p>הסמכה בינלאומית לניהול אבטחת מידע ברמה הגבוהה ביותר</p>
+            <div class="plan-card">
+                <div class="plan-icon">🎯</div>
+                <h3>פיצ'רים חדשניים</h3>
+                <p>אנחנו מפתחים יכולות חדשות כמו זיהוי רגשות, אנליטיקות התנהגות, ואינטגרציה עם פלטפורמות למידה דיגיטליות.</p>
             </div>
-            <div class="award-card">
-                <div class="award-icon">🛡️</div>
-                <h3>אישור משרד החינוך</h3>
-                <p>המוצר מאושר לשימוש במוסדות חינוך ציבוריים</p>
-            </div>
-            <div class="award-card">
-                <div class="award-icon">🌟</div>
-                <h3>דירוג 5 כוכבים</h3>
-                <p>דירוג ממוצע של 4.9/5 מלקוחותינו המרוצים</p>
+            <div class="plan-card">
+                <div class="plan-icon">🏢</div>
+                <h3>הרחבה לחברות</h3>
+                <p>הטכנולוגיה שלנו יכולה לשרת גם חברות ומשרדים. אנחנו בוחנים אפשרויות להרחיב את השימוש לעולם העסקי.</p>
             </div>
         </div>
     </div>
@@ -261,14 +287,14 @@
 <section class="about-cta section">
     <div class="container">
         <div class="cta-content">
-            <h2>מעוניינים להצטרף אלינו?</h2>
-            <p>גלו איך AttendMe יכולה לשפר את הניהול במוסד החינוכי שלכם</p>
+            <h2>מעוניינים להצטרף למהפכה?</h2>
+            <p>ראו איך AttendMe יכולה לשנות את האופן שבו המוסד שלכם מנהל נוכחות</p>
             <div class="cta-buttons">
                 {% if current_user %}
-                    <a href="{{ url_for('people') }}" class="cta-button">התחילו עכשיו</a>
-                    <a href="{{ url_for('contact') }}" class="cta-button secondary">צרו קשר</a>
+                    <a href="{{ url_for('people') }}" class="cta-button primary">התחילו עכשיו</a>
+                    <a href="{{ url_for('contact') }}" class="cta-button secondary">ספרו לנו על המוסד</a>
                 {% else %}
-                    <a href="{{ url_for('register') }}" class="cta-button">הרשמו היום</a>
+                    <a href="{{ url_for('register') }}" class="cta-button primary">הצטרפו למהפכה</a>
                     <a href="{{ url_for('contact') }}" class="cta-button secondary">בקשו הדגמה</a>
                 {% endif %}
             </div>

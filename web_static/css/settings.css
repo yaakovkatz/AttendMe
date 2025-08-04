@@ -1,356 +1,639 @@
-/* ==================== SETTINGS STYLES ==================== */
+/* ==================== MODERN SETTINGS STYLES ==================== */
 /*
- * קובץ סגנונות לדף הגדרות המערכת
- * מכיל: קבוצות הגדרות, מודל בחירת אנשים, הודעות התראה, רכיבים מתקדמים
- * צריך לטעון אחרי variables.css ו-common.css
+ * עיצוב מודרני ואטרקטיבי לדף הגדרות
+ * כולל: gradients, glassmorphism, אנימציות חלקות, עיצוב מתקדם
  */
 
-/* ==================== SETTINGS CONTAINER ==================== */
-/* מבנה כללי לדף הגדרות */
-
-/* מיכל הגדרות - גריד של קבוצות הגדרות */
-.settings-container {
-    display: grid;                   /* פריסת גריד */
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* עמודות גמישות */
-    gap: 30px;                       /* מרווח בין הקבוצות */
-    margin-bottom: 40px;             /* מרווח תחתון */
+/* ==================== CSS VARIABLES ==================== */
+:root {
+    --settings-primary: #667eea;
+    --settings-secondary: #764ba2;
+    --settings-success: #00d2ff;
+    --settings-warning: #ff9a00;
+    --settings-error: #ff5858;
+    --settings-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --settings-card-bg: rgba(255, 255, 255, 0.85);
+    --settings-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    --settings-border: rgba(255, 255, 255, 0.18);
+    --settings-text: #2d3748;
+    --settings-text-light: #718096;
+    --settings-radius: 16px;
+    --settings-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* קבוצת הגדרות - כרטיס הגדרות בודד */
+/* ==================== MAIN SECTION ==================== */
+#settings.section {
+    background: var(--settings-bg);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--settings-primary), var(--settings-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 3rem;
+    text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* ==================== SETTINGS NAVIGATION ==================== */
+.settings-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--settings-radius);
+    border: 1px solid var(--settings-border);
+}
+
+.settings-tab {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--settings-border);
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    color: var(--settings-text);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--settings-transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.settings-tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.6s;
+}
+
+.settings-tab:hover::before {
+    left: 100%;
+}
+
+.settings-tab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.settings-tab.active {
+    background: linear-gradient(135deg, var(--settings-primary), var(--settings-secondary));
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+}
+
+.settings-tab i {
+    font-size: 1.1rem;
+}
+
+/* ==================== SETTINGS CONTENT ==================== */
+.settings-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.settings-panel {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.settings-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-panel h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--settings-text);
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.settings-panel h3::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(135deg, var(--settings-primary), var(--settings-secondary));
+    border-radius: 2px;
+}
+
+/* ==================== SETTINGS GROUPS ==================== */
 .settings-group {
-    background-color: white;         /* רקע לבן */
-    border-radius: var(--border-radius); /* פינות עגולות */
-    box-shadow: var(--box-shadow);   /* צל */
-    padding: 25px;                   /* מרווח פנימי */
+    background: var(--settings-card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--settings-border);
+    border-radius: var(--settings-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--settings-shadow);
+    transition: var(--settings-transition);
+    position: relative;
+    overflow: hidden;
 }
 
-/* כותרת קבוצת הגדרות */
-.settings-group h3 {
-    margin-bottom: 20px;             /* מרווח תחתון */
-    color: var(--primary-color);     /* צבע כחול */
-    font-size: 1.3rem;               /* גודל בינוני */
+.settings-group::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, var(--settings-primary), var(--settings-secondary));
 }
 
-/* פעולות הגדרות - כפתורים בתחתית הדף */
+.settings-group:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(31, 38, 135, 0.2);
+}
+
+.settings-group h4 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--settings-text);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-group h4::before {
+    content: '⚙️';
+    font-size: 1.2rem;
+}
+
+/* ==================== SETTING ITEMS ==================== */
+.setting-item {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.setting-item label {
+    display: block;
+    font-weight: 600;
+    color: var(--settings-text);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.setting-item input[type="text"],
+.setting-item input[type="email"],
+.setting-item input[type="tel"],
+.setting-item input[type="password"],
+.setting-item input[type="number"],
+.setting-item select,
+.setting-item textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--settings-text);
+    font-size: 0.95rem;
+    transition: var(--settings-transition);
+    backdrop-filter: blur(5px);
+}
+
+.setting-item input:focus,
+.setting-item select:focus,
+.setting-item textarea:focus {
+    outline: none;
+    border-color: var(--settings-primary);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.setting-item textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.setting-item small {
+    display: block;
+    color: var(--settings-text-light);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+/* ==================== CHECKBOX ITEMS ==================== */
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    transition: var(--settings-transition);
+    cursor: pointer;
+}
+
+.checkbox-item:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateX(5px);
+}
+
+.checkbox-item label {
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--settings-primary);
+    cursor: pointer;
+}
+
+/* ==================== RANGE SLIDER ==================== */
+.setting-item input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #e2e8f0, var(--settings-primary));
+    outline: none;
+    margin: 1rem 0;
+}
+
+.range-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--settings-text-light);
+    margin-top: 0.5rem;
+}
+
+#threshold-value {
+    background: linear-gradient(135deg, var(--settings-primary), var(--settings-secondary));
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* ==================== PASSWORD STRENGTH ==================== */
+.password-strength {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.strength-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: var(--settings-transition);
+    border-radius: 4px;
+}
+
+.strength-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--settings-text-light);
+}
+
+/* ==================== STATS GRID ==================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--settings-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--settings-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--settings-success), var(--settings-primary));
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--settings-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--settings-text-light);
+    font-weight: 500;
+}
+
+/* ==================== ACTION BUTTONS ==================== */
 .settings-actions {
-    display: flex;                   /* פריסה גמישה */
-    justify-content: center;         /* יישור למרכז */
-    margin-top: 30px;                /* מרווח עליון */
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
 }
 
-/* ==================== PERSON SELECTION MODAL ==================== */
-/* חלון בחירת אדם מתקדם עם חיפוש */
-
-/* מודל בחירת אדם - רוחב מורחב */
-#select-person-modal .modal-content {
-    max-width: 600px;                /* רוחב מקסימלי */
-    max-height: 95vh;                /* גובה מקסימלי */
-    overflow: auto;                  /* גלילה */
+.action-button {
+    background: linear-gradient(135deg, var(--settings-primary), var(--settings-secondary));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--settings-transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+    min-width: 160px;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* מיכל חיפוש */
-.search-container {
-    margin-bottom: 15px;             /* מרווח תחתון */
-    padding: 0 5px;                  /* מרווח פנימי בצדדים */
+.action-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s;
 }
 
-/* שדה חיפוש */
-.search-input {
-    width: 100%;                     /* רוחב מלא */
-    padding: 10px;                   /* מרווח פנימי */
-    border: 1px solid #ddd;          /* גבול אפור */
-    border-radius: 5px;              /* פינות עגולות */
-    font-size: 16px;                 /* גודל טקסט */
+.action-button:hover::before {
+    left: 100%;
 }
 
-/* טבלת בחירת אנשים */
-.person-selection-table {
-    width: 100%;                     /* רוחב מלא */
-    border-collapse: collapse;       /* מיזוג גבולות */
-    margin-top: 10px;                /* מרווח עליון */
-    direction: rtl;                  /* כיוון עברית */
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
 }
 
-/* תאים בטבלת בחירה */
-.person-selection-table th,
-.person-selection-table td {
-    padding: 12px 15px;              /* מרווח פנימי */
-    text-align: right;               /* יישור לימין */
-    border-bottom: 1px solid #e0e0e0; /* גבול תחתון */
-    vertical-align: middle;          /* יישור אנכי במרכז */
+.action-button:active {
+    transform: translateY(0);
 }
 
-/* כותרות טבלת בחירה */
-.person-selection-table th {
-    background-color: #f5f5f5;       /* רקע אפור בהיר */
-    font-weight: bold;               /* טקסט בולט */
-    color: #333;                     /* צבע כהה */
-    position: sticky;                /* מיקום דביק */
-    top: 0;                          /* דבוק לעליון */
-    z-index: 10;                     /* מעל התוכן */
+.action-button.secondary {
+    background: linear-gradient(135deg, var(--settings-text-light), #9ca3af);
+    box-shadow: 0 4px 15px rgba(156, 163, 175, 0.4);
+    color: white !important;
 }
 
-/* שורת בחירת אדם */
-.person-selection-row {
-    cursor: pointer;                 /* סמן יד */
-    transition: background-color 0.2s; /* מעבר חלק */
+.action-button.secondary:hover {
+    box-shadow: 0 8px 25px rgba(156, 163, 175, 0.6);
+    color: white !important;
 }
 
-/* אפקט hover לשורת בחירה */
-.person-selection-row:hover {
-    background-color: #f0f8ff;       /* רקע כחול בהיר */
+/* ==================== LOGIN HISTORY ==================== */
+.login-history {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--settings-border);
 }
 
-/* שורת בחירה נבחרת */
-.person-selection-row.selected {
-    background-color: #e3f2fd;       /* רקע כחול בהיר יותר */
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    transition: var(--settings-transition);
 }
 
-/* תא תמונת אדם */
-.person-image-cell {
-    width: 60px;                     /* רוחב קבוע */
-    text-align: center;              /* יישור למרכז */
+.history-item:hover {
+    background: rgba(102, 126, 234, 0.05);
 }
 
-/* תמונת בחירת אדם */
-.person-selection-image {
-    width: 48px;                     /* רוחב */
-    height: 48px;                    /* גובה */
-    border-radius: 50%;              /* עיגול מלא */
-    object-fit: cover;               /* התאמת גודל תמונה */
-    border: 1px solid #ddd;          /* גבול אפור */
+.history-item:last-child {
+    border-bottom: none;
 }
 
-/* תא שם אדם */
-.person-name-cell {
-    font-weight: 500;                /* משקל טקסט בינוני */
-    color: #2c3e50;                  /* צבע כהה */
+.history-time {
+    font-weight: 600;
+    color: var(--settings-text);
 }
 
-/* תא מספר זהות */
-.person-id-cell {
-    color: #7f8c8d;                  /* צבע אפור */
-    font-family: monospace;          /* פונט מונוספייס */
-    font-size: 14px;                 /* גודל קטן */
+.history-device,
+.history-ip {
+    color: var(--settings-text-light);
+    font-size: 0.9rem;
 }
 
-/* הודעת אין אנשים */
-.no-people-message {
-    text-align: center;              /* יישור למרכז */
-    padding: 20px;                   /* מרווח פנימי */
-    color: #666;                     /* צבע אפור */
+/* ==================== BACKUP LIST ==================== */
+.backup-list {
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--settings-border);
 }
 
-/* הודעת שגיאה */
-.error-message {
-    text-align: center;              /* יישור למרכז */
-    padding: 20px;                   /* מרווח פנימי */
-    color: #e74c3c;                  /* צבע אדום */
+.backup-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    transition: var(--settings-transition);
 }
 
-/* ==================== RESULTS PANEL ==================== */
-/* פאנל תוצאות מתקדם */
-
-/* פאנל תוצאות */
-.results-panel {
-    background: white;               /* רקע לבן */
-    border-radius: 12px;             /* פינות עגולות */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* צל */
-    margin-top: 30px;                /* מרווח עליון */
-    overflow: hidden;                /* הסתרת גלישה */
-    border: 1px solid #e9ecef;       /* גבול אפור */
+.backup-item:hover {
+    background: rgba(102, 126, 234, 0.05);
 }
 
-/* כותרת פאנל תוצאות */
-.results-header {
-    background: linear-gradient(135deg, #f8f9fa, #ffffff); /* רקע גרדיינט */
-    padding: 20px 25px;              /* מרווח פנימי */
-    border-bottom: 1px solid #e9ecef; /* גבול תחתון */
-    display: flex;                   /* פריסה גמישה */
-    justify-content: space-between;  /* פיזור תוכן */
-    align-items: center;             /* יישור אנכי במרכז */
+.backup-item:last-child {
+    border-bottom: none;
 }
 
-/* כותרת תוצאות */
-.results-header h3 {
-    margin: 0;                       /* ביטול מרווח */
-    color: var(--primary-color);     /* צבע כחול */
-    font-size: 1.2rem;               /* גודל בינוני */
+.backup-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
-/* כפתור סגירת תוצאות */
-.close-button {
-    background: none;                /* ביטול רקע */
-    border: none;                    /* ביטול גבול */
-    font-size: 24px;                 /* גודל גדול */
-    cursor: pointer;                 /* סמן יד */
-    color: #666;                     /* צבע אפור */
-    width: 32px;                     /* רוחב */
-    height: 32px;                    /* גובה */
-    display: flex;                   /* פריסה גמישה */
-    align-items: center;             /* יישור אנכי במרכז */
-    justify-content: center;         /* יישור אופקי במרכז */
-    border-radius: 50%;              /* עיגול מלא */
-    transition: all 0.3s ease;       /* מעבר חלק */
+.backup-date {
+    font-weight: 600;
+    color: var(--settings-text);
 }
 
-/* אפקט hover לכפתור סגירה */
-.close-button:hover {
-    background: rgba(231, 76, 60, 0.1); /* רקע אדום שקוף */
-    color: #e74c3c;                  /* צבע אדום */
+.backup-size,
+.backup-type {
+    font-size: 0.85rem;
+    color: var(--settings-text-light);
 }
 
-/* תוכן תוצאות */
-.results-content {
-    padding: 25px;                   /* מרווח פנימי */
-    max-height: 400px;               /* גובה מקסימלי */
-    overflow-y: auto;                /* גלילה אנכית */
+.backup-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
-/* ==================== ADVANCED COMPONENTS ==================== */
-/* רכיבים מתקדמים נוספים */
-
-/* מצב ריק בגלריה */
-.target-empty-state {
-    text-align: center;              /* יישור למרכז */
-    padding: 60px 20px;              /* מרווח פנימי */
-    color: #7f8c8d;                  /* צבע אפור */
-    grid-column: 1 / -1;             /* כל העמודות */
+.backup-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--settings-transition);
+    color: white;
+    font-size: 0.9rem;
 }
 
-/* אייקון מצב ריק */
-.target-empty-icon {
-    font-size: 64px;                 /* גודל גדול */
-    margin-bottom: 20px;             /* מרווח תחתון */
-    opacity: 0.5;                    /* שקיפות */
+.backup-btn.download {
+    background: linear-gradient(135deg, var(--settings-success), #00b4db);
 }
 
-/* כותרת מצב ריק */
-.target-empty-state h3 {
-    color: #7f8c8d;                  /* צבע אפור */
-    margin-bottom: 10px;             /* מרווח תחתון */
+.backup-btn.restore {
+    background: linear-gradient(135deg, var(--settings-warning), #ff7b00);
 }
 
-/* טקסט מצב ריק */
-.target-empty-state p {
-    color: #bdc3c7;                  /* צבע אפור בהיר */
+.backup-btn.delete {
+    background: linear-gradient(135deg, var(--settings-error), #ff3838);
 }
 
-/* אלמנט עם כלים מתקדמים */
-.page-break-avoid {
-    page-break-inside: avoid;        /* מניעת קריעה בהדפסה */
+.backup-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* ==================== ANIMATIONS FOR SETTINGS ==================== */
-/* אנימציות ספציפיות להגדרות */
-
-/* אנימציית הופעת הודעה */
-@keyframes slideInNotification {
-    from {
-        transform: translateX(100%) scale(0.8); /* מתחיל מימין וקטן */
-        opacity: 0;                  /* שקוף */
-    }
-    to {
-        transform: translateX(0) scale(1); /* מגיע למיקום רגיל */
-        opacity: 1;                  /* גלוי */
-    }
+/* ==================== EMPTY STATES ==================== */
+.no-people-message,
+.no-history,
+.no-backups {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--settings-text-light);
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 2px dashed rgba(102, 126, 234, 0.2);
 }
 
-/* אנימציית יציאת הודעה */
-@keyframes slideOutNotification {
-    from {
-        transform: translateX(0) scale(1); /* מתחיל במיקום רגיל */
-        opacity: 1;                  /* גלוי */
-    }
-    to {
-        transform: translateX(100%) scale(0.8); /* יוצא ימינה וקטן */
-        opacity: 0;                  /* שקוף */
-    }
+.no-people-message::before,
+.no-history::before,
+.no-backups::before {
+    content: '📭';
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 1rem;
 }
 
-/* ==================== RESPONSIVE STYLES FOR SETTINGS ==================== */
-/* עיצוב רספונסיבי להגדרות */
-
-/* עיצוב רספונסיבי לטאבלטים */
-@media (max-width: 900px) {
-    /* מיכל הגדרות */
-    .settings-container {
-        grid-template-columns: 1fr;  /* עמודה אחת */
-        gap: 20px;                   /* מרווח מופחת */
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 2rem;
     }
 
-    /* הודעות התראה */
-    .notification-container {
-        top: 10px;                   /* מרחק מופחת מלמעלה */
-        right: 10px;                 /* מרחק מופחת מימין */
-        left: 10px;                  /* מרחק מימין גם */
-        max-width: none;             /* ביטול רוחב מקסימלי */
+    .settings-nav {
+        flex-direction: column;
+        align-items: center;
     }
 
-    /* הודעת התראה */
-    .notification {
-        margin-bottom: 8px;          /* מרווח מופחת */
-        padding: 15px 18px;          /* מרווח פנימי מופחת */
+    .settings-tab {
+        min-width: 200px;
     }
-}
 
-/* עיצוב רספונסיבי למובייל */
-@media (max-width: 600px) {
-    /* קבוצת הגדרות */
     .settings-group {
-        padding: 20px;               /* מרווח פנימי מופחת */
+        padding: 1.5rem;
     }
 
-    /* כותרת קבוצת הגדרות */
-    .settings-group h3 {
-        font-size: 1.1rem;           /* גודל מופחת */
+    .settings-actions {
+        flex-direction: column;
+        align-items: center;
     }
 
-    /* מודל בחירת אדם */
-    #select-person-modal .modal-content {
-        max-width: 95%;              /* רוחב מותאם למובייל */
-        margin: 20px;                /* מרווח חיצוני */
+    .action-button {
+        min-width: 200px;
     }
 
-    /* תאים בטבלת בחירה */
-    .person-selection-table th,
-    .person-selection-table td {
-        padding: 8px 10px;           /* מרווח פנימי מופחת */
-        font-size: 14px;             /* גודל טקסט מופחת */
+    .stats-grid {
+        grid-template-columns: 1fr;
     }
 
-    /* תמונת בחירת אדם */
-    .person-selection-image {
-        width: 36px;                 /* רוחב מופחת */
-        height: 36px;                /* גובה מופחת */
+    .history-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
 
-    /* תוכן ההודעה */
-    .notification-message {
-        font-size: 13px;             /* גודל טקסט מופחת */
-        margin-right: 10px;          /* מרווח מופחת */
-    }
-
-    /* כפתור סגירת הודעה */
-    .notification-close {
-        width: 24px;                 /* רוחב מופחת */
-        height: 24px;                /* גובה מופחת */
-        font-size: 16px;             /* גודל טקסט מופחת */
-    }
-
-    /* פאנל תוצאות */
-    .results-panel {
-        margin-top: 20px;            /* מרווח עליון מופחת */
-    }
-
-    /* כותרת פאנל תוצאות */
-    .results-header {
-        padding: 15px 20px;          /* מרווח פנימי מופחת */
-    }
-
-    /* תוכן תוצאות */
-    .results-content {
-        padding: 20px;               /* מרווח פנימי מופחת */
-        max-height: 300px;           /* גובה מקסימלי מופחת */
+    .backup-item {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
     }
 }
