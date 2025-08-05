@@ -1340,7 +1340,7 @@ def internal_error_api(error):
 
 if __name__ == '__main__':
     # קבלת פורט מ-Render - חשוב מאוד!
-    port = int(os.environ.get("PORT", 10000))  # 🔧 שונה מ-5000 ל-10000
+    port = int(os.environ.get("PORT", 4000))  # 🔧 שונה מ-5000 ל-10000
 
     print(f"🚀 Starting Flask server on port {port}")
     print(f"🌍 Environment: {'Render' if os.environ.get('RENDER') else 'Local'}")
