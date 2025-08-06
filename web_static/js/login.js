@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkPasswordRequirements();
     });
 
-    showMessage('🎯 זהו דף ההתחברות - כעת מחובר למערכת Python', 'success');
+    showMessage('🎯 זהו דף ההתחברות - למערכת AttendMe', 'success');
 });
 
 // ==================== TEMP DATA MANAGEMENT ====================
